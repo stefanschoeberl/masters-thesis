@@ -228,3 +228,4 @@ TSWLatexianTemp*
 # End of https://www.gitignore.io/api/latex
 
 main.pdf
+*.code-workspace
