@@ -1,0 +1,75 @@
+%%% File encoding: UTF-8
+%%% äöüÄÖÜß  <-- keine deutschen Umlaute hier? UTF-faehigen Editor verwenden!
+
+%%% Magic Comments zum Setzen der korrekten Parameter in kompatiblen IDEs
+% !TeX encoding = utf8
+% !TeX program = pdflatex 
+% !TeX spellcheck = de_DE
+% !BIB program = biber
+
+\documentclass[master,german,smartquotes]{hgbthesis}
+% Zulässige Optionen in [..]: 
+%   Typ der Arbeit: diploma, master (default), bachelor, internship
+%   Hauptsprache: german (default), english
+%		smartquotes: zur vereinfachten Eingabe von Hochkommas (nur "...")
+%%%----------------------------------------------------------
+
+\RequirePackage[utf8]{inputenc}		% bei der Verw. von lualatex oder xelatex entfernen!
+
+\graphicspath{{images/}}    % Verzeichnis mit Bildern und Grafiken
+\logofile{logo}							% Logo-Datei = images/logo.pdf (\logofile{}, wenn kein Logo gewünscht)
+\bibliography{references}  	% Biblatex-Literaturdatei (references.bib)
+
+%%%----------------------------------------------------------
+% Angaben für die Titelei (Titelseite, Erklärung etc.)
+%%%----------------------------------------------------------
+
+%%% Einträge für ALLE Arbeiten: -----------------------------
+\title{MiniJava-Compiler für WebAssembly auf Basis von ANTLR und Kotlin}
+\author{Stefan Schöberl, BSc}
+
+\programtype{Fachhochschul-Masterstudiengang}
+
+\programname{Software Engineering}
+\placeofstudy{Hagenberg}
+\dateofsubmission{2020}{06}{30}	% {YYYY}{MM}{DD}
+
+\advisor{FH-Prof. DI Dr. Heinz Dobler}	% optional
+
+%\strictlicense		%%% restrictive license instead of Creative Commons (discouraged!)
+
+%%%----------------------------------------------------------
+\begin{document}
+%%%----------------------------------------------------------
+
+%%%----------------------------------------------------------
+\frontmatter                    % Titelei (röm. Seitenzahlen)
+%%%----------------------------------------------------------
+
+\maketitle
+\tableofcontents
+
+\include{front/kurzfassung}
+\include{front/abstract}
+
+%%%----------------------------------------------------------
+\mainmatter          % Hauptteil (ab hier arab. Seitenzahlen)
+%%%----------------------------------------------------------
+
+\include{chapters/einleitung}
+\include{chapters/zusammenfassung}
+
+%%%----------------------------------------------------------
+\appendix                                            % Anhang 
+%%%----------------------------------------------------------
+
+%%%----------------------------------------------------------
+\MakeBibliography                        % Quellenverzeichnis
+%%%----------------------------------------------------------
+
+%%% Messbox zur Druckkontrolle ------------------------------
+\include{back/messbox}
+
+%%%----------------------------------------------------------
+\end{document}
+%%%----------------------------------------------------------
