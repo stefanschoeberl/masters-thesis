@@ -2,6 +2,32 @@
 
 \section{Testen}
 
+Während dem Entwickeln des Compilers muss sichergestellt werden, dass beim Hinzufügen neuer Features, diese wie erwartet funktionieren. Gleichzeitig musste auch gewährleistet werden, dass die bereits bestehende Funktionalität des Compilers nicht (versehentlich) verändert wird.
+
+Grundsätzlich stehen zwei Ansätze zum Testen zur Verfügung:
+\begin{enumerate}
+    \item Jede Komponente isoliert testen, dies entspricht konzeptionell klassischen Unit-Tests. Hier könnte man testen, ob zum Beispiel die erwünschten Instruktionen für eine Schleife generiert werden. 
+    \item Testen, ob ein gegebener MiniJava-Sourcecode eine erwartete Konsolenausgabe beim Ausführen produziert. Das entspricht konzeptionell eher einem Integrationstest. Dabei werden in allen Tests alle Teilprozesse (Kompilieren, Codegenieren und Ausführen) immer ausgeführt.
+\end{enumerate}
+
+Es wurde der zweite Ansatz gewählt, da er während dem Entwickeln eine größere Flexibilität bietet. Die finale Architektur des Compilers entstand erst im Laufe der Entwicklung. Am Anfang war zu erwarten, dass sich interne Strukturen des Compilers laufend ändern könnten. Klassische Unit-Tests müsste man bei größeren Architekturänderungen oft anpassen. Bei Tests, die den gesamten Prozess vom Kompileren bis zum Ausführen als "Black-Box" betrachten, ist eine Änderung praktisch nicht notwendig, da bei den einzigen zwei Schnittstellen (Sourcecode und Konsolenausgabe) zwischen Implementierung und Tests keine Änderungen zu erwarten sind. Außerdem sind alle Testfälle gemeinsam eine Art Spezifikation für die Programmiersprache.
+
+Als Testframework wird JUnit 5 \cite{JUnit} in Kombination mit AssertJ \cite{AssertJ} eingesetzt. Nachfolgend sieht man ein Beispiel, für einen einfachen Testfall:
+
+\lstinputlisting{src/testenGradle/simpleTest.kt}
+
+Beim Durchführen des Tests wird im Hintergrund eine Datei (main.minijava) mit dem zu testenden MiniJava-Sourcecode angelegt. JUnit 5 bietet die Annotation \lstinline{@TempDir} an, mit der ein temporäres Verzeichnis für jeden Testfall angelegt wird, das nach Ablauf der Tests wieder gelöscht wird \cite{JUnit}. So werden die Testfälle von einander isoliert.
+
+Hilfsfunktionen wie \lstinline{compileAndRunInMainClass} starten den Compiler und führen das erzeugte Modul aus. Am Ende wird die Konsolenausgabe als String zurückgegeben.
+
+Unter Zuhilfenahme von AssertJ lassen sich die erwarteten Ergebnisse fast wie ein englischer Satz elegant formulieren, zum Beispiel: \lstinline{assertThat(...).containsExactly(...)} \cite{AssertJ}.
+
+Es ist auch möglich, native Methoden auf diese Art zu testen. In diesem Fall wird zusätzlich ein Stück JavaScript-Sourcecode mitgegeben. Dieser Sourcecode wird in die Datei main.js gespeichert, die ebenfalls im temporären Verzeichnis liegt.
+
+Nachfolgend ein einfaches Beispiel für so einen Testfall:
+
+\lstinputlisting{src/testenGradle/nativeTest.kt}
+
 \section{Gradle-Task und Plugin}
 
 \section{Integration von MiniJava in Node.js als Konsolenanwendung}
