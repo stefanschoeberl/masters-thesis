@@ -1,0 +1,7 @@
+demo-nodejs/
+  build/wasm-module (Ouput)
+  minijava/
+    ... (MiniJava-Sourcecode)
+  build.gradle
+  index.js
+  package.json

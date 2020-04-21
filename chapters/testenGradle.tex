@@ -28,6 +28,52 @@ Nachfolgend ein einfaches Beispiel für so einen Testfall:
 
 \lstinputlisting{src/testenGradle/nativeTest.kt}
 
-\section{Gradle-Task und Plugin}
+\section{Gradle-Task und -Plugin}
+
+Es ist möglich, den MiniJava-Compiler direkt zum Beispiel über die Kommandozeile aufzurufen. Für praktische Projekte ist allerdings eine Integration in bestehende Build-Systeme (in diesem Fall Gradle) nützlich, wie es bei anderen Programmiersprachen (zum Beispiel Java und Kotlin) üblich ist.
+
+In der Gradle-Dokumentation \cite{Gradle} wird beschrieben, wie eigene Erweiterungen für Gradle implementiert werden können. Nachfolgend werden die notwendigen Schritte speziell für den MiniJava-Compiler erläutert.
+
+Der MiniJava-Compiler lässt sich auf folgende Weise, in Gradle integrieren:
+
+Zunächst wird ein eigener Task (\lstinline{MiniJavaCompilationTask}) definiert, der das Kompilieren von MiniJava-Sourcecode kapselt. Dieser Task ist von \lstinline{JavaExec} abgeleitet. Der \lstinline{JavaExec}-Task wird von Gradle zur Verfügung gestellt und kann -- ähnlich wie die java-Kommandozeile -- kompilierte Bytecode-Klassen ausführen. Im \lstinline{MiniJavaCompilationTask} wird der \lstinline{JavaExec}-Task konfiguriert:
+
+\lstinputlisting{src/testenGradle/MiniJavaCompilationTask.groovy}
+
+Der \lstinline{MiniJavaCompilationTask} bietet zusätzlich noch die Methoden \lstinline{inputDirs} und \lstinline{outputDir} an, mit denen der Task konfiguriert werden kann. Die Methoden speichern die übergebenen Ordner und leiten daraus die Parameter für den Compiler ab (\lstinline{updateArg}). Über \lstinline{inputs.dir(...)} und \lstinline{outputs.dir(...)} können in Gradle Metainformationen für den Task definiert werden, die beschreiben, von welchen Dateien der Task abhängig ist und welche Dateien der Task produziert. So kann Gradle den Build-Prozess optimieren, indem beispielsweise nur dann der MiniJava-Compiler ausgeführt wird, wenn sich eine MiniJava-Sourcecode-Datei verändert hat
+
+Der \lstinline{JavaExec}-Task benötigt zum Ausführen einen Klassenpfad, in dem die MiniJava-Compiler-Klassen enthalten sind. Dieser Klassenpfad besitzt einen eigenen Namen (\lstinline{project.configurations.minijava}) und ist unabhängig von anderen, die in Gradle definiert sind (zum Beispiel \lstinline{implementation}, \lstinline{testImplementation}, \lstinline{compileOnly})
+
+Der minijava-Klassenpfad muss daher zunächst im Gradle-Projekt definiert werden. Dies ist mit Hilfe eines eigenen Plugins möglich:
+
+\lstinputlisting{src/testenGradle/MiniJavaPlugin.groovy}
+
+Damit andere Gradle-Projekte das Plugin finden, gibt es mehrere Möglichkeiten. Bei der hier eingesetzten genügt es, im Gradle-Wurzelprojekt einen Ordner \lstinline{buildSrc} zu erstellen, in dem der Sourcecode vom Task und Plugin gemäß folgender Ordnerstruktur abgelegt wird:
+
+\lstinputlisting{src/testenGradle/buildSrc.txt}
+
+Weiters ist darin die Datei \lstinline{dev.ssch.minijava.properties} notwendig, in der der Name der Plugin-Klasse definiert wird:
+
+\lstinputlisting{src/testenGradle/dev.ssch.minijava.properties}
+
+\lstinline{dev.ssch.minijava} ist der Bezeichner, unter dem das Plugin von anderen Gradle-Projekten gefunden werden kann.
 
 \section{Integration von MiniJava in Node.js als Konsolenanwendung}
+
+Auf Basis der Vorbereitungen im vorherigen Abschnitt kann der Compiler nun in eigenen Projekten eingesetzt werden. Nachfolgend wird die Konfiguration in Gradle, sowie die Anwendung als Node.js-Konsolenanwendung demonstriert.
+
+Das Projekt ist folgendermaßen strukturiert:
+
+\lstinputlisting{src/testenGradle/demo-nodejs.txt}
+
+In der Datei \lstinline{build.gradle} wird folgende Konfiguration vorgenommen:
+
+\lstinputlisting{src/testenGradle/build.gradle}
+
+Mit (1) wird das Plugin mit dem im vorherigen Abschnitt definierten Bezeichner aktiviert. Mit (2) wird der Compiler in den Klassenpfad \lstinline{minijava} gelegt. (3) definiert einen neuen Gradle-Task mit zwei Quellcode-Verzeichnissen (Standardbibliothek, die sich außerhalb des Projekts befindet, und das minijava-Verzeichnis) und dem Ausgabe-Verzeichnis (build/wasm-module).
+
+In der Datei \lstinline{index.js} kann nun das kompilierte MiniJava-Modul wie in Node.js üblich mit \lstinline{require} importiert und aufgerufen werden:
+
+\lstinputlisting{src/testenGradle/index.js}
+
+Das Projekt kann nun mit \lstinline{node index.js} gestartet werden.

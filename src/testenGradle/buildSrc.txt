@@ -1,0 +1,9 @@
+buildSrc/
+  src/main/
+    groovy/
+      dev/ssch/minijava/plugin/ (package)
+        MiniJavaCompilationTask.groovy
+        MiniJavaPlugin.groovy
+    resources/
+      META-INF/.gradle-plugin/
+        dev.ssch.minijava.properties
