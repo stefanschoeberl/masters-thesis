@@ -1,0 +1,14 @@
+class Main {
+    public static void main() {
+        Elements elements = new Elements();
+        elements.txtFrom = Document.getElementById("txtFrom");
+        elements.txtTo = Document.getElementById("txtTo");
+        elements.resultBox = Document.getElementById("resultBox");
+        elements.infoBox = Document.getElementById("infoBox");
+
+        HTMLElement btnCalculate = Document.getElementById("btnCalculate");
+
+        ClickEventListener listener = new ClickEventListener(elements);
+        btnCalculate.addClickEventListener(listener);
+    }
+}

@@ -1,0 +1,44 @@
+class ClickEventListener {
+    Elements elements;
+
+    ClickEventListener(Elements elements) {
+        this.elements = elements;
+    }
+
+    public void handleEvent(MouseEvent event) {
+        int start = Stopwatch.now();
+        Range range = new Range(
+            Integer.parseInt(elements.txtFrom.value),
+            Integer.parseInt(elements.txtTo.value)
+        );
+
+        elements.resultBox.textContent = "";
+
+        HTMLElement table = Document.createElement("table");
+        elements.resultBox.appendChild(table);
+        table.classList.add("table");
+
+        HTMLElement tbody = Document.createElement("tbody");
+        table.appendChild(tbody);
+
+        int[] numbers = FibonacciCalculator.fibNumbers(range);
+        int i = 0;
+        while (i < numbers.length) {
+            HTMLElement row = Document.createElement("tr");
+            HTMLElement titleCol = Document.createElement("td");
+            HTMLElement valueCol = Document.createElement("td");
+
+            titleCol.innerText = "fib(" + (i + range.from) + ")";
+            valueCol.innerText = Integer.toString(numbers[i]);
+
+            row.appendChild(titleCol);
+            row.appendChild(valueCol);
+            tbody.appendChild(row);
+            i = i + 1;
+        }
+        int end = Stopwatch.now();
+
+        elements.infoBox.classList.remove("invisible");
+        elements.infoBox.innerText = "Generated Fibonacci ... in MiniJava! ...";
+    }
+}

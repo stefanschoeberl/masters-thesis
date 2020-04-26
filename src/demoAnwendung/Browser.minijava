@@ -1,0 +1,7 @@
+class Document {
+    native static HTMLElement getElementById(String elementId);
+}
+
+class HTMLElement {
+    native void addClickEventListener(Object handler);
+}

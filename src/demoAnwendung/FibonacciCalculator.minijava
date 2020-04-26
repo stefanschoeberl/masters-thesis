@@ -1,0 +1,19 @@
+class FibonacciCalculator {
+    static int fib(int n) {
+        if (n == 0 || n == 1) {
+            return n;
+        } else {
+            return fib(n - 1) + fib(n - 2);
+        }
+    }
+
+    static int[] fibNumbers(Range range) {
+        int[] numbers = new int[range.to - range.from + 1];
+        int i = 0;
+        while (i < numbers.length) {
+            numbers[i] = fib(i + range.from);
+            i = i + 1;
+        }
+        return numbers;
+    }
+}
