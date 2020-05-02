@@ -1,0 +1,11 @@
+<bundle-name>/
+  native/
+    0.js       (*)
+    1.js       (*)
+    ...
+  imports.js
+  internal.js
+  module.js    (*)
+  module.wasm  (*)
+  module.wat   (*)
+  runtime.js
