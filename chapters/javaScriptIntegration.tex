@@ -59,11 +59,41 @@ Man sieht am Beginn die zwei Stringliterale (1). Etwas weiter unten ist der Kons
 \subsection{Arrayfunktionen}
 \subsection{Stringkonkatenation}
 
-\section{Methodenaufrufe von JavaScript nach MiniJava}
-
 \section{Objektverwaltung für MiniJava in JavaScript}
 \subsection{Aufbau}
 \subsection{Typinformationen}
 \subsection{Hilfsfunktionen}
+
+\section{Methodenaufrufe von JavaScript nach MiniJava}
+
+Alle MiniJava-Methoden, die mit dem Schlüsselwort \lstinline{public} gekennzeichnet wurden, werden als Funktion im WebAssembly-Modul exportiert. Dabei wird dieselbe Benennungskonvention wie für das Importieren von nativen Methoden verwendet (siehe Abschnitt TODO).
+
+In der JavaScript-Klasse \lstinline{Runtime} wird die Funktion \lstinline{findMethod} zur Verfügung gestellt, mit der aus Klassenname, Methodenname und der Eingabeparametertypliste der Methodenname zusammengebaut wird. Anschließend wird die Funktion in den \lstinline{exports} der WebAssembly-Modulinstanz abgerufen.
+
+\lstinputlisting{src/javaScriptIntegration/findMethod.js}
+
+Auf dieser Funktion aufbauend können nun Aufrufe auf statische Methoden und Instanzmethoden realisiert werden.
+
+\subsection{Statische Methodenaufrufe}
+
+Bei statischen Aufrufen kann \lstinline{findMethod} praktisch direkt verwendet werden. Um dem Verwender der \lstinline{Runtime}-Klasse eine einheitliche Schnittstelle zu bieten, wird der Aufruf von \lstinline{findMethod} in der Methode \lstinline{staticMethod} gekapselt:
+
+\lstinputlisting{src/javaScriptIntegration/staticMethod.js}
+
+Nun kann ein statischer Aufruf durchgeführt werden. So wird beispielsweise die Mini\-Java-Methode \lstinline{public static int add(int a, int b)} der MiniJava-Klasse \lstinline{Utils} in Java\-Script aufgerufen:
+
+\lstinputlisting{src/javaScriptIntegration/staticCall.js}
+
+\subsection{Instanzmethodenaufrufe}
+
+Instanzmethoden können nicht direkt wie statische Methoden aufgerufen werden, da zunächst der Typ des Objekts, auf das die Methode aufgerufen wird, bestimmt werden muss. Damit dies möglich ist, muss das Empfängerobjekt bereits mit \lstinline{runtime.wasmRefType} registriert sein. Anschließend kann mit \lstinline{findMethod} die Methode gesucht werden. Da Instanzmethoden per Konvention als ersten Parameter eine Referenz auf das Empfängerobjekt erwarten ("\lstinline{this}-Referenz"), muss die Referenz als erster Parameter beim Aufruf eingefügt werden:
+
+\lstinputlisting{src/javaScriptIntegration/instanceMethod.js}
+
+Da die Anzahl der Parameter von der tatsächlichen Funktion abhängig ist, werden in Zeile 4 beim Lambda-Ausdruck in der Parameterliste "Rest-Parameter" (\lstinline{...args}) \cite{MDNJavaScript} verwendet, die alle übergebenen Parameter in der Liste \lstinline{args} speichern. Beim Aufruf der WebAssembly-Funktion muss diese Parameterliste wieder "ausgepackt" werden - ansonsten würde man ja die Parameterliste als ein Listenobjekt übergeben. Dafür wird die "Spread-Syntax" (\lstinline{...args}) verwendet. Die beiden Konstrukte sehen syntaktisch ident aus, erfüllen aber die jeweils gegensätzliche Funktion.
+
+Nun kann ein Aufruf einer Instanzmethode durchgeführt werden. So wird beispielsweise die MiniJava-Methode \lstinline{public void increment(int a)} eines Objekts \lstinline{obj} in JavaScript aufgerufen:
+
+\lstinputlisting{src/javaScriptIntegration/instanceCall.js}
 
 \section{Auszug aus der Standardbibliothek}

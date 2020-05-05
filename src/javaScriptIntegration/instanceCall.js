@@ -1,0 +1,1 @@
+runtime.instanceMethod(obj, 'increment', 'int')(3);

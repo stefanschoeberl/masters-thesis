@@ -1,0 +1,1 @@
+runtime.staticMethod('Utils', 'add', 'int', 'int')(3, 4);
