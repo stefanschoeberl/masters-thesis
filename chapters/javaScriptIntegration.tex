@@ -55,14 +55,67 @@ Aus diesem Code wurde die Datei \emph{module.js} erzeugt:
 
 Man sieht am Beginn die zwei Stringliterale (1). Etwas weiter unten ist der Konstruktor, der die Instanzvariablen mit \lstinline{0} und \lstinline{null} initialisiert (2). Bei (3) werden Getter und Setter für die \lstinline{int}-Instanzvariable definiert. Da es sich um einen elementaren Datentyp handelt, kann der Wert direkt aus dem übergebenen Parameter gelesen werden (Setter) bzw. als Rückgabewert zurückgegeben werden (Getter). Beim Getter und Setter für die \lstinline{String}-Instanzvarible (4) muss der Parameter beim Setter zunächst derefenziert werden bzw. muss beim Getter zunächst eine Referenz auf das Objekt erzeugt werden.
 
+\section{Objektverwaltung für MiniJava in JavaScript}
+
+Sämtliche Objekte, auf die von MiniJava zugegriffen wird, werden in JavaScript als "echte" JavaScript-Objekte verwaltet. Diese Objekte werden in MiniJava über eine Adresse bzw. Referenz angesprochen. Im Wesentlichen entspricht diese Referenz einer fortlaufenden Nummer, die bei 1 beginnt, da 0 \lstinline{null} entspricht.
+
+Es muss möglich sein, eindeutig von einem Objekt auf die Referenz und umgekehrt schließen zu können. Dafür wird jeweils eine JavaScript-\lstinline{Map} verwendet.
+
+Diese Datenstrukturen werden in der JavaScript-Klasse \lstinline{Runtime} verwaltet. Im Konstruktor werden diese sinnvoll initialisiert, beispielsweise wird die Referenz 0 auf \lstinline{null} und umgekehrt abgebildet:
+
+\lstinputlisting{src/javaScriptIntegration/runtimeConstructor.js}
+
+Weiters werden drei Methoden zur Verfügung gestellt, die das Erstellen einer Referenz auf ein JavaScript-Objekt und das Dereferenzieren einer Referenz kapseln:
+
+\lstinputlisting{src/javaScriptIntegration/wasmRefDeref.js}
+
+Die Methode \lstinline{wasmRefType} sollte genau dann verwendet werden, wenn das erste Mal eine Referenz für ein JavaScript-Objekt angefordert wird, da hier der MiniJava-Datentyp des Objekts registriert wird. Dieser Typ wird später für Methodenaufrufe benötigt.
+
+Wie der Name der Methoden bereits erahnen lässt, liefert \lstinline{wasmDeref} das Objekt bzw. \lstinline{null} hinter der Referenz. \lstinline{wasmRef} liefert die Referenz auf das Objekt, falls bereits eine Referenz erstellt wurde oder erstellt eine neue, falls das Objekt noch keine Referenz besitzt.
+
 \section{Sprachinterne Funktionen}
+
+MiniJava bietet einige Sprachfeatures an, die nicht zur Gänze in WebAssembly abgebildet werden können, da sie mit JavaScript-Objekten interagieren. Dazu zählen alle Funktionalitäten rund um Arrays wie das Erstellen eines Arrays, das Abfragen der Länge des Arrays und das Lesen und Schreiben über einen Index. Außerdem bietet MiniJava das Konkatenieren von Strings mit diversen Datentypen an.
+
 \subsection{Arrayfunktionen}
+
+Die Implementierung der Arrayfunktionen sind vom konkreten Element-Datentyp des Arrays abhängig. Allgemein lassen sich daher vier Fälle unterscheiden:
+
+\begin{description}
+    \item[Werte numerische Datentypen] wie \lstinline{int} und \lstinline{float} werden auf denselben JavaScript-Daten\-typ abgebildet, da JavaScript nur den Datentyp \lstinline{number} kennt.
+    \item[boolean-Werte] müssen zwischen JavaScripts \lstinline{true} und \lstinline{false} auf 1 und 0 und umgekehrt abgebildet werden, da WebAssembly keinen eigenen Datentyp für Wahrheitswerte besitzt
+    \item[char-Werte] müssen zwischen einer Ganzzahl und einem String mit einem Zeichen abgebildet werden, da JavaScript nur den Datentyp \lstinline{string} kennt und keinen eigenen Datentyp für einzelne Zeichen besitzt.
+    \item[Objekte] müssen auf Referenzen und umgekehrt abgebildet werden. 
+\end{description}
+
+Sämtliche Funktionen für Arrays wurden für diese vier Fälle einzeln implmentiert und funktionieren konzeptionell ähnlich. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der diesem Schema entspricht: \lstinline{<function>_array_<type>}.
+
+Am interessantesten sind die Funktionen für Arrays von Objekten, daher werden diese nun im Detail betrachtet.
+
+Beim Erstellen eines Arrays wird ein JavaScript-Array in der angeforderten Größe erstellt und mit Standardwerten (hier \lstinline{null}) vorbefüllt:
+\lstinputlisting{src/javaScriptIntegration/arrayNew.js}
+
+Das Abrufen eines Objekts über den Index funktioniert folgendermaßen, dabei muss zunächst das Array selbst derefenziert werden. Anschließend wird für das über den Index erhaltene Objekt mit \lstinline{runtime.wasmRef} eine Referenz erstellt:
+\lstinputlisting{src/javaScriptIntegration/arrayGet.js}
+
+Analog dazu funktioniert das Setzen eines Objekts an einem Index:
+\lstinputlisting{src/javaScriptIntegration/arraySet.js}
+
+Die Funktion für das Abfragen der Länge des Arrays ist typunabhängig, daher gibt hier nur eine Implementierung:
+
+\lstinputlisting{src/javaScriptIntegration/arrayLength.js}
+
 \subsection{Stringkonkatenation}
 
-\section{Objektverwaltung für MiniJava in JavaScript}
-\subsection{Aufbau}
-\subsection{Typinformationen}
-\subsection{Hilfsfunktionen}
+Alle Verwendungen des MiniJava-Konkatenationsoperators \lstinline{+} werden auf JavaScript-Funktionen abgebildet. Dabei muss zumindest auf einer Seite des Operators ein String stehen. Abhängig vom Datentyp "auf der anderen Seite" gibt es (ähnlich wie bei den Arrays) eine eigene Implementierung. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der diesem Schema entspricht: \lstinline{+_<left-type>_<right-type>}.
+
+Die einfachste Variante ist das Konkatenieren von zwei Strings. Hier werden zunächst die Referenzen der beiden Strings dereferenziert. Anschließend wird eine Referenz auf den zusammengesetzten String erstellt:
+\lstinputlisting{src/javaScriptIntegration/stringString.js}
+
+Ähnlich wie bei den Arrays gibt es dieselben vier Fälle für die Datentypen "auf der anderen Seite". Für jeden Fall gibt es zwei Varianten: Datentyp auf der linken Seite und String auf der rechten Seite sowie String auf der linken Seite und Datentyp auf der rechten Seite. Somit ergibt das insgesamt acht Funktionen.
+
+Da das Konkatenieren für die einzelnen Datentypen konzeptionell ähnlich funktioniert, werden stellvertretend nun beispielhaft die zwei Funktionen gezeigt, um einen String mit einem numerischen Wert zu verketten:
+\lstinputlisting{src/javaScriptIntegration/stringNumeric.js}
 
 \section{Methodenaufrufe von JavaScript nach MiniJava}
 
