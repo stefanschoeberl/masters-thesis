@@ -9,7 +9,7 @@ Das Paket hat folgende Ordnerstruktur:
 
 Der Name des Wurzelordners ist vom Aufrufer der Compilers frei wählbar, daher wurde er hier als Platzhalter mit \lstinline{<bundle-name>} gekennzeichnet. Alle mit einem \lstinline{(*)} gekennzeichnete Dateien sind von den zu kompilierenden Dateien abhängig und werden dynamisch erzeugt. Alle anderen Dateien sind statisch und sind von den zu kompilierenden Dateien unabhängig. Sie werden 1:1 in den Ordner bei jedem Compileraufruf kopiert.
 
-Nachfolgend einige Details zu den statischen Dateien:
+\subsection{Statische Dateien}
 
 \emph{imports.js} ist für das Erstellen des Import-Objekts verantwortlich, das beim Instanzieren des WebAssembly-Moduls benötigt wird. Hier werden die JavaScript-Implementie\-rungen von sprachinternen Funktionalitäten, als auch die JavaScript-Pendants nativer Methoden in ein Objekt zusammengefasst.
 
@@ -17,13 +17,15 @@ Nachfolgend einige Details zu den statischen Dateien:
 
 \emph{runtime.js} definiert die Laufzeitumgebung für das Zusammenspiel zwischen JavaScript und WebAssembly/MiniJavs. Hier befindet sich die Objektverwaltung und diverse Hilfsfunktionen um Daten zwischen JavaScript und WebAssembly/MiniJava auszutauschen und um von JavaScript ausgehend MiniJava-Methoden aufrufen zu können.
 
-Nun zu den dynamischen Dateien:
+\subsection{Dynamische Dateien}
 
 Alle JavaScript-Pendants für native Methoden werden in den Ordner \emph{native} kopiert. Um dabei potenzielle Dateinamenkollisionen zu umgehen, werden alle Dateien ab 0 beginnend nummeriert.
 
 Der generierte Bytecode wird in der Datei \emph{module.wasm} abgelegt. Als Zwischenprodukt entsteht beim Kompilieren die Datei \emph{module.wat}, die lediglich die textuelle Repräsentation des WebAssembly-Moduls ist, aus dieser Datei entsteht mit dem Werkzeug \lstinline{wat2wasm}\cite{WABT} dann die binäre Form des Moduls. Die textuelle Repräsentation wird zur Laufzeit grundsätzlich nicht benötigt.
 
 Alle im MiniJava-Sourcecode vorhandenen Stringliterale werden in der Datei \emph{module.js} registriert. Außerdem werden zur Compile-Zeit sämtliche Konstrukturen, Getter und Setter für MiniJava-Klassen generiert und in dieser Datei gespeichert. Weiters referenziert diese Datei alle JavaScript-Dateien im \emph{native} Ordner.
+
+\subsection{Zusammenhang zwischen den Dateien}
 
 Je nachdem, auf welcher Plattform das Paket ausgeführt wird, muss das WebAssembly-Modul unterschiedlich geladen werden: Bei Node.js kann das Module aus dem Dateisystem gelesen werden, im Browser muss es von einem Web-Server heruntergeladen werden. Um dem Benutzer des Pakets  Flexibilität zu ermöglichen, wird das WebAssembly-Modul nicht direkt von den anderen JavaScript-Dateien referenziert.
 
