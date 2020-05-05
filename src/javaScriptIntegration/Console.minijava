@@ -1,0 +1,4 @@
+class Console {
+    native static void println(int a);
+    native static void println(String a);
+}

@@ -1,0 +1,4 @@
+class Integer {
+    native static int parseInt(String s);
+    native static String toString(int i);
+}

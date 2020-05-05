@@ -1,0 +1,5 @@
+class String {
+    native int length();
+    native char charAt(int index);
+    native boolean equals(String other);
+}
