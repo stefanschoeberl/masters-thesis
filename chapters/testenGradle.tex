@@ -18,7 +18,7 @@ Als Testframework wird JUnit 5 \cite{JUnit} in Kombination mit AssertJ \cite{Ass
 
 Beim Durchführen des Tests wird im Hintergrund eine Datei (\emph{main.minijava}) mit dem zu testenden MiniJava-Sourcecode angelegt. JUnit 5 bietet die Annotation \lstinline{@TempDir} an, mit der ein temporäres Verzeichnis für jeden Testfall angelegt wird, das nach Ablauf der Tests wieder gelöscht wird \cite{JUnit}. So werden die Testfälle von einander isoliert.
 
-Hilfsfunktionen wie \lstinline{compileAndRunInMainClass} starten den Compiler und führen das erzeugte Modul aus. Am Ende wird die Konsolenausgabe als String zurückgegeben.
+Hilfsmethoden wie \lstinline{compileAndRunInMainClass} starten den Compiler und führen das erzeugte Modul aus. Am Ende wird die Konsolenausgabe als String zurückgegeben.
 
 Unter Zuhilfenahme von AssertJ lassen sich die erwarteten Ergebnisse fast wie ein englischer Satz elegant formulieren, zum Beispiel: \lstinline{assertThat(...).containsExactly(...)} \cite{AssertJ}.
 
@@ -34,7 +34,7 @@ Es ist möglich, den MiniJava-Compiler direkt zum Beispiel über die Kommandozei
 
 In der Gradle-Dokumentation \cite{Gradle} wird beschrieben, wie eigene Erweiterungen für Gradle implementiert werden können. Nachfolgend werden die notwendigen Schritte erläutert, die speziell für den MiniJava-Compiler notwendig sind, um ihn in Gradle zu integrieren.
 
-Zunächst wird ein eigener Task (\lstinline{MiniJavaCompilationTask}) definiert, der das Kompilieren von MiniJava-Sourcecode kapselt. Dieser Task ist von \lstinline{JavaExec} abgeleitet. Der \lstinline{JavaExec}-Task wird von Gradle zur Verfügung gestellt und kann -- ähnlich wie die java-Kommandozeile -- kompilierte Bytecode-Klassen ausführen. Im \lstinline{MiniJavaCompilationTask} wird der \lstinline{JavaExec}-Task konfiguriert, damit er die Hauptklasse des Compilers (\lstinline{MainKt}) mit den gewünschten Parametern aufruft:
+Zunächst wird ein eigener Task (\lstinline{MiniJavaCompilationTask}) definiert, der das Kompilieren von MiniJava-Sourcecode kapselt. Dieser Task ist von \lstinline{JavaExec} abgeleitet. Der \lstinline{JavaExec}-Task wird von Gradle zur Verfügung gestellt und kann -- ähnlich wie die java-Komman\-dozeile -- kompilierte Bytecode-Klassen ausführen. Im \lstinline{MiniJavaCompilationTask} wird der \lstinline{JavaExec}-Task konfiguriert, damit er die Hauptklasse des Compilers (\lstinline{MainKt}) mit den gewünschten Parametern aufruft:
 
 \lstinputlisting{src/testenGradle/MiniJavaCompilationTask.groovy}
 
