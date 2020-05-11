@@ -47,3 +47,21 @@ Weiters bietet Blazor Schnittstellen an, um von JavaScript ausgehend .NET-Method
 \lstinputlisting[caption = Aufruf einer C\#{}-Methode in JavaScript \cite{Blazor}]{src/technischeGrundlagen/blazorCSharpCall.txt}
 
 \subsection{Rust}
+
+Die Programmiersprache Rust verspricht auf der eigenen Website \cite{RustWasmWebsite} Unterstützung für WebAssembly. Dabei werden sticht besonders hervor, dass zur Laufzeit kein Garbage-Collector involviert ist, die Ausführzeiten somit vorhersehbar werden und der Rust-Compiler in der Lage ist, möglichst kleine WebAssembly-Module zu generieren.
+
+Der Weg vom Rust-Code zur Webanwendung sieht folgendermaßen aus: Der Rust-Sourcecode wird mit cargo in ein WebAssembly-Modul kompiliert. Anschließend wird mit wasm-bindgen JavaScript-Code generiert. Das Werkzeug wasm-pack fasst diese Aufgaben zusammen \cite{RustWasmBook}.
+
+Um Rust-Sourcecode im WebAssembly-Umfeld verwenden zu können, sind einige Anpassungen im Code notwendig. Nachfolgend findet sich ein einfaches Code-Beispiel (basierend auf der offiziellen Dokumentation \cite{RustWasmBook}), das die Interopabilität zwischen Rust und JavaScript demonstrieren soll.
+
+\lstinputlisting[caption = Rust-Sourcecode für WebAssembly angepasst]{src/technischeGrundlagen/rustLib.rs}
+
+Zunächst muss die Speicherverwaltung konfiguriert werden. Dafür wird \lstinline{wee_alloc} (The Wasm-Enabled, Elfin Allocator) eingesetzt. Dieser erzeugt besonders wenig WebAs\-sembly-Bytecode, laut offizieller Dokumentation unter einem Kilobyte und ist für WebAssembly ausgelegt \cite{WeeAlloc}.
+
+Mit dem Attribut \lstinline{#[wasm_bindgen]} können Funktionalitäten von JavaScript importiert (hier die Funktion \lstinline{alert} in Kombination mit \lstinline{extern}) werden. Es ist auch möglich, Datenstrukturen und Funktionen für JavaScript zugänglich zu machen (hier die Datenstruktur \lstinline{Point} und die Funktionen \lstinline{Point.new} und \lstinline{alert_point}).
+
+Aus diesen Informationen kann wasm-pack JavaScript-Code erzeugen, der sehr einfach verwendet werden kann:
+
+\lstinputlisting[caption = Verwendung eines Rust-Moduls in JavaScript ]{src/technischeGrundlagen/rustJS.js}
+
+Sämtliche Daten (wie die Instanz der Struktur \lstinline{Point}) werden im eigenen Speicherbereich für WebAssembly abgelegt (siehe Abschnit TODO). Es wird nur die Adresse des hinterlegten Rust-Objekts in einem JavaScript-Objekt gekapselt. Dieses JavaScript-Objekt delegiert sämtliche Funktionsaufrufe an WebAssembly.
