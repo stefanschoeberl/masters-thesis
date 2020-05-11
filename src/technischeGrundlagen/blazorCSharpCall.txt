@@ -1,0 +1,7 @@
+// JavaScript
+DotNet.invokeMethodAsync('BlazorSample', 'ReturnArrayAsync')
+      .then(data => console.log(data));
+
+// C#
+[JSInvokable]
+public static Task<int[]> ReturnArrayAsync() => Task.FromResult(new int[] { 1 });

@@ -19,8 +19,31 @@
 \subsection{JavaScript}
 \subsection{Gradle}
 \subsection{webpack}
-
+\pagebreak % TODO: remove
 \section{Stand der Technik}
+Es gibt bereits eine Reihe an Technologien, die auf WebAssembly aufbauen. In diesem Abschnitt werden drei ausgewählte aktuelle Technologien betrachtet. Es wird dabei der Fokus auf den Einsatz der Technologien und der Art der Integration mit WebAssembly und JavaScript gelegt.
+
 \subsection{Emscripten}
-\subsection{Blazor}
+
+\subsection{Blazor WebAssembly}
+Blazor \cite{Blazor} ist ein von Microsoft entwickeltes Framework und eine Technologie in der ASP.NET Core Familie. Mit Blazor lassen sich clientseitige Web-Anwendungen auf Basis von .NET mit C\#{} entwickeln. Blazor wird in zwei Ausprägungen angeboten: Blazor Server und Blazor WebAssembly. Weitere Ausprägungen für Progressive-Web-Apps, mobile Anwendungen auf Basis von Web-Technologien und native Anwendungen sind geplant \cite{BlazorBlog}.
+
+Blazor basiert auf Razor \cite{Razor}. Razor ermöglicht, HTML und C\#{} miteinander zu kombinieren. Nachfolgend ist ein Code-Beispiel, das das Zusammenspiel zwischen HTML und C\#{} verdeutlichen soll.
+
+\lstinputlisting[caption = Beispiel für eine Blazor-Komponente aus der offiziellen Dokumenation \cite{Blazor}]{src/technischeGrundlagen/blazorExample.razor}
+
+Man sieht, dass sich Werte aus Variablen ausgeben lassen können (\lstinline{@Title}) und Maus\-klick-Ereignisse auf Methodenaufrufe abgebildet werden können (\lstinline{@onclick="OnYes"}). Weiters lassen sich andere Komponenten einbinden (\lstinline{@ChildContent}).
+
+Blazor Server wird, wie der Name bereits erahnen lässt, serverseitig betrieben. Dabei läuft die Logik der Web-Anwendung auf dem Server. Die Kommunikation zwischen Server und Browser erfolgt über SignalR. Das bedeutet, dass jedes Ereignis und jedes Update der Benutzeroberfläche über das Netzwerk erfolgt. Blazor Server wurde hier nur zur Vollständigkeit erwähnt und wird nicht weiter behandelt.
+
+Bei der zweiten Variante, Blazor WebAssembly, wird keine Logik mehr am Server ausgeführt. Der Weg vom Code zur lauffähigen Anwendung sieht folgendermaßen aus: Der Code wird zu .NET-Assemblies kompiliert. Der Browser lädt diese Assemblies und die .NET-Laufzeit-Umgebung von einem Web-Server herunter. Die .NET-Lauf\-zeit\-um\-ge\-bung läuft in der virtuellen WebAssembly-Maschine und lädt die Assemblies. In diesem Prozess gibt es eine Reihe an Optimierungen, zum Beispiel wird die .NET-Laufzeitumgebung im Cache des Browsers ablegt, um unnötige Downloads zu ersparen.
+
+Blazor basiert auf dem .NET Standard 2.0. Somit kann bestehender Code, der diesen Standard erfüllt, wiederverwendet werden. Gewisse Funktionaliäten dieses Standards werden jedoch nicht unterstützt, dazu zählt beispielsweise direkter Dateisystemzugriff und Threading. In diesen Fällen kommt es zu einem Laufzeitfehler.
+
+Weiters bietet Blazor Schnittstellen an, um von JavaScript ausgehend .NET-Methoden aufzurufen und umgekehrt. Nachfolgend finden sich zwei Codeausschnitte, die die Interoperabilität veranschaulichen sollen. Sie basieren auf der offiziellen Dokumentation und wurden auf die wesentlichen Bestandteile zusammengefasst.
+
+\lstinputlisting[caption = Aufruf einer JavaScript-Funktion in C\#{} \cite{Blazor}]{src/technischeGrundlagen/blazorJSCalls.txt}
+
+\lstinputlisting[caption = Aufruf einer C\#{}-Methode in JavaScript \cite{Blazor}]{src/technischeGrundlagen/blazorCSharpCall.txt}
+
 \subsection{Rust}

@@ -1,0 +1,6 @@
+// C#
+uint[] numbers = new uint[] { 72, 101, 108, 108, 111 };
+var text = await JSRuntime.InvokeAsync<string>("convertArray", numbers);
+
+// JavaScript
+window.convertArray = (arrayData) => { return asciiToText(arrayData) };
