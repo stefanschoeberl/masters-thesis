@@ -25,6 +25,20 @@ Es gibt bereits eine Reihe an Technologien, die auf WebAssembly aufbauen. In die
 
 \subsection{Emscripten}
 
+Emscripten ist ein Compiler, mit dem sich C/C++-Sourcecode nach WebAssembly übersetzen lässt \cite{Emscripten}. Die grundsätzliche Idee ist, dass sich mit möglichst wenig Aufwand bestehender Code ins Web bringen lässt. Zum Beispiel werden \lstinline{printf}-Aufrufe automatisch auf die Konsole abgebildet. Weitere typische Bibliotheken werden direkt unterstützt, darunter zum Beispiel SDL (Simple DirectMedia Layer) OpenGL (über WebGL) oder OpenAL (über Web Audio API). Emscripten bietet zusätzlich eine Reihe an eigenen Schnittstellen an, darunter zum Beispiel Anbindungen an HTML 5 und WebVR.
+
+Da WebAssembly in einem isolierten Umfeld läuft, ergeben sich natürlich auch einige Einschränkungen, die keine 1:1-Abbildungen ermöglichen, dazu zählen zum Beispiel direkter Dateisystem- und Netzwerkzugriff. Für Netzwerkanbindungen bietet Emscripten zum Beispiel eine Schnittstelle für WebSockets an. Dateisystemzugriff wird über ein virtuelles Dateisystem abgebildet. Auf dieses virtuelle Dateisystem kann wie gewohnt über Funktionen wie \lstinline{fopen} zugegriffen werden. Dateien können entweder statisch beim Kompilieren in dieses Dateisystem oder zur Laufzeit dynamisch über XMLHttpRequests geladen werden.
+
+Mit Emscripten sind Aufrufe von JavaScript nach C möglich. Funktionen werden in C mit \lstinline{EMSCRIPTEN_KEEPALIVE} markiert, damit sie durch Optimierungen nicht gelöscht werden, falls sie nirgends in C referenziert werden. In JavaScript gibt es zwei Möglichkeiten zum Aufruf: Direkt an das Modul mit einem Unterstrich vor dem Funktionsnamen oder über \lstinline{ccall}. Nachfolgend findet sich ein auf der offziellen Dokumentation basierendes Code-Beispiel.
+
+\lstinputlisting[caption = Aufruf einer C-Funktion in JavaScript]{src/technischeGrundlagen/emscriptenCCalls.txt}
+
+Es ist auch möglich, C++-Funktionen aufzurufen, dies ist aber aufgrund von Name mangling nicht so einfach wie bei C-Funktionen möglich. Eine Lösung für dieses Problem ist das "Verpacken" in \lstinline|extern "C" { ... }| Konstrukte. Weitere Möglichkeiten sind in der offiziellen Dokumentation zu finden.
+
+Aufrufe von C nach JavaScript sind auch möglich. Grundsätzlich bietet Emscripten hier zwei Ansätze: Das Ausführen von beliebigen JavaScript-Sourcecode-Strings (wird vom JavaScript über \lstinline{eval} ausgewertet) oder das Einbetten von JavaScript-Sourcecode in C. Nachfolgend findet sich ein auf der offziellen Dokumentation basierendes Code-Beispiel.
+
+\lstinputlisting[caption = Aufruf von JavaScript in C]{src/technischeGrundlagen/emscriptenJSCalls.txt}
+
 \subsection{Blazor WebAssembly}
 Blazor \cite{Blazor} ist ein von Microsoft entwickeltes Framework und eine Technologie in der ASP.NET Core Familie. Mit Blazor lassen sich clientseitige Web-Anwendungen auf Basis von .NET mit C\#{} entwickeln. Blazor wird in zwei Ausprägungen angeboten: Blazor Server und Blazor WebAssembly. Weitere Ausprägungen für Progressive-Web-Apps, mobile Anwendungen auf Basis von Web-Technologien und native Anwendungen sind geplant \cite{BlazorBlog}.
 

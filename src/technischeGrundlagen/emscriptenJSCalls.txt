@@ -1,0 +1,13 @@
+#include <emscripten.h>
+
+EM_JS(int, add_forty_two, (int n), {
+    console.log('add_forty_two called');
+    return n + 42;
+});
+
+int main() {
+    emscripten_run_script("alert('hi')"); // => JavaScript eval(...)
+
+    int x = add_forty_two(100);
+    return 0;
+}

@@ -1,0 +1,13 @@
+// JavaScript
+var em_module = require('./api_example.js');
+
+console.log(em_module.ccall("daysInWeek"));
+console.log(em_module._daysInWeek());
+
+// C
+#include <emscripten.h>
+
+EMSCRIPTEN_KEEPALIVE
+int daysInWeek() {
+    return 7;
+}
