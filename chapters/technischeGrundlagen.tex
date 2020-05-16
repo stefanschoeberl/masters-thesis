@@ -15,11 +15,45 @@
 
 \section{Weitere Technologien}
 \subsection{Kotlin}
+Kotlin ist eine von JetBrains entwickelte Programmiersprache \cite{KotlinReference}. Kotlin zeichnet besonders durch die kompakte Syntax und starke Integration in das bestehende Java-Umfeld aus. Zusätzlich bietet Kotlin Absicherungen gegen \lstinline{NullPointerExceptions} zur Compile-Zeit. Wie bei Java wird aus Kotlin beim Kompilieren ebenfalls Bytecode für die JVM (Java Virtual Machine) erzeugt. Durch diese enge Interoperabilität kann beim Programmieren mit Kotlin auf die bereits große Menge an Java-Bibliotheken zurückgegriffen werden.
+
+Bei MiniJava wird Kotlin als Implementierungssprache des MiniJava-Compilers eingesetzt. Der von ANTLR generierte Parser (Java-Sourcecode) lässt sich von Kotlin ausgehend problemlos verwenden Kotlin aufgrund persönlicher Präferenz gewählt, da die tatsächliche Implementierungssprache des Compilers im JVM-Umfeld keine essenzielle Rolle spielt.
+
 \subsection{Node.js}
+Node.js ist eine JavaScript-Laufzeitumgebung, die auf der V8 JavaScript Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript-Schnittstelle für WebAssembly (siehe Abschnitt TODO).
+
+Bei MiniJava wird Node.js als Laufzeitumgebung für Konsolenanwendungen eingesetzt.
+
 \subsection{JavaScript}
+JavaScript ist eine Skriptsprache, die zur Laufzeit interpretiert wird \cite{MDNJavaScript}. Bekannt ist sie vor allem als clientseitige Programmiersprache im Browser für Webseiten. JavaScript ist prototyp-basiert und dynamisch typisiert. Weiters besitzt JavaScript nur eine Handvoll an Datentypen, darunter \lstinline{number} für Ganz- und Fließkommazahlen, \lstinline{string} für Zeichenketten, \lstinline{boolean} für Wahrheitswerte, \lstinline{function} für Funktionen und \lstinline{object} für jede Art von Objekt inklusive Arrays. Der Sprachumfang von JavaScript basiert auf der ECMAScript-Spezifikation.
+
+JavaScript dient bei MiniJava als Bindeglied zu WebAssembly.
+
 \subsection{Gradle}
+Gradle ist ein Build-System, das sich im Java-Umfeld etabliert hat \cite{Gradle}. Der Build-Prozess wird dabei deklarativ in der Programmiersprache Groovy beschrieben.
+
+Das Kernelement sind so genannte Tasks, die eine definierte Aufgabe erfüllen, beispielsweise Java-Code kompilieren, Tests ausführen oder ein Java-Archiv (JAR) erstellen. Zwischen Tasks lassen sich Abhängigkeiten definieren, dadurch werden Tasks in der richtigen Reihenfolge abgearbeitet (zum Beispiel Tests müssen nach dem Kompilieren ausgeführt werden). Weiters können für Tasks Eingaben und Ausgaben (das sind Order bzw. Dateien) definiert werden. Mit diesen Informationen kann Gradle den Build-Prozess dahingehend optimieren, dass nur diejenigen Tasks ausgeführt werden, bei denen es auch sinnvoll ist: Beispielsweise würde es nichts bringen, Java-Sourcecode nocheinmal zu kompilieren, wenn er sich seit dem letzten Kompilieren nicht verändert hat.
+
+Gradle baut auf der Abhängigkeitsverwaltung von Maven auf. So lassen sich bestehende Bibliotheken, die zum Beispiel im Central Repository\footnote{\url{https://search.maven.org}} verfügbar sind, einfach einbinden.
+
+Bei MiniJava wird Gradle bei der gesamten Implementierung dieser Masterarbeit eingesetzt, sowohl beim Kompilieren des MiniJava-Compilers selbst, als auch beim Kompilieren von MiniJava-Sourcecode mit dem MiniJava-Compiler.
+
 \subsection{webpack}
-\pagebreak % TODO: remove
+webpack ist ein Werkzeug, mit dem mehrere JavaScript-Module, die auf mehrere Dateien aufgeteilt sind, in eine einzige JavaScript-Datei zusammengebündelt werden können \cite{Webpack}. webpack unterstützt eine Reihe von Modulsystemen, darunter CommonJS (mit Statement \lstinline{require}) oder die \lstinline{import}-Statements im ES2015-Umfeld. Weiters kann webpack auch so konfiguriert werden, dass andere Programmiersprachen (wie zum Beispiel TypeScript) ebenfalls in diesen Prozess eingebunden werden können. Diese müssen dabei mit einem Transpiler in JavaScript-Sourcecode konvertiert werden.
+
+Bei MiniJava wird webpack eingesetzt, um beim Einsatz im Browser alle (generierten) JavaScript-Dateien in eine gemeinsame JavaScript-Datei zusammenzufassen.
+
+\subsection{JUnit und AssertJ}
+JUnit ist ein Unit-Test-Framework für Java \cite{JUnit}. Testfälle können sehr einfach definiert werden, es genügt dabei eine Methode mit der \lstinline{@Test}-Annotation zu markieren, dann kann sie von JUnit gefunden werden. Weiters lässt sich JUnit direkt in Gradle als Teil des Build-Prozesses integrieren \cite{Gradle}.
+
+AssertJ ist eine Bibliothek zum Schreiben von Assertionen. JUnit bietet diese Funktionalität bereits, jedoch ist der wesentliche Vorteil gegenüber JUnit, dass die Assertionen fast wie ein englischer Satz aussehen. Nachfolgend ein Beispiel dazu:
+
+\lstinputlisting{src/technischeGrundlagen/assertions.java}
+
+Auch wenn der Code etwas länger ist, ist er aussagekräftiger. Außerdem würde man sofort erkennen, wenn man den erwarteten und den tatsächlichen Wert vertauschen würde.
+
+JUnit wird gemeinsam mit AssertJ bei MiniJava zum Testen des Compilers eingesetzt.
+
 \section{Stand der Technik}
 Es gibt bereits eine Reihe an Technologien, die auf WebAssembly aufbauen. In diesem Abschnitt werden drei ausgewählte aktuelle Technologien betrachtet. Es wird dabei der Fokus auf den Einsatz der Technologien und der Art der Integration mit WebAssembly und JavaScript gelegt.
 
