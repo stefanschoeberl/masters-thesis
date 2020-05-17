@@ -15,7 +15,24 @@ Im Rahmen eines MVP (Minimum Viable Product) entstand die erste Version für Web
 WebAssembly trifft in der Spezifikation keine Annahmen zur Laufzeitumgebung. Auch wenn das primäre Einsatzgebiet das Web ist, ist es durchaus denkbar, dass WebAssembly andersweitig eingesetzt wird. WebAssembly wurde auch so entworfen, dass nicht einmal JavaScript für die Laufzeitumgebung notwendig sein müsste \cite{WebAssemblyWebsite}.
 
 \subsection{Konzepte}
+WebAssembly stellt eine Art einfache Programmiersprache dar, in der Spezifikation werden für diese einige Konzepte \cite{WebAssemblySpecification} definiert. Nachfolgend werden diese vorgestellt und erklärt.
+
+\begin{description}
+    \item[Datentypen] WebAssembly definiert vier Datentypen, zwei für Ganzzahlen und zwei für Fließkommazahlen, jeweils als 32-Bit- und 64-Bit-Variante. Der 32-Bit-Ganz\-zahl\-typ wird ebenfalls für Wahrheitswerte und für Speicheradressen verwendet. Die Ganzzahltypen können sowohl für vorzeichenbehafte und vorzeichenlose Zahlen verwendet werden, abhängig von den konkreten Operation darauf werden sie entsprechend interpretiert.
+    \item[Instruktionen] Das Laufzeitmodell von WebAssembly basiert auf einer Stack-Ma\-schi\-ne. Das bedeutet, dass Instruktionen Operanden zunächst vom Stack herunternehmen, dann die Operation ausführen und am Schluss das Ergebnis wieder auf diesen Stack legen. Instruktionen werden nacheinander abgearbeitet. Weiters gibt es noch Instruktionen, die den Kontrollfluss steuern können. Einige Instruktionen werden in Abschnitt \ref{subsec:WebAssembly-Instruktionen} detailliert behandelt.
+    \item[Traps] Instruktionen können (absichtlich oder unbeabsichtigt) Laufzeitfehler in Form von Traps erzeugen, die zu einem sofortigen Abbruch der Ausführung führen. Die Behandlung dieser erfolgt in der Laufzeitumgebung und nicht direkt in WebAssembly.
+    \item[Funktionen] Instruktionen werden in Funktionen gekapselt. Funktionen können beliebig viele Eingangsparameter, maximal einen Ausgangsparameter und beliebig viele lokale Variablen definieren. Funktionen können andere Funktionen oder sich selbst rekursiv aufrufen.
+    \item[Tabellen] In Tabellen können derzeit Funktionen abgelegt werden, auf die über einen Index zugegriffen werden kann. Auf diese Art und Weise können beispielsweise Funktionszeiger umgesetzt werden. 
+    \item[Linearer Speicher] Linearer Speicher ist ein zusammendhängendes Byte-Array, auf das lesend und schreibend zugegriffen werden kann. Über Instruktionen erfolgt dieser Zugriff über einen Index. Beim Erstellen des Speichers wird eine initale Größe definiert, der Speicher kann zur Laufzeit dynamisch wachsen.
+    \item[Module] In einem Modul werden sämtliche Bestandteile von WebAssembly, darunter Funktionen, Tabellen, Imports und Exports, definiert. Weitere Details zu Modulen finden sich in Abschnitt \ref{subsec:WebAssembly-Module}.
+\end{description}
+
+Die Spezifikation fordert nicht, dass Laufzeitumgebungen einen "echten" Stack zur Auswertung verwalten müssen. Das Programm muss lediglich so ausgeführt werden, als ob es auf einer Stack-Maschine laufen würde.
+
 \subsection{WebAssembly-Module}
+\label{subsec:WebAssembly-Module}
+\subsection{WebAssembly-Instruktionen}
+\label{subsec:WebAssembly-Instruktionen}
 \subsection{Aktueller Entwicklungsstand}
 \subsection{WebAssembly Binary Toolkit}
 \subsection{JavaScript-API}
