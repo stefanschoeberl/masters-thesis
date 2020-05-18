@@ -1,0 +1,1 @@
+(export "main" (func 3))
