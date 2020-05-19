@@ -59,8 +59,32 @@ In einem Modul können verschiedene Komponenten definiert werden. Nachfolgend wi
 
 \subsection{WebAssembly-Instruktionen}
 \label{subsec:WebAssembly-Instruktionen}
+WebAssembly unterstützt eine Reihe an elementaren Bytecode-Instruktionen. Instruktionen können (zur Compilezeit) festgelegte Argumente annehmen. Nachfolgend wird auf einige ausgewählte Instruktionen im Detail eingegangen. Eine vollständige Liste aller Instruktionen findet sich in der WebAssembly-Spezifikation \cite{WebAssemblySpecification}. Anmerkung: Die meisten Instruktionen existieren in Ausprägungen für jeden der vier elementaren Datentypen. Die nachfolgenden Beispiele werden nur anhand des 32-Bit Ganzzahltyp gezeigt, \lstinline{i32} könnte man somit mit einem anderen Datentyp ersetzen.
+
+Die Instruktion \lstinline{i32.const} legt zur Laufzeit einen zur Compilezeit definierten Wert (Konstante) oben auf den Stack. Beispiel: \lstinline{i32.const 123}.
+
+Lokale Variablen lassen sich mit \lstinline{local.get} und \lstinline{local.set} lesen und schreiben. Die lokalen Variablen werden ab \lstinline{0} beginnend adressiert. Besitzt eine Funktion Parameter, so zählen die Parameter ebenfalls zu den lokalen Variablen. Der erste Parameter besitzt die Adresse \lstinline{0}.
+
+\lstinline{local.get} liest den Wert der angeforderten lokalen Variable und legt den Wert oben auf den Stack. \lstinline{local.set} nimmt den obersten Wert am Stack herunter und speichert diesen in die angegebene Variable. Beispiel fürs Lesen der erste lokale Variable: \lstinline{local.get 0}. Beispiel fürs Schreiben in die zweite lokale Variable: \lstinline{local.set 1}.
+
+Für das Rechnen mit Variablen bietet WebAssembly eine Reihe an binären Operationen an. Diese nehmen jeweils die obersten zwei Werte vom Stack herunter (Operanden), wenden auf diese die Operation an und legen anschließend das Ergebnis oben auf den Stack. Beispiele: \lstinline{i32.add} (Addieren), \lstinline{i64.and} (Bitweise Und), \lstinline{f32.le} (Kleiner oder gleich)
+
+Weiters gibt es einige Anweisungen zur Steuerung des Kontrollflusses. Die einfachste ist die binäre Verzweigung und besteht aus drei Instruktionen (\lstinline{if}, \lstinline{else} und \lstinline{end}). Die \lstinline{if} Instruktion nimmt den obersten Wert vom Stack herunter. Ist dieser ungleich 0 ("wahr") werden die Instruktionen zwischen \lstinline{if} und \lstinline{else} ausgeführt. Ist der oberste Wert am Stack gleich 0 ("falsch"), werden die Instruktionen zwischen \lstinline{else} und \lstinline{end} ausgeführt. Nachfolgend ein Beispiel:
+
+\lstinputlisting[caption = Beispiel für eine binäre Verzweigung: Abhängig vom Wert in der ersten lokalen Variable wird \lstinline{1} oder \lstinline{2} in die zweite lokale Variable geschrieben.]{src/technischeGrundlagen/instructionsIfElseEnd.wat}
+
+Neben der binären Verzweigung sind auch Sprünge zu Sprungmarken möglich. Es ist allerdings nicht möglich, beliebig im Code herumzuspringen. Sprungmarken werden mit \lstinline{block ... end} oder \lstinline{loop ... end} definiert. Dabei wird beim Betreten des Bereichs ein Sprungziel auf den Stack gelegt. Beim Verlassen des Bereichs wird das Sprungziel wieder vom Stack heruntergenommen. Somit sind die Sprungmarken nur innerhalb des Bereich gültig. Das Sprungziel ist bei \lstinline{block} das Ende des Bereichs, bei \lstinline{loop} der Anfang des Bereichs. Einen (unbedingten) Sprung kann man mit der \lstinline{br}-Instruktion durchführen. Für einen bedingten Sprung ist die \lstinline{br_if}-Instruktion vorgesehen, dabei wird der oberste Wert zunächst vom Stack heruntergenommen. Ist dieser wahr (ungleich 0), wird gesprungen. Beide Sprunginstruktionen erwarten als Argument eine Zahl \lstinline{n}. Die Instruktion führ dann einen Sprung zum \lstinline{n}-ten obersten Sprungziel am Stack durch. Diese Instruktionen können für Schleifen eingesetzt werden. Nachfolgend ein Beispiel: 
+
+\lstinputlisting[caption = {Beispiel für eine einfache Schleife: Am Anfang der Schleife wird der Wert der ersten lokalen Variable ausgelesen. Ist dieser wahr, wird die Schleife verlassen. Am Ende der Schleife wird unbedingt zum Anfang der Schleife gesprungen.}]{src/technischeGrundlagen/instructionsBranches.wat}
+
+Funktionen können mit der \lstinline{call}-Instruktion aufgerufen werden. Die Instruktion benötigt als Argument den Index der aufzurufenden Funktion. Beispiel: \lstinline{call 1}. Falls die aufgerufene Funktion einen Rückgabewert besitzt, liegt dieser nach dem Funktionsaufruf oben am Stack. Daher muss in der Implementierung einer Funktion mit Rückgabewert dieser am Ende der Funktion oben am Stack liegen.
+
+Eine Funktion kann frühzeitig mit der \lstinline{return}-Instruktion verlassen werden. Besitzt die Funktion einen Rückgabewert, muss dieser vor der \lstinline{return}-Instruktion oben am Stack liegen.
+
 \subsection{Aktueller Entwicklungsstand}
 \subsection{WebAssembly Binary Toolkit}
+Das WebAssembly Binary Toolkit (WABT) ist eine Sammlung an Werkzeugen, die Entwickler im Kontext von WebAssembly unterstützen sollen \cite{WABT}. Dazu zählen Werkzeuge zum Analysieren, Validieren und Dekompilieren von WebAssembly-Modulen. Zwei im Rahmen dieser Arbeit nützliche Werkzeuge sind \lstinline{wat2wasm} und \lstinline{wasm2wat}, mit denen zwischen der textuellen und binären Repräsentation eines Moduls konvertiert werden kann. Konkret wird \lstinline{wat2wasm} im MiniJava-Compiler aufgerufen, um das binäre WebAssembly-Modul zu generieren.
+
 \subsection{JavaScript-API}
 
 \section{ANTLR}
