@@ -15,6 +15,7 @@ Im Rahmen eines MVP (Minimum Viable Product) entstand die erste Version für Web
 WebAssembly trifft in der Spezifikation keine Annahmen zur Laufzeitumgebung. Auch wenn das primäre Einsatzgebiet das Web ist, ist es durchaus denkbar, dass WebAssembly andersweitig eingesetzt wird. WebAssembly wurde auch so entworfen, dass nicht einmal JavaScript für die Laufzeitumgebung notwendig sein müsste \cite{WebAssemblyWebsite}.
 
 \subsection{Konzepte}
+\label{subsec:WebAssembly-Konzepte}
 WebAssembly stellt eine Art einfache Programmiersprache dar, in der Spezifikation werden für diese einige Konzepte \cite{WebAssemblySpecification} definiert. Nachfolgend werden diese vorgestellt und erklärt.
 
 \begin{description}
@@ -81,11 +82,42 @@ Funktionen können mit der \lstinline{call}-Instruktion aufgerufen werden. Die I
 
 Eine Funktion kann frühzeitig mit der \lstinline{return}-Instruktion verlassen werden. Besitzt die Funktion einen Rückgabewert, muss dieser vor der \lstinline{return}-Instruktion oben am Stack liegen.
 
-\subsection{Aktueller Entwicklungsstand}
+\subsection{Aktueller Entwicklungsstand und zukünftige Entwicklungen}
+Wie bereits beschrieben wurde im MVP von WebAssembly nur die allernotwendigste Funktionalität spezifiziert und implementiert. Neue Features durchlaufen einen Standardisierungsprozess \cite{WebAssemblyW3CProcess}. Dieser besteht aus 6 Phasen:
+
+\begin{enumerate}
+    \setcounter{enumi}{-1}
+    \item Pre-Proposal: Ein Mitglied der Community Group hat eine Idee und erstellt eine quasi-formale Beschreibung. Die Community Group stimmt für oder gegen Idee.
+    \item Feature Proposal: Das Feature wird in einem offiziellen Repository aktiv entworfen. Wenn notwendig können Prototypen implementiert werden.
+    \item Proposed Spec Text Available: Eine vollständige Spezifikation in Englisch ist nun vorhanden. In dieser Phase an mindestens einer Implementierung entwickelt, sodass Tests auf dieser ausgeführt werden können. Diese Tests werden in einer Testsuite zusammengefasst.
+    \item Implementation Phase: Die Testsuite ist nun vollständig und mindestens eine Implementierung durchläuft diese fehlerfrei. Nun müssen sogenannte "Embedder" das Feature implementieren. Die Spezifikation wird weiter verfeinert. Die Referenzimplementierung und Werkzeuge werden um das Feature ergänzt.
+    \item Standardize the Feature: Nun sind einige Implementierungen vollständig und die Spezifikation ist praktisch eingefroren. Ab jetzt übernimmt die Working Group. Regelmäßig wird über die Nützlichkeit des Features abgestimmt.
+    \item The Feature is Standardized: Das Feature ist fertiggestellt.
+\end{enumerate}
+
+Sämtliche aktive Entwicklungen werden in einem GitHub-Repository zusammengefasst \cite{WebAssemblyProposals}.
+Eine davon haben bereits die Implementierungsphase (4) erreicht, beispielsweise Unterstützung für Referenzdatentypen. Threads sind beispielsweise erst in Phase 2. Interessante Features wie Garbage Collection oder Interface Types (diese sollen dabei helfen, die Interoperabilität mit Web-APIs zu verbessern \cite{WebAssemblyInterfaceTypes}) sind erst in Phase 1.
+
 \subsection{WebAssembly Binary Toolkit}
 Das WebAssembly Binary Toolkit (WABT) ist eine Sammlung an Werkzeugen, die Entwickler im Kontext von WebAssembly unterstützen sollen \cite{WABT}. Dazu zählen Werkzeuge zum Analysieren, Validieren und Dekompilieren von WebAssembly-Modulen. Zwei im Rahmen dieser Arbeit nützliche Werkzeuge sind \lstinline{wat2wasm} und \lstinline{wasm2wat}, mit denen zwischen der textuellen und binären Repräsentation eines Moduls konvertiert werden kann. Konkret wird \lstinline{wat2wasm} im MiniJava-Compiler aufgerufen, um das binäre WebAssembly-Modul zu generieren.
 
 \subsection{JavaScript-API}
+\label{subsec:WebAssembly-JavaScript-API}
+JavaScript stellt eine Schnittstelle zur Verfügung, mit der WebAssembly-Module geladen, kompiliert und ausgeführt werden können \cite{MDNWebAssembly}. In diesem Abschnitt soll ein Überblick über diese Schnittstelle gegeben werden.
+
+Zunächst muss das Modul geladen werden. Dies kann im Browser beispielsweise mit \lstinline{fetch} und in Node.js mit \lstinline{fs.readFile} erfolgen. Aus diesen Rohdaten wird mit \lstinline{WebAssembly.compile} das Modul kompiliert. Im Browser können diese zwei Schritte auch gemeinsam mit \lstinline{WebAssembly.compileStreaming} zusammengefasst werden, dabei wird während dem Herunterladen das Modul gleichzeitig kompiliert. Dadurch können potenziell schnellere Ladezeiten erreicht werden. Diese Funktion ist allerdings nicht in allen Browsern verfügbar.
+
+Nun wird eine Instanz des Moduls mit \lstinline{WebAssembly.instantiate} erzeugt. Diese Funktion benötigt als weiteren Parameter ein JavaScript-Objekt, das die Imports definiert. In diesem Import-Objekt spiegelt sich der zweistufige Bezeichner wieder. So könnte man beispielsweise die in Abschnitt \ref{subsec:WebAssembly-Module} importierte Funktion \lstinline{env.println} bereitstellen:
+
+\lstinputlisting{src/technischeGrundlagen/importObject.js}
+
+Die Schritte Herunterladen, Kompilieren und Instanzieren lassen sich ebenfalls mit der (nicht in allen Browsern unterstützten) Funktion \lstinline{WebAssembly.instantiateStreaming} zusammenfassen.
+
+Man erhält am Ende die Modulinstanz als Objekt. Dieses Objekt besitzt die Datenkomponente \lstinline{exports}. Über diese können exportiere Funktionen aufgerufen werden.
+
+Nachfolgend findet sich ein zusammenhängendes Beispiel, um das Zusammenspiel zwischen WebAssembly und JavaScript zu veranschaulichen:
+
+\lstinputlisting[caption = {Beispiel aus der MDN Dokumentation \cite{MDNWebAssembly}: In JavaScript wird die exportierte Funktion \lstinline{exported_func} aufgerufen, diese ruft wiederum \lstinline{imported_func} auf.}]{src/technischeGrundlagen/simpleJSAPI.txt}
 
 \section{ANTLR}
 \subsection{Hintergrund}
@@ -99,7 +131,7 @@ Kotlin ist eine von JetBrains entwickelte Programmiersprache \cite{KotlinReferen
 Bei MiniJava wird Kotlin als Implementierungssprache des MiniJava-Compilers eingesetzt. Der von ANTLR generierte Parser (Java-Sourcecode) lässt sich von Kotlin ausgehend problemlos verwenden Kotlin aufgrund persönlicher Präferenz gewählt, da die tatsächliche Implementierungssprache des Compilers im JVM-Umfeld keine essenzielle Rolle spielt.
 
 \subsection{Node.js}
-Node.js ist eine JavaScript-Laufzeitumgebung, die auf der V8 JavaScript Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript-Schnittstelle für WebAssembly (siehe Abschnitt TODO).
+Node.js ist eine JavaScript-Laufzeitumgebung, die auf der V8 JavaScript Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript-Schnittstelle für WebAssembly (siehe Abschnitt \ref{subsec:WebAssembly-JavaScript-API}).
 
 Bei MiniJava wird Node.js als Laufzeitumgebung für Konsolenanwendungen eingesetzt.
 
@@ -191,4 +223,4 @@ Aus diesen Informationen kann wasm-pack JavaScript-Code erzeugen, der sehr einfa
 
 \lstinputlisting[caption = Verwendung eines Rust-Moduls in JavaScript ]{src/technischeGrundlagen/rustJS.js}
 
-Sämtliche Daten (wie die Instanz der Struktur \lstinline{Point}) werden im eigenen Speicherbereich für WebAssembly abgelegt (siehe Abschnit TODO). Es wird nur die Adresse des hinterlegten Rust-Objekts in einem JavaScript-Objekt gekapselt. Dieses JavaScript-Objekt delegiert sämtliche Funktionsaufrufe an WebAssembly.
+Sämtliche Daten (wie die Instanz der Struktur \lstinline{Point}) werden im eigenen Speicherbereich für WebAssembly abgelegt (siehe Speicher in Abschnit \ref{subsec:WebAssembly-Konzepte}). Es wird nur die Adresse des hinterlegten Rust-Objekts in einem JavaScript-Objekt gekapselt. Dieses JavaScript-Objekt delegiert sämtliche Funktionsaufrufe an WebAssembly.

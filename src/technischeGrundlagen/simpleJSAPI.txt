@@ -1,0 +1,15 @@
+// WebAssembly
+(module
+    (func (import "imports" "imported_func") (param i32))
+    (func (export "exported_func")
+      i32.const 42
+      call 0
+    )
+)
+
+// JavaScript
+var importObject = {
+    imports: { imported_func: arg => console.log(arg) }
+};
+WebAssembly.instantiateStreaming(fetch('simple.wasm'), importObject)
+.then(obj => obj.instance.exports.exported_func());
