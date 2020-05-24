@@ -1,0 +1,5 @@
+val input = CharStreams.fromStream(File(...).inputStream())
+val lexer = MyLanguageLexer(input)
+val tokens = CommonTokenStream(lexer)
+val parser = MyLanguageParser(tokens)
+val tree = parser.listOfNumbers()

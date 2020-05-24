@@ -120,9 +120,76 @@ Nachfolgend findet sich ein zusammenhängendes Beispiel, um das Zusammenspiel zw
 \lstinputlisting[caption = {Beispiel aus der MDN Dokumentation \cite{MDNWebAssembly}: In JavaScript wird die exportierte Funktion \lstinline{exported_func} aufgerufen, diese ruft wiederum \lstinline{imported_func} auf.}]{src/technischeGrundlagen/simpleJSAPI.txt}
 
 \section{ANTLR}
-\subsection{Hintergrund}
-\subsection{Grundkonzepte}
+
+ANTLR (ANother Tool for Language Recognition) ist ein von Terence Parr entwickelter Scanner- und Parsergenerator für diverse Programmiersprachen (darunter Java und C\#{}) \cite{ANTLR4Reference} \cite{ANTLRWebsite}. ANTLR selbst ist in Java geschrieben. Die Programmiersprache, für die Scanner und Parser generiert werden, wird nachfolgend auch als Zielsprache bezeichnet.
+
+\subsection{LL(*)-Parser}
+
+ANTLR erzeugt so genannten LL(*)-Parser \cite{ANTLRLLStar}. TODO
+
 \subsection{Grammatikbeschreibung}
+
+Die Grammatik einer Sprache wird in einer \lstinline{g4}-Datei beschrieben. Nachfolgend ist ein einfaches Beispiel für eine Grammatik, die "benannte Zahlenlisten" beschreibt, zum Beispiel \lstinline{even[ 2 4 ]}, \lstinline{empty[ ]} oder \lstinline{prime[ 2 3 5 7 ]}:
+
+\lstinputlisting[caption = MyLanguage.g4]{src/technischeGrundlagen/MyLanguage.g4}
+
+Am Beginn steht der Name der Grammatik. Anschließend folgen Regeln für Nonterminalsymbole und zum Schluss Terminalsymbole. Formatierungen wie Leerzeichen, Zeilenumbrüche usw. können ignoriert werden. Dafür ist das Terminalsymbol \lstinline{WS} zuständig. Mit \lstinline{-> skip} "wirft" es sämtliche Formatierung "weg", sodass man sich in der eigentlichen Grammatik darum nicht mehr kümmern muss. 
+
+Nonterminalsymbole werden üblicherweise kleingeschrieben, Terminalsymbole groß.
+
+TODO
+
+Aus der Grammatikdatei werden Scanner, Parser und weitere Hilfsklassen und -dateien mit dem ANTLR-Werkzeug\footnote{\url{https://www.antlr.org/download/antlr-4.8-complete.jar}} erzeugt. Dieser Prozess lässt sich außerdem auch in Gradle über ein Plugin integrieren \cite{GradleANTLRPlugin}.
+
+\subsection{Integration in Kotlin}
+
+Aus der im vorherigen Abschnitt beschriebenen Grammatik kann mit ANTLR nun Code für die Zielsprache Java erzeugt werden. Die Namen der generierten Dateien beginnen mit dem Grammatiknamen. Der erzeugte Scanner und Parser wird nun in ein eigenes Programm integriert.
+
+Da sich Java-Sourcecode von Kotlin ausgehend verwenden lässt, wird nachfolgend gezeigt, wie der generierte Scanner und Parser in Kotlin aufgerufen wird:
+
+\lstinputlisting[]{src/technischeGrundlagen/antlrKotlin.kt}
+
+Zu den einzelnen Zeilen ein paar Details:
+\begin{enumerate}
+    \item erzeugt aus dem Inhalt einer Datei einen Strom an Zeichen.
+    \item erzeugt ein Lexer-Objekt aus der generierten Klasse \lstinline{MyLanguageLexer} und dem Zeichenstrom.
+    \item erzeugt einen Strom an Terminalsymbolen ("Tokens") aus dem Lexer-Objekt.
+    \item erzeugt ein Parser-Objekt aus der generierten Klasse \lstinline{MyLanguageParser} und dem Strom an Terminalsymbolen.
+    \item erzeugt einen Syntaxbaum mit dem Satzsymbol \lstinline{listOfNumbers}.
+\end{enumerate}
+
+\subsection{Semantische Aktionen}
+
+Oft reicht es nicht, lediglich zu überprüfen, ob ein Text (Satz) in der Sprache der Grammatik enthalten ist. Besonders beim Parsen von Programmiersprachen müssen anhand des konkreten Sourcecodes Entscheidungen bzw. semantische Aktionen getroffen werden. ANTLR bietet hier zwei grundsätzliche Ansätze an:
+
+\begin{itemize}
+    \item Die Struktur der Sprache wird in einer Grammatik (-datei) beschrieben. Semantische Aktionen erfolgen davon getrennt in eigenen Komponenten (\lstinline{Listener} oder \lstinline{Visitor}), die den Syntaxbaum auswerten. Die Grammatik enthält keinen zielsprachenspezifischen Code.
+    \item Die Grammatik enthält zielsprachenspezifischen Code in Form von Codeeinschlüssen. Dieser Code wird in den generierten Scanner bzw. Parser eingebettet und wird später während dem Scannen und Parsen ausgeführt. 
+\end{itemize}
+
+Parr empfiehlt, soweit als möglich auf Codeeinschlüsse zu verzichten. Dafür sprechen folgende Argumente:
+\begin{itemize}
+    \item Saubere Trennung von Grammatik und Auswertung im Sinne des Single-res\-pon\-si\-bi\-li\-ty principle TODO cite.
+    \item Da die Grammatik sprachunabhängig bleibt, können Scanner und Parser einfacher für andere Zielsprachen aus bestehenden Grammatiken erzeugt werden.
+    \item Grammatik bleibt übersichtlicher, da Zielsprache nicht mit Grammatikregeln verwoben ist.
+\end{itemize}
+
+Dennoch kann es Gründe geben, die für Codeeinschlüsse sprechen:
+\begin{itemize}
+    \item Wenn nur wenige semantische Aktionen benötigt werden und ist der Gesamtcode so übersichtlicher bleibt.
+    \item Um sich das Aufbauen des Syntaxbaums im RAM zu ersparen. Dies ist zum Beispiel bei performancekritischen Anwendungen wichtig.
+    \item Manchmal ist es notwendig, Entscheidungen im Parsevorgang selbst treffen zu müssen ("Predicated parsing").
+    \item Generierung für mehrere Zielsprachen ist nicht notwendig.
+    \item Wiederverwendbarkeit der Grammatik steht nicht im Vordergrund.
+\end{itemize}
+
+In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. Nachfolgend werden die beiden Ansätze beschrieben.
+
+\subsection{Weitere nütliche Features}
+
+Auflösen von Linksrekursionen
+
+Non-Greedy
 
 \section{Weitere Technologien}
 \subsection{Kotlin}
