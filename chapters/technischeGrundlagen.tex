@@ -121,11 +121,21 @@ Nachfolgend findet sich ein zusammenhängendes Beispiel, um das Zusammenspiel zw
 
 \section{ANTLR}
 
-ANTLR (ANother Tool for Language Recognition) ist ein von Terence Parr entwickelter Scanner- und Parsergenerator für diverse Programmiersprachen (darunter Java und C\#{}) \cite{ANTLR4Reference} \cite{ANTLRWebsite}. ANTLR selbst ist in Java geschrieben. Die Programmiersprache, für die Scanner und Parser generiert werden, wird nachfolgend auch als Zielsprache bezeichnet.
+ANTLR (ANother Tool for Language Recognition) ist ein von Terence Parr entwickelter Scanner- und Parsergenerator für diverse Programmiersprachen (darunter Java und C\#{}) \cite{ANTLR4Reference} \cite{ANTLRWebsite}. ANTLR selbst ist in Java geschrieben. Die Programmiersprache, für die Scanner und Parser generiert werden, wird nachfolgend auch als Zielsprache bezeichnet. Unter "ANTLR" ist in der gesamten Arbeit die aktuelle Hauptversion 4 zu verstehen, außer es wird explizit anders angegeben.
 
-\subsection{LL(*)-Parser}
+\subsection{Parser}
 
-ANTLR erzeugt so genannten LL(*)-Parser \cite{ANTLRLLStar}. TODO
+ANTLR ist in der Lage, für jede kontextfreie Grammatik ohne indirekte oder versteckte Linksrekursion einen Parser zu erzeugen \cite{ANTLRALLStar}. Der Parser arbeitet nach dem Prinzip des rekursiven Abstiegs. Das dabei eingesetzt Verfahren heißt ALL(*) (Adaptive LL(*)). In diesem Abschnitt wird das Verfahren nur überblicksmäßig erläutert, weitere Details dazu sind in \cite{ANTLR4Reference}, \cite{ANTLRLLStar} und \cite{ANTLRALLStar} nachzulesen.
+
+ALL(*) basiert auf dem in ANTLR 3 eingesetzten LL(*). LL(*) unterschiedet sich zu LL(k) dahingehend, dass die Anzahl der Vorgriffssymbole k nicht fixiert ist. Beim Treffen einer Entscheidung bei Alternativen wird stattdessen ein regulärer Ausdruck verwendet. ANTLR 3 erzeugt beim Generieren des Parsers für jedes Nonterminalsymbol einen deterministischen endlichen Automat. Gelingt es nicht, einen deterministischen endlichen Automanten zu erzeugen, wird auf Backtracking zurückgegriffen \cite{ANTLRLLStar}.
+
+ALL(*) erweitert die Idee von LL(*): Hier wird der determinische Automat beim Parsen dynamisch erzeugt \cite{ANTLRALLStar}. Beim Erzeugen des Automaten werden die aktuellen Bandsymbole verwendet. Beim Treffen zukünftigen Entscheidungen wird der bestehende Automat verwendet oder wenn notwendig erweitert. Der Vorteil gegenüber LL(*) ist, dass beim Aufbau des deterministischen endlichen Automats zur Laufzeit nur eine endliche Menge an Eingaben berücksichtigt werden müssen, während bei LL(*) \emph{alle} Möglichkeiten berücksichtigt werden müssen.
+
+ALL(*) kann grundsätzlich nicht mit Linksrekursionen umgehen \cite{ANTLR4Reference} \cite{ANTLRALLStar}. ANTLR ist jedoch in der Lage, direkte Linksrekursionen aufzulösen. Dadurch lassen sich mathematische Ausdrücke übersichtlicher und kompakter schreiben. Der Vorrang der Operatoren wird durch die Reihenfolge der Alternativen beschrieben: Die Priorität nimmt von oben nach unten ab. Nachfolgend findet sich ein Beispiel um das zu verdeutlichen:
+
+\lstinputlisting[caption = Beispiel für mathematische Ausdrücke in ANTLR \cite{ANTLR4Reference}]{src/technischeGrundlagen/antlrMathExpressions.g4}
+
+Insgesamt lassen sich durch das automatische Auflösen von Linksrekursionen und durch ALL(*) Grammatiken schreiben, die nicht zu stark auf das darunterliegende Verfahren angepasst werden müssen \cite{ANTLR4Reference}. Als extremes Gegenbeispiel soll hier an das (händische) "Umbauen" einer Grammatik erinnert werden, sodass die daraus entstehende Grammatik LL(1) ist.
 
 \subsection{Grammatikbeschreibung}
 
@@ -133,11 +143,9 @@ Die Grammatik einer Sprache wird in einer \lstinline{g4}-Datei beschrieben. Nach
 
 \lstinputlisting[caption = MyLanguage.g4]{src/technischeGrundlagen/MyLanguage.g4}
 
-Am Beginn steht der Name der Grammatik. Anschließend folgen Regeln für Nonterminalsymbole und zum Schluss Terminalsymbole. Formatierungen wie Leerzeichen, Zeilenumbrüche usw. können ignoriert werden. Dafür ist das Terminalsymbol \lstinline{WS} zuständig. Mit \lstinline{-> skip} "wirft" es sämtliche Formatierung "weg", sodass man sich in der eigentlichen Grammatik darum nicht mehr kümmern muss. 
+Am Beginn steht der Name der Grammatik. Anschließend folgen Regeln für Nonterminalsymbole und zum Schluss Terminalsymbole. Formatierungen wie Leerzeichen, Zeilenumbrüche usw. können ignoriert werden. Dafür ist das Terminalsymbol \lstinline{WS} zuständig. Mit \lstinline{-> skip} wird sämtliche Formatierung "weggeworfen", sodass man sich in der eigentlichen Grammatik darum nicht mehr kümmern muss. 
 
-Nonterminalsymbole werden üblicherweise kleingeschrieben, Terminalsymbole groß.
-
-TODO
+Beim Parsen entsteht aus einem Eingabetext ein Syntaxbaum. Nonterminalsymbole stellen Knoten in diesem Baum dar, Terminalsymbole sind darin immer Blatknoten. Kindknoten in diesem Syntaxbaum lassen sich auch benennen. Bei zum Beispiel einem \lstinline{listOfNumbers}-Knoten wird das Terminalsymbol \lstinline{IDENT} mit \lstinline{name} benannt. Der Knoten im Syntaxbaum erhält dann eine Datenkomponente \lstinline{name}, die auf das Terminalsymbol verweist. Es können auch mehrere Kindknoten in einer Liste gespeichert werden (dies erfolgt mit dem Operator \lstinline{+=}), in diesem Fall sind alle \lstinline{NUMBER}-Terminalsymbole in der Datenkomponente \lstinline{numbers} abrufbar.
 
 Aus der Grammatikdatei werden Scanner, Parser und weitere Hilfsklassen und -dateien mit dem ANTLR-Werkzeug\footnote{\url{https://www.antlr.org/download/antlr-4.8-complete.jar}} erzeugt. Dieser Prozess lässt sich außerdem auch in Gradle über ein Plugin integrieren \cite{GradleANTLRPlugin}.
 
@@ -184,12 +192,6 @@ Dennoch kann es Gründe geben, die für Codeeinschlüsse sprechen:
 \end{itemize}
 
 In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. Nachfolgend werden die beiden Ansätze beschrieben.
-
-\subsection{Weitere nütliche Features}
-
-Auflösen von Linksrekursionen
-
-Non-Greedy
 
 \section{Weitere Technologien}
 \subsection{Kotlin}
