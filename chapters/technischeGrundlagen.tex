@@ -191,7 +191,20 @@ Dennoch kann es Gründe geben, die für Codeeinschlüsse sprechen:
     \item Wiederverwendbarkeit der Grammatik steht nicht im Vordergrund.
 \end{itemize}
 
-In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. Nachfolgend werden die beiden Ansätze beschrieben.
+In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. In Abbildung \ref{fig:listenerVisitor} werden die beiden Ansätze visuell gegenübergestellt. Nachfolgend werden die beiden Ansätze beschrieben.
+
+Die einfachste Art einen Syntaxbaum abzuarbeiten ist eine Kombination aus einem \lstinline{ParseTreeWalker} und einem \lstinline{Listener}. Das Prinzip ist hier vergleichbar mit dem Verarbeiten von XML-Dokumenten auf Basis von SAX. ANTLR stellt den \lstinline{ParseTreeWalker} zur Verfügung, der \lstinline{Listener} (auf Basis eines generieten \lstinline{interfaces}) ist selber zu implementieren. Der Syntaxbaum wird vom \lstinline{ParseTreeWalker} depth-first abgearbeitet. Beim Betreten und Verlassen der Knoten werden entsprechende Methoden des \lstinline{Listeners} aufgerufen (\lstinline{enterXYZ} und \lstinline{exitXYZ}, bzw. \lstinline{visitTerminal}).
+
+Manchmal ist jedoch etwas mehr Kontrolle notwendig: Zum Beispiel möchte man den Baum in einere anderen Reihenfolge auswerden oder Ergebnisse "nach oben" zurückgeben. Es kann auch möglich sein, dass Teile des Syntaxbaums gar nicht ausgewertet werden müssen. Hier muss basierend auf einem generierten \lstinline{interface} ein \lstinline{Visitor} implementiert werden. für jeden Knotentyp gibt es eine Methode nach dem Schema \lstinline{visitXYZ}. In der Implementierung \lstinline{visit}-Methoden muss (sofern erwünscht) aktiv das Abarbeiten von Kindknoten angestoßen werden.
+
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{technischeGrundlagen/listenerVisitor}
+    \caption{Abarbeiten des Syntaxbaums des Satzes \lstinline{sp = 100;} mit einem \lstinline{Listener} und \lstinline{Visitor} \cite{ANTLR4Reference}}
+    \label{fig:listenerVisitor}
+\end{figure}
+
+ANTLR generiert zu jedem \lstinline{Listener}- und \lstinline{Visitor}-\lstinline{interface} eine Basisimplementierung, in der alle Methoden leer sind (\lstinline{Listener}) bzw. alle Kinder abgearbeitet werden (\lstinline{Visitor}). So können in eigenen Implementierung nur die relevanten Methoden überschrieben werden.
 
 \section{Weitere Technologien}
 \subsection{Kotlin}
