@@ -444,10 +444,7 @@ This work is published under the conditions of the
 %% Assembly of title pages ----------------------------------------------------
 
 \renewcommand{\@mastertitlepages}{
-	\@mastertitle
-	\ifthenelse{\equal{\@advisor}{}}%
-			{}{\@advisorpage}%
-	\@copyrightpage
+	\includepdf{title.pdf}
 	\@declarationpage
 }
      
