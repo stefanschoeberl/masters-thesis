@@ -1,3 +1,3 @@
-'array_length': arrayAddress => {
-    return runtime.wasmDeref(arrayAddress).length
+'array_length': arrayRef => {
+    return runtime.wasmDeref(arrayRef).length
 }

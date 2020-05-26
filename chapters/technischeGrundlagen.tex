@@ -98,7 +98,7 @@ Wie bereits beschrieben wurde im MVP von WebAssembly nur die allernotwendigste F
 Sämtliche aktive Entwicklungen werden in einem GitHub-Repository zusammengefasst \cite{WebAssemblyProposals}.
 Eine davon haben bereits die Implementierungsphase (4) erreicht, beispielsweise Unterstützung für Referenzdatentypen. Threads sind beispielsweise erst in Phase 2. Interessante Features wie Garbage Collection oder Interface Types (diese sollen dabei helfen, die Interoperabilität mit Web-APIs zu verbessern \cite{WebAssemblyInterfaceTypes}) sind erst in Phase 1.
 
-\subsection{WebAssembly Binary Toolkit}
+\subsection{\emph{WebAssembly Binary Toolkit}}
 Das WebAssembly Binary Toolkit (WABT) ist eine Sammlung an Werkzeugen, die Entwickler im Kontext von WebAssembly unterstützen sollen \cite{WABT}. Dazu zählen Werkzeuge zum Analysieren, Validieren und Dekompilieren von WebAssembly-Modulen. Zwei im Rahmen dieser Arbeit nützliche Werkzeuge sind \lstinline{wat2wasm} und \lstinline{wasm2wat}, mit denen zwischen der textuellen und binären Repräsentation eines Moduls konvertiert werden kann. Konkret wird \lstinline{wat2wasm} im MiniJava-Compiler aufgerufen, um das binäre WebAssembly-Modul zu generieren.
 
 \subsection{JavaScript-API}

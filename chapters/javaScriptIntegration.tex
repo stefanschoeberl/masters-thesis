@@ -1,162 +1,175 @@
 \chapter{Integration mit JavaScript}
 
-Im vorherigen Kapitel wurde gezeigt, wie das WebAssembly-Modul erzeugt wird. Grundsätzlich wäre dieses allein theoretisch lauffähig, da aber Interaktion mit JavaScript vorausgesetzt wird (zum Beispiel Objektverwaltung, Konsolenausgaben und native Methoden), ist ein JavaScript-Gerüst rundherum notwendig, das alle Komponenten miteinander verbindet. Daher wird vom Compiler nicht nur ein einfache \lstinline{wasm}-Datei erzeugt, sondern ein Ordner (im Sourcecode \lstinline{Bundle} genannt, nachfolgend auch als "Paket" bezeichnet) mit einigen JavaScript-Dateien und der \lstinline{wasm}-Datei erzeugt.
+Im vorherigen Kapitel wurde gezeigt, wie das WebAssembly-Modul erzeugt wird. Grundsätzlich wäre dieses alleine lauffähig, funktioniert aber nicht, da Interaktion mit Ja\-va\-Script vorausgesetzt wird (zum Beispiel für Objektverwaltung, Konsolenausgaben und native Methoden), ist ein JavaScript-Gerüst rundherum notwendig, das alle Komponenten miteinander verbindet. Daher wird vom MiniJava-Compiler nicht nur ein einfache \lstinline{wasm}-Datei erzeugt, sondern ein Verzeichnis (im Quelltext \lstinline{Bundle} genannt, nachfolgend auch als \emph{Paket} bezeichnet) mit einigen JavaScript-Dateien und der \lstinline{wasm}-Datei erzeugt.
 
 \section{Aufbau des erzeugten Pakets}
 
-Das Paket hat folgende Ordnerstruktur:
+Das erzeugte Paket hat folgende Struktur:
 \lstinputlisting{src/javaScriptIntegration/bundleStructure.txt}
 
-Der Name des Wurzelordners ist vom Benutzer der Compilers frei wählbar, daher wurde er hier als Platzhalter mit \lstinline{<bundle-name>} gekennzeichnet. Alle mit einem \lstinline{(*)} gekennzeichnete Dateien sind von den zu kompilierenden Dateien abhängig und werden dynamisch erzeugt. Alle anderen Dateien sind statisch und sind von den zu kompilierenden Dateien unabhängig. Sie werden 1:1 in den Paket-Ordner bei jedem Compileraufruf kopiert.
+Der Name des Wurzelverzeichnis ist beim Aufruf des MiniJava-Compilers frei wählbar, daher wurde er hier als Platzhalter mit \lstinline{<bundle-name>} gekennzeichnet. Alle mit einem \lstinline{(*)} gekennzeichnete Dateien sind von den zu kompilierenden Dateien abhängig und werden vom MiniJava-Compiler generiert. Alle anderen Dateien sind von den zu kompilierenden Dateien unabhängig und werden 1:1 in das Paket-Verzeichnis bei jedem Compileraufruf kopiert.
 
-\subsection{Statische Dateien}
+\subsection{Kopierte Dateien}
 
-\emph{imports.js} ist für das Erstellen des Import-Objekts verantwortlich, das beim Instanzieren des WebAssembly-Moduls benötigt wird. Hier werden die JavaScript-Implementie\-rungen von sprachinternen Funktionalitäten, als auch die JavaScript-Pendants nativer Methoden in ein Objekt zusammengefasst.
+Das Skript \emph{imports.js} ist für das Erstellen des Import-Objekts verantwortlich, das beim Instanzieren des WebAssembly-Moduls benötigt wird. Hier werden sowohl die Ja\-va\-Script-Im\-ple\-men\-tie\-rungen von sprachinternen Funktionalitäten als auch die Ja\-va\-Script-Pen\-dants nativer Methoden in ein Objekt zusammengefasst.
 
-\emph{internal.js} enthält die JavaScript-Implementierungen von sprachinternen Funktionalitäten für Arrays und Stringkonkatenationen.
+Das Skript \emph{internal.js} enthält die JavaScript-Implementierungen von sprachinternen Funktionalitäten für Felder und Zeichnketten-Konkatenationen.
 
-\emph{runtime.js} definiert die Laufzeitumgebung für das Zusammenspiel zwischen JavaScript und WebAssembly/MiniJava. Hier befindet sich die Objektverwaltung und diverse Hilfsfunktionen um Daten zwischen JavaScript und WebAssembly/MiniJava auszutauschen und um von JavaScript ausgehend MiniJava-Methoden aufrufen zu können.
+Das Skript \emph{runtime.js} definiert in der JavaScript-Klasse \lstinline{Runtime} die Laufzeitumgebung für das Zusammenspiel zwischen JavaScript und WebAssembly/MiniJava. In dieser Klasse befinden sich die Objektverwaltung und diverse Hilfsmethoden, um Daten zwischen JavaScript und WebAssembly/MiniJava auszutauschen und um von JavaScript ausgehend MiniJava-Methoden aufrufen zu können.
 
-\subsection{Dynamische Dateien}
+\subsection{Generierte Dateien}
 
-Alle JavaScript-Pendants für native Methoden werden in den Ordner \emph{native} kopiert. Um dabei potenzielle Dateinamenkollisionen zu umgehen, werden alle Dateien ab 0 beginnend nummeriert.
+Alle JavaScript-Pendants für native Methoden werden in das Verzeichnis \emph{native} kopiert. Um dabei potenzielle Dateinamenkollisionen zu umgehen, werden alle Dateien ab 0 beginnend nummeriert.
 
-Der generierte Bytecode wird in der Datei \emph{module.wasm} abgelegt. Als Zwischenprodukt entsteht beim Kompilieren die Datei \emph{module.wat}, die lediglich die textuelle Repräsentation des WebAssembly-Moduls ist\footnote{Dies hat den Hintergrund, dass das Erstellen der textuellen Repräsentation wesentlich einfacher ist. Außerdem können beim Entwickeln des Compilers potenzielle Fehler leichter in einer Textdatei als in einer binären Datei gefunden werden.}. Aus dieser Datei entsteht mit dem Werkzeug \lstinline{wat2wasm}\cite{WABT} dann die binäre Form des Moduls. Die textuelle Repräsentation wird zur Laufzeit grundsätzlich nicht benötigt.
+Der generierte Bytecode wird in der Datei \emph{module.wasm} abgelegt. Als Zwischenprodukt entsteht beim Kompilieren die Datei \emph{module.wat}, die lediglich die textuelle Repräsentation des WebAssembly-Moduls ist\footnote{Der Grund dafür ist, dass das Erstellen der textuellen Repräsentation wesentlich einfacher ist. Außerdem können beim Entwickeln des Compilers potenzielle Fehler leichter in einer Textdatei als in einer binären Datei gefunden werden.}. Aus dieser Datei entsteht mit dem Werkzeug \lstinline{wat2wasm} \cite{WABT} dann die binäre Form des Moduls. Die textuelle Repräsentation wird zur Laufzeit grundsätzlich nicht benötigt.
 
-Alle im MiniJava-Sourcecode vorhandenen Stringliterale werden in der Datei \emph{module.js} registriert. Außerdem werden zur Compile-Zeit sämtliche Konstrukturen, Getter und Setter für MiniJava-Klassen generiert und in dieser Datei gespeichert. Weiters referenziert diese Datei alle JavaScript-Dateien im Ordner \emph{native}.
+Alle im MiniJava-Quelltext vorhandenen Zeichenketten-Literale werden in der Datei \emph{module.js} registriert. Außerdem werden zur Compile-Zeit sämtliche Konstrukturen, \emph{Getter} und \emph{Setter} für MiniJava-Klassen generiert und in dieser Datei gespeichert. Weiters referenziert diese Datei alle JavaScript-Dateien im Verzeichnis \emph{native}.
 
 \subsection{Zusammenhang zwischen den Dateien}
 
-Je nachdem, auf welcher Plattform das Paket ausgeführt wird, muss das WebAssembly-Modul unterschiedlich geladen werden: Bei Node.js kann das Modul direkt aus dem Dateisystem gelesen werden, im Browser muss es von einem Web-Server heruntergeladen werden. Um dem Benutzer des Pakets hier Flexibilität zu ermöglichen, wird das WebAssembly-Modul nicht direkt von den anderen JavaScript-Dateien referenziert.
+Je nachdem, auf welcher Plattform das Paket ausgeführt wird, muss das WebAssembly-Modul unterschiedlich geladen werden: Bei Node.js kann das Modul direkt aus dem Dateisystem gelesen werden, im Browser muss es von einem Web-Server heruntergeladen werden. Um für die verschiedenen Einsatzgebiete Flexibilität zu ermöglichen, wird das WebAssembly-Modul nicht direkt von den anderen JavaScript-Dateien referenziert. In Abbildung \ref{fig:bundleStructure} wird der Zusammenhang zwischen den JavaScript-Dateien visualisiert.
 
-In der folgenden Grafik wird der Zusammenhang zwischen den JavaScript-Dateien visualisiert:
-
-\begin{center}
+\begin{figure}[]
+    \centering
     \includegraphics[width=0.8\textwidth]{javaScriptIntegration/bundle}
-\end{center}
+    \caption{Zusammenhang der JavaScript-Dateien in einem Paket}
+    \label{fig:bundleStructure}
+\end{figure}
 
 Auf die praktische Verwendung des gesamten Pakets wird in diesem Kapitel nicht eingangen. Im Abschnitt \ref{sec:NodeJSExample} wird anhand eines Beispiels gezeigt, wie sich das Paket in eine Node.js-Konsolenanwendung integrieren lässt.
 
 \section{JavaScript-Codegenerierung}
 
-Wie im vorherigen Abschnitt beschrieben, wird beim Kompilieren JavaScript-Code in der Datei \emph{module.js} generiert.
+Wie im vorherigen Abschnitt beschrieben, wird beim Kompilieren Ja\-va\-Script-Quell\-text in der Datei \emph{module.js} generiert.
 
-Beim Erzeugen des Bytecodes wurden bereits für die Stringliterale Speicheradressen (ab 1 beginnend) festgelegt. Daher müssen später zur Laufzeit die Stringliterale in der Reihenfolge der zuvor zugewiesenen Speicheradressen (siehe Abschnitt TODO) registriert werden. Dies muss geschehen, bevor das WebAssembly-Modul gestartet wird, da zu diesem Zeitpunkt noch keine Objekte erstellt wurden. So wird garantiert, dass sich die Adressen nicht verschieben.
+Beim Erzeugen des Bytecodes wurden bereits für die Zeichenketten-Literale Referenzen (ab 1 beginnend) festgelegt. Daher müssen später zur Laufzeit die Zeichenketten-Literale in der Reihenfolge der zuvor zugewiesenen Referenzen (siehe Abschnitt TODO) registriert werden. Dies muss erfolgen, bevor das WebAssembly-Modul gestartet wird, da zu diesem Zeitpunkt noch keine Objekte erstellt wurden. So wird garantiert, dass sich die Referenzen nicht verschieben.
 
-Außerdem muss für jede Klasse ein Konstruktur generiert werden. Dieser hat die Aufgabe, ein JavaScript-Objekt zu erzeugen, in dem alle Instanzvariablen mit einem (je nach Datentyp) sinnvollen Platzhalterwert initialisiert werden. Außerdem wird der MiniJava-Datentyp mit dem Objekt verknüpft. Die Konstrukturen geben als Rückgabewert die Adresse des erzeugen Objekts zurück.
+Außerdem muss für jede Klasse ein Konstruktur generiert werden. Dieser hat die Aufgabe, ein JavaScript-Objekt zu erzeugen, in dem alle Datenkomponenten mit einem (je nach Datentyp) sinnvollen Platzhalterwert initialisiert werden. Außerdem wird der entsprechende MiniJava-Datentyp mit dem Objekt verknüpft. Die Konstrukturen liefern als Rückgabewert eine Referenz des erzeugten Objekts.
 
-Instanzvariablen von MiniJava-Klassen werden direkt auf Instanzvariablen von Java\-Script-Objekten abgebildet. Da WebAssembly nicht direkt auf JavaScript-Objekte zugreifen kann, müssen für diese Getter und Setter erzeugt werden, die diese Aufgabe übernehmen. Die Getter bekommen als Parameter nur die Adresse bzw. Referenz des Objekts und müssen den Wert der Instanzvariable (oder die Adresse wenn die Instanzvariable ein Objekt referenziert) zurückgeben. Ähnlich funktionieren die Setter: Diese bekommen zwei Parameter, die Adresse des Objekts und den Wert des neuen Werts für die Instanzvariable (oder die Adresse, wenn es sich um referenzierte Objekte handelt). Setter haben keinen Rückgabewert.
+Datenkomponenten von MiniJava-Klassen werden direkt auf Datenkomponenten von Java\-Script-Objekten abgebildet. Da WebAssembly nicht direkt auf JavaScript-Objekte zugreifen kann, müssen für diese \emph{Getter} und \emph{Setter} erzeugt werden, die diese Aufgabe übernehmen. Die \emph{Getter} bekommen als Parameter nur die Referenz des Objekts und müssen den Wert der Datenkomponente (oder eine Referenz darauf wenn die Datenkomponente ein Objekt referenziert) zurückgeben. Ähnlich funktionieren die \emph{Setter}: Diese bekommen zwei Parameter, die Referenz des Objekts und den Wert des neuen Werts für die Datenkomponente (oder eine Referenz, wenn es sich um Objekte handelt). \emph{Setter} haben keinen Rückgabewert.
 
-Die Codegenerierung wird anhand eines überschaubaren Beispiel nun detailliert gezeigt. Nachfolgend sieht man den MiniJava-Code für dieses Beispiel:
+Die Codegenerierung wird anhand eines überschaubaren Beispiel nun detailliert gezeigt. Nachfolgend ist der MiniJava-Quelltext für dieses Beispiel dargestellt:
 
 \lstinputlisting{src/javaScriptIntegration/Example.minijava}
 
-Aus diesem Code wurde die Datei \emph{module.js} erzeugt:
+Aus diesem Quelltext wurde vom Compiler die Datei \emph{module.js} generiert:
 
 \lstinputlisting{src/javaScriptIntegration/module.js}
 
-Man sieht am Beginn die zwei Stringliterale (1). Etwas weiter unten ist der Konstruktor, der die Instanzvariablen mit \lstinline{0} und \lstinline{null} initialisiert (2). Bei (3) werden Getter und Setter für die \lstinline{int}-Instanzvariable definiert. Da es sich um einen elementaren Datentyp handelt, kann der Wert direkt aus dem übergebenen Parameter gelesen werden (Setter) bzw. als Rückgabewert zurückgegeben werden (Getter). Beim Getter und Setter für die \lstinline{String}-Instanzvarible (4) muss der Parameter beim Setter zunächst derefenziert werden bzw. muss beim Getter zunächst eine Referenz auf das Objekt erzeugt werden.
+Nachfolgend einige Details zur generierten Datei:
+
+\begin{itemize}
+    \item In den Zeilen 2 und 3 werden die Zeichenketten-Literale registriert. 
+    \item In den Zeilen 7 bis 9 befindet sich der Konstruktor der Klasse \lstinline{MyClass}, der die Datenkomponenten mit \lstinline{0} und \lstinline{null} initialisiert.
+    \item In den Zeilen 3 bis 15 werden \emph{Getter} und \emph{Setter} für die \lstinline{int}-Datenkomponente definiert. Da es sich um einen elementaren Datentyp handelt, kann der Wert direkt aus dem übergebenen Parameter gelesen werden (\emph{Setter}) bzw. als Rückgabewert geliefert werden (\emph{Getter}).
+    \item In den Zeilen 16 bis 21 werden \emph{Getter} und \emph{Setter} für die \lstinline{String}-Datenkomponente definiert. Hier muss der Parameter beim \emph{Setter} zunächst derefenziert werden bzw. muss beim \emph{Getter} zunächst eine Referenz auf das Objekt erzeugt werden.
+\end{itemize}
 
 \section{Objektverwaltung für MiniJava in JavaScript}
 
-Sämtliche Objekte, auf die von MiniJava zugegriffen wird, werden in JavaScript als "echte" JavaScript-Objekte verwaltet. Diese Objekte werden in MiniJava über eine Adresse bzw. Referenz angesprochen. Im Wesentlichen entspricht diese Referenz einer fortlaufenden Nummer, die bei 1 beginnt, da 0 \lstinline{null} entspricht.
+Sämtliche Objekte, auf die von MiniJava zugegriffen wird, werden in JavaScript als echte JavaScript-Objekte verwaltet. Diese Objekte werden in MiniJava über eine Referenz angesprochen. Im Wesentlichen entspricht diese Referenz einer fortlaufenden Nummer, die bei 1 beginnt, da 0 \lstinline{null} entspricht.
 
-Es muss möglich sein, eindeutig von einem Objekt auf die Referenz und umgekehrt schließen zu können. Für beide Richtungen wird diese Abbildung jeweils in einer Java\-Script-\lstinline{Map} gespeichert.
+Es muss möglich sein, eindeutig von einem Objekt auf die Referenz und umgekehrt schließen zu können. Für beide Richtungen wird diese Abbildung jeweils mit einer Java\-Script-\lstinline{Map} realisiert.
 
-Diese Datenstrukturen werden in der JavaScript-Klasse \lstinline{Runtime} verwaltet. Im Konstruktor werden diese sinnvoll initialisiert, beispielsweise wird die Referenz 0 auf \lstinline{null} und umgekehrt abgebildet:
+Diese \lstinline{Maps} werden in der JavaScript-Klasse \lstinline{Runtime} verwaltet. Im Konstruktor werden diese sinnvoll initialisiert, beispielsweise wird die Referenz 0 auf \lstinline{null} und umgekehrt abgebildet:
 
 \lstinputlisting{src/javaScriptIntegration/runtimeConstructor.js}
 
-Weiters werden drei Methoden zur Verfügung gestellt, die das Erstellen einer Referenz auf ein JavaScript-Objekt und das Dereferenzieren einer Referenz kapseln:
+Weiters werden drei Methoden zur Verfügung gestellt, zwei für das Erstellen einer Referenz auf ein JavaScript-Objekt und eine für das Dereferenzieren einer Referenz:
+\begin{enumerate}
+    \item Die Methode \lstinline{wasmRef} liefert die Referenz auf das Objekt, falls bereits eine Referenz erstellt wurde oder erstellt eine neue, falls das Objekt noch keine Referenz besitzt.
+    \item Die Methode \lstinline{wasmRefType} liefert ebenfalls die Referenz auf das Objekt. Sie sollte genau dann verwendet werden, wenn das erste Mal eine Referenz für ein Ja\-va\-Script-Ob\-jekt angefordert wird, da hier der MiniJava-Datentyp des Objekts registriert wird. Dieser Typ wird später für Methodenaufrufe benötigt.
+    \item Die Methode \lstinline{wasmDeref} liefert \lstinline{wasmDeref} das Objekt bzw. \lstinline{null} hinter der Referenz.
+\end{enumerate}
+
+Nachfolgend wird der Quelltext für diese drei Methoden dargestellt:
 
 \lstinputlisting{src/javaScriptIntegration/runtimeRefs.js}
 
-Die Methode \lstinline{wasmRefType} sollte genau dann verwendet werden, wenn das erste Mal eine Referenz für ein JavaScript-Objekt angefordert wird, da hier der MiniJava-Datentyp des Objekts registriert wird. Dieser Typ wird später für Methodenaufrufe benötigt.
-
-Wie der Name der Methoden bereits erahnen lässt, liefert \lstinline{wasmDeref} das Objekt bzw. \lstinline{null} hinter der Referenz. \lstinline{wasmRef} liefert die Referenz auf das Objekt, falls bereits eine Referenz erstellt wurde oder erstellt eine neue, falls das Objekt noch keine Referenz besitzt.
-
-\section{Hilfsfunktionen}
+\section{Hilfsmethoden}
 
 Die Klasse \lstinline{Runtime} bietet noch einige nützliche Hilfsmethoden an, die das Zusammenspiel zwischen JavaScript und WebAssembly/MiniJava erleichtern sollen:
 
 \lstinputlisting{src/javaScriptIntegration/runtimeHelpers.js}
 
-Mit \lstinline{wasmBoolean} kann ein MiniJava-\lstinline{boolean} (entspricht einer Ganzahl in WebAssembly) in einen JavaScript-\lstinline{boolean} konvertiert werden. In die andere Richtung ist keine explizite Konvertierung erforderlich.
+Mit \lstinline{wasmBoolean} kann ein Wert des MiniJava-Datentyps \lstinline{boolean} (entspricht einer Ganzahl in WebAssembly) in Wert des JavaScript-Datentyps \lstinline{boolean} konvertiert werden. In die andere Richtung ist keine explizite Konvertierung erforderlich.
 
-Mit \lstinline{charToWasm} und \lstinline{wasmToChar} kann zwischen einem MiniJava-\lstinline{char} (entspricht ebenfalls einer Ganzzahl in WebAssembly) und einem JavaScript-\lstinline{string} mit genau einem Zeichen konvertiert werden.
-Es musste ein JavaScript-\lstinline{string} verwendet werden, da JavaScript keinen eigenen Datentyp für einzelne Zeichen besitzt.
+Mit \lstinline{charToWasm} und \lstinline{wasmToChar} kann zwischen einem Wert des MiniJava-Datentyps \lstinline{char} (entspricht ebenfalls einer Ganzzahl in WebAssembly) und einem Wert des Ja\-va\-Script-Da\-ten\-typs \lstinline{string} mit genau einem Zeichen konvertiert werden.
+Es muss der JavaScript-Datentyp \lstinline{string} verwendet werden, da JavaScript keinen eigenen Datentyp für einzelne Zeichen besitzt.
 
 \section{Sprachinterne Funktionalitäten}
 
-MiniJava bietet einige Sprachfeatures an, die nicht zur Gänze in WebAssembly abgebildet werden können, da sie mit JavaScript-Objekten interagieren. Dazu zählen alle Funktionalitäten rund um Arrays wie das Erstellen eines Arrays, das Abfragen der Länge des Arrays und das Lesen und Schreiben über einen Index. Außerdem bietet MiniJava das Konkatenieren von Strings mit diversen Datentypen an.
+MiniJava bietet einige Sprachfunktionalitäten an, die nicht zur Gänze in WebAssembly abgebildet werden können, da sie mit JavaScript-Objekten interagieren. Dazu zählen alle Funktionalitäten rund um Felder wie das Erstellen eines Felds, das Abfragen der Länge des Felds und das Zugreifen über einen Index. Außerdem bietet MiniJava das Konkatenieren von Zeichenketten an.
 
-\subsection{Arrayfunktionen}
+\subsection{Feld-Funktionen}
 
-Die Implementierung der Arrayfunktionen sind vom konkreten Element-Datentyp des Arrays abhängig. Allgemein lassen sich daher vier Fälle unterscheiden:
+Die Implementierung der Feld-Funktionen sind vom konkreten Element-Datentyp des Felds abhängig. Allgemein lassen sich daher vier Fälle unterscheiden:
 
-\begin{description}
-    \item[Werte numerische Datentypen] wie \lstinline{int} und \lstinline{float} werden auf denselben JavaScript-Daten\-typ abgebildet, da JavaScript nur den Datentyp \lstinline{number} kennt.
-    \item[boolean-Werte] müssen zwischen JavaScripts \lstinline{true} und \lstinline{false} auf 1 und 0 und umgekehrt abgebildet werden, da WebAssembly keinen eigenen Datentyp für Wahrheitswerte besitzt
-    \item[char-Werte] müssen zwischen einer Ganzzahl und einem String mit einem Zeichen abgebildet werden.
-    \item[Objekte] müssen auf Referenzen und umgekehrt abgebildet werden. 
-\end{description}
+\begin{enumerate}
+    \item Werte numerische Datentypen wie \lstinline{int} und \lstinline{float} werden auf denselben JavaScript-Daten\-typ abgebildet, da JavaScript nur den Datentyp \lstinline{number} für numerische Werte zur Verfügung stellt.
+    \item Werte des \lstinline{boolean}-Datentyps müssen zwischen JavaScripts \lstinline{true} und \lstinline{false} auf 1 und 0 und umgekehrt abgebildet werden, da WebAssembly keinen eigenen Datentyp für Wahrheitswerte besitzt
+    \item Werte des \lstinline{char}-Datentyps müssen zwischen einer Ganzzahl und einem Zeichenkette mit einem Zeichen abgebildet werden.
+    \item Objekte  müssen auf Referenzen und umgekehrt abgebildet werden. 
+\end{enumerate}
 
-Sämtliche Funktionen für Arrays wurden für diese vier Fälle einzeln implmentiert und funktionieren konzeptionell ähnlich. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der diesem Schema entspricht: \lstinline{<function>_array_<type>}.
+Sämtliche Funktionen für Felder wurden für diese vier Fälle einzeln implementiert und funktionieren ähnlich. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der folgendem Schema entspricht: \\
+\lstinline{<function>_array_<type>}
 
-Am interessantesten sind die Funktionen für Arrays von Objekten, daher werden diese nun im Detail betrachtet.
+Am interessantesten sind die Funktionen für Felder von Objekten, daher werden diese nun im Detail betrachtet.
 
-Beim Erstellen eines Arrays wird ein JavaScript-Array in der angeforderten Größe erstellt und mit Standardwerten (hier \lstinline{null}) vorbefüllt:
+Beim Erstellen eines Felds wird ein JavaScript-Feld in der angeforderten Größe erstellt und mit Standardwerten (hier \lstinline{null}) vorbefüllt:
 \lstinputlisting{src/javaScriptIntegration/arrayNew.js}
 
-Das Abrufen eines Objekts über den Index funktioniert folgendermaßen, dabei muss zunächst das Array selbst derefenziert werden. Anschließend wird für das über den Index erhaltene Objekt mit \lstinline{runtime.wasmRef} eine Referenz erstellt:
+Das Abrufen eines Objekts über den Index funktioniert so, dass zunächst das Array selbst derefenziert werden muss. Anschließend wird für das über den Index erhaltene Objekt mit \lstinline{runtime.wasmRef} eine Referenz erstellt:
 \lstinputlisting{src/javaScriptIntegration/arrayGet.js}
 
-Analog dazu funktioniert das Setzen eines Objekts an einem Index:
+Analog dazu funktioniert das Setzen eines Objekts mit einem Index:
 \lstinputlisting{src/javaScriptIntegration/arraySet.js}
 
-Die Funktion für das Abfragen der Länge des Arrays ist typunabhängig, daher gibt hier nur eine Implementierung:
+Die Funktion für das Abfragen der Länge des Felds ist typunabhängig, daher gibt es dafür nur eine Implementierung:
 
 \lstinputlisting{src/javaScriptIntegration/arrayLength.js}
 
-\subsection{Stringkonkatenation}
+\subsection{Zeichenketten-Konkatenation}
 
-Alle Verwendungen des MiniJava-Konkatenationsoperators \lstinline{+} werden auf JavaScript-Funktionen abgebildet. Dabei muss zumindest auf einer Seite des Operators ein String stehen. Abhängig vom Datentyp "auf der anderen Seite" gibt es (ähnlich wie bei den Arrays) eine eigene Implementierung. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der diesem Schema entspricht: \lstinline{+_<left-type>_<right-type>}.
+Alle Verwendungen des MiniJava-Konkatenationsoperators \lstinline{+} werden auf JavaScript-Funktionen abgebildet. Dabei muss zumindest auf einer Seite des Operators ein Mi\-ni\-Ja\-va-\lstinline{String} stehen. Abhängig vom Datentyp auf der anderen Seite des Operators gibt es (ähnlich wie bei den Feldern) eine eigene Implementierung. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der folgendem Schema entspricht: \\
+\lstinline{+_<left-type>_<right-type>}
 
-Die einfachste Variante ist das Konkatenieren von zwei Strings. Hier werden zunächst die Referenzen der beiden Strings dereferenziert. Anschließend wird eine Referenz auf den zusammengesetzten String erstellt:
+Die erste Variante ist das Konkatenieren von zwei Zeichenketten. Hier werden zunächst die Referenzen der beiden Zeichenketten dereferenziert. Anschließend wird eine Referenz auf die zusammengesetzte Zeichenkette erstellt:
 \lstinputlisting{src/javaScriptIntegration/stringString.js}
 
-Ähnlich wie bei den Arrays gibt es dieselben vier Fälle für die Datentypen "auf der anderen Seite". Für jeden Fall gibt es zwei Varianten: Datentyp auf der linken Seite und String auf der rechten Seite sowie String auf der linken Seite und Datentyp auf der rechten Seite. Somit ergibt das insgesamt acht Funktionen.
+Die zweite Variante ist Konkatenieren von einer Zeichenkette mit dem Wert eines anderen Datentyps \emph{T}. Der Datentyp \emph{T} kann entweder auf der rechten oder linken Seite des Operators stehen, das ergibt zwei Möglichkeiten pro Datentyp. Ähnlich wie bei den Feldern gibt es dieselben vier Fälle für den Datentyp \emph{T}. Jede Kombination wird in einer eigenen Funktion implementiert, insgesamt ergibt das somit acht Funktionen. Der Wert des Datentyp \emph{T} wird dabei automatisch in eine Zeichenkette umgewandelt.
 
-Da das Konkatenieren für die einzelnen Datentypen konzeptionell ähnlich funktioniert, werden stellvertretend nun beispielhaft die zwei Funktionen gezeigt, um einen String mit einem numerischen Wert zu verketten:
+Da das Konkatenieren für die einzelnen Datentypen ähnlich funktioniert, werden stellvertretend nun beispielhaft die zwei Funktionen gezeigt, um einen Zeichenkette mit einem numerischen Wert zu verketten:
 \lstinputlisting{src/javaScriptIntegration/stringNumeric.js}
 
 \section{Methodenaufrufe von JavaScript nach MiniJava}
 
 Alle MiniJava-Methoden, die mit dem Schlüsselwort \lstinline{public} gekennzeichnet wurden, werden als Funktion im WebAssembly-Modul exportiert. Dabei wird dieselbe Benennungskonvention wie für das Importieren von nativen Methoden verwendet (siehe Abschnitt TODO).
 
-In der JavaScript-Klasse \lstinline{Runtime} wird die Funktion \lstinline{findMethod} zur Verfügung gestellt, mit der aus Klassenname, Methodenname und der Eingabeparametertypliste der Methodenname zusammengebaut wird. Anschließend wird die Funktion aus der \lstinline{exports}-Datenstruktur der WebAssembly-Modulinstanz abgerufen.
+In der JavaScript-Klasse \lstinline{Runtime} wird die Funktion \lstinline{findMethod} zur Verfügung gestellt, die aus dem Klassennamen, dem Methodennamen und der Liste der Eingabeparametertypen den exportierten WebAssembly-Funktionsnamen ableitet. Anschließend wird die Funktion aus der \lstinline{exports}-Datenstruktur der WebAssembly-Modulinstanz abgerufen.
 
 \lstinputlisting{src/javaScriptIntegration/runtimeFindMethod.js}
 
-Auf dieser Funktion aufbauend können nun Aufrufe auf statische Methoden und Instanzmethoden realisiert werden.
+Auf dieser Funktion aufbauend können nun Aufrufe auf Klassenmethoden und Objektmethoden realisiert werden.
 
-\subsection{Statische Methodenaufrufe}
+\subsection{Aufruf von Klassenmethoden}
 
-Bei statischen Aufrufen kann \lstinline{findMethod} praktisch direkt verwendet werden. Um dem Verwender der \lstinline{Runtime}-Klasse eine einheitliche Schnittstelle zu bieten, wird der Aufruf von \lstinline{findMethod} in der Methode \lstinline{staticMethod} gekapselt:
+Bei Aufrufen von Klassenmethoden kann \lstinline{findMethod} direkt verwendet werden. Um die Schnittstelle der \lstinline{Runtime}-Klasse zu vereinheintlichen, wird der Aufruf von \lstinline{findMethod} in der Methode \lstinline{staticMethod} gekapselt, dies spiegelt die Kennzeichnung im MiniJava-Quelltext durch das Schlüsselwort \lstinline{static}.
 
 \lstinputlisting{src/javaScriptIntegration/runtimeStaticMethod.js}
 
-Nun kann ein statischer Aufruf durchgeführt werden. So wird beispielsweise die Mini\-Java-Methode \lstinline{public static int add(int a, int b)} der MiniJava-Klasse \lstinline{Utils} in Java\-Script mit den Parametern \lstinline{a = 3} und \lstinline{b = 4} aufgerufen:
+Nun kann eine Klassenmethode aufgerufen werden. So wird beispielsweise die Mini\-Java-Methode \lstinline{public static int add(int a, int b)} der MiniJava-Klasse \lstinline{Utils} in Java\-Script mit den Parametern \lstinline{a = 3} und \lstinline{b = 4} aufgerufen:
 
 \lstinputlisting{src/javaScriptIntegration/staticCall.js}
 
-\subsection{Instanzmethodenaufrufe}
+\subsection{Aufruf von Objektmethoden}
 
-Instanzmethoden können nicht direkt wie statische Methoden aufgerufen werden, da zunächst der Typ des Objekts, auf das die Methode aufgerufen wird, bestimmt werden muss. Damit dies möglich ist, muss das Empfängerobjekt bereits mit \lstinline{runtime.wasmRefType} registriert sein. Anschließend kann mit \lstinline{findMethod} die Methode gesucht werden. Da Instanzmethoden per Konvention als ersten Parameter eine Referenz auf das Empfängerobjekt erwarten ("\lstinline{this}-Referenz", siehe Abschnitt TODO), muss die Referenz als erster Parameter beim Aufruf eingefügt werden:
+Objektmethoden können nicht wie Klassenmethoden aufgerufen werden, da zunächst der Typ des Objekts, für welches die Methode aufgerufen wird, bestimmt werden muss. Damit dies möglich ist, muss das Empfängerobjekt bereits mit \lstinline{runtime.wasmRefType} registriert sein. Anschließend kann mit \lstinline{findMethod} die Methode gesucht werden. Da Objektmethoden per Konvention als ersten Parameter eine Referenz auf das Empfängerobjekt erwarten (\lstinline{this}-Referenz, siehe Abschnitt TODO), muss die Referenz als erster Parameter beim Aufruf eingefügt werden:
 
 \lstinputlisting{src/javaScriptIntegration/runtimeInstanceMethod.js}
 
-Da die Anzahl der Parameter von der tatsächlichen Methode abhängig ist, werden in Zeile 4 beim Lambda-Ausdruck in der Parameterliste "Rest-Parameter" (\lstinline{...args}) \cite{MDNJavaScript} verwendet, die alle übergebenen Parameter in der Liste \lstinline{args} speichern. Beim Aufruf der WebAssembly-Funktion muss diese Parameterliste wieder "ausgepackt" werden - ansonsten würde man ja die Parameterliste als ein Listenobjekt übergeben. Dafür wird die "Spread-Syntax" (\lstinline{...args}) verwendet. Die beiden Konstrukte sehen syntaktisch ident aus, erfüllen aber die jeweils gegensätzliche Funktion.
+Da die Anzahl der Parameter von der tatsächlichen Methode abhängig ist, werden in Zeile 4 beim Lambda-Ausdruck in der Parameterliste \emph{Rest-Parameter} (\lstinline{...args}) \cite{MDNJavaScript} verwendet, die alle übergebenen Parameter in der Liste \lstinline{args} speichern. Beim Aufruf der WebAssembly-Funktion muss diese Parameterliste wieder ausgepackt werden, ansonsten würde man die Parameterliste als ein Listenobjekt übergeben. Dafür wird die \emph{Spread-Syntax} (\lstinline{...args}) verwendet. Die beiden Konstrukte sind syntaktisch ident, erfüllen aber die jeweils gegensätzliche Funktion.
 
 Nun kann ein Aufruf einer Instanzmethode durchgeführt werden. So wird beispielsweise die MiniJava-Methode \lstinline{public void increment(int a)} eines Objekts \lstinline{obj} in JavaScript mit dem Parameter \lstinline{a = 3} aufgerufen:
 
@@ -164,39 +177,42 @@ Nun kann ein Aufruf einer Instanzmethode durchgeführt werden. So wird beispiels
 
 \section{Standardbibliothek}
 
-Jede Programmiersprache benötigt eine Standardbibliothek. Diese sollte einerseits Basisfunktionalitäten zur Verfügung stellen, um sinnvoll mit der Laufzeitumgebung interagieren zu können. Andererseits können hier oft verwendete Basisfunktionalitäten zur Verfügung gestellt werden, die in nahezu jeder Anwendung benötigt werden.
+Moderne Programmiersprache benötigt eine Standardbibliothek. Diese sollte einerseits Basisfunktionalitäten zur Verfügung stellen, um sinnvoll mit der Laufzeitumgebung interagieren zu können. Andererseits können hier oft verwendete Basisfunktionalitäten zur Verfügung gestellt werden, die in nahezu jeder Anwendung benötigt werden.
 
 Um einen Eindruck zu vermitteln, wie man für MiniJava die Grundsteine für eine Standardbibliothek legen könnte, wurden einige solche Basisfunktionalitäten implementiert. In diesem Abschnitt werden einige Ausschnitte daraus präsentiert.
 
-Bei Interaktionen mit der Laufzeitumgebung sind native Methoden mit JavaScript-Pendants unumgänglich. Somit vermittelt dieser Abschnitt ebenfalls einen Einblick, wie native Methoden aufgebaut werden können.
+Bei Interaktionen mit der Laufzeitumgebung sind native Methoden mit JavaScript-Pendants unumgänglich. Somit vermittelt dieser Abschnitt ebenfalls einen Einblick dafür, wie native Methoden aufgebaut werden können.
 
 \subsection{Konsolenausgabe}
 Die einfachste Form einer Benutzeroberfläche ist die Konsole. Daher ist die Konsole die absolute Grundvoraussetzung, um die Ergebnisse eigener Programme sehen zu können.
 
-Sämtliche Funktionalitäten für die Konsolenausgabe wurden in der MiniJava-Klasse \lstinline{Console} gekapselt, die eine Reihe an statischen Methoden zur Verfügung stellt. Hier werden nur zwei davon gezeigt, in der vollständigen Implementierung sind noch einige mehr vorhanden, wie zum Beispiel zur Ausgabe von Arrays.
-
-In MiniJava werden die Methoden folgendermaßen definiert:
+Sämtliche Funktionalitäten für die Konsolenausgabe wurden in der MiniJava-Klasse \lstinline{Console} gekapselt, die eine Reihe an Klassenmethoden zur Verfügung stellt. Hier werden nur zwei davon gezeigt, in der vollständigen Implementierung sind noch weitere mehr vorhanden, wie zum Beispiel zur Ausgabe von Feldern. In MiniJava werden die Methoden für die Konsolenausgabe folgendermaßen definiert:
 \lstinputlisting{src/javaScriptIntegration/Console.minijava}
 
 In JavaScript werden die Aufrufe an \lstinline{console.log} delegiert:
 \lstinputlisting{src/javaScriptIntegration/Console.js}
 
-\subsection{Methoden für Strings}
+\subsection{Methoden für den Datentyp \lstinline{String}}
 
-Strings gehören ebenso zum Grundwerkzeug beim Programmieren dazu. Zu den Basisfunktionalitäten für Strings zählen das Bestimmen der Länge, das Abfragen eines Zeichens an einer Stelle und das Vergleichen, ob zwei Strings gleich sind.
+Zeichenketten sind ein notwendiger Basisdatentyp in jeder Programmiersprache. Zu den Basisfunktionalitäten für Zeichenketten zählen das Bestimmen der Länge, das Abfragen eines Zeichens an einer Stelle und der Vergleich, ob zwei Zeichenketten gleich sind.
 
 Diese drei Funktionalitäten werden als Instanzmethoden in der MiniJava-Klasse \lstinline{String} definiert:
 \lstinputlisting{src/javaScriptIntegration/String.minijava}
 
-In JavaScript werden diese mit Hilfe von bereits bestehenden Funktionalität implementiert:
+In JavaScript werden diese Methoden mit Hilfe von bereits bestehenden Funktionalität implementiert:
 \lstinputlisting{src/javaScriptIntegration/String.js}
 
-\subsection{Konvertieren zwischen Ganzzahlen und Strings}
+\subsection{Konvertieren zwischen Ganzzahlen und Zeichenketten}
 
-Oft werden in Benutzereingaben Zahlen erfasst. Diese stehen dann in Form eines Strings zur Verfügung. Um mit den Werten sinnvoll arbeiten zu können, müssen die Strings in eine Zahl konvertiert werden. Umgekehrt müssen Zahlen für zum Beispiel Ausgaben wiederum in Strings konvertiert werden.
+Oft werden zum Beispiel in der Konsole oder in einer grafischen Benutzeroberfläche Zahlen eingegeben. Diese stehen dann in Form von Zeichenketten zur Verfügung. Um mit den Werten sinnvoll arbeiten zu können, müssen die Zeichenketten in Zahlen konvertiert werden. Umgekehrt müssen Zahlen zum Beispiel für Ausgaben wiederum in Zeichenketten konvertiert werden.
 
-Dafür wurden (angelehnt an die echte Java-Standardbibliothek) zwei statische Methoden in der MiniJava-Klasse \lstinline{Integer} definiert:
+Dafür wurden (angelehnt an die Java-Standardbibliothek) zwei Klassenmethoden in der MiniJava-Klasse \lstinline{Integer} definiert:
 \lstinputlisting{src/javaScriptIntegration/Integer.minijava}
 
-Da JavaScript auch hier bereits Funktionalitäten zur Verfügung stellt, wird das Konvertieren an JavaScript delegiert:
+Da JavaScript auch dafür bereits Funktionalitäten zur Verfügung stellt, wird das Konvertieren an JavaScript delegiert:
 \lstinputlisting{src/javaScriptIntegration/Integer.js}
+
+\vspace{3em}
+In diesem Kapitel wurde beschrieben, wie ein Paket aufgebaut ist und welche Rolle die einzelnen JavaScript-Dateien darin spielen. Weiters wurde auf das in JavaScript implementierte Laufzeitsystem eingegangen, dabei wurde der Fokus auf Objekt-Verwaltung, Felder und Zeichenketten gelegt. Zum Schluss wurde gezeigt, wie JavaScript mit MiniJava-Methoden interagieren kann.
+
+Somit sind nun alle Grundlagen des Compilers abgeschlossen. Im nächsten Kapitel wird auf das Testen des Compilers eingegangen. Außerdem wird das Integrieren in Gradle gemeinsam mit dem Einsatz des Compilers in einer Konsolenanwendung gezeigt.
