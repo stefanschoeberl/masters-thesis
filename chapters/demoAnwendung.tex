@@ -58,13 +58,16 @@ Als Event-Listeners für das Mausklickeregnis wird eine JavaScript-Funktion (Lam
 
 \section{Ergebnis}
 
-Nachfolgend sind zwei Bildschirm-Schnappschüsse des Fibonacci-Rechners im Browser. Links wurde die JavaScript-Version ausgeführt, rechts die MiniJava-Version. Man erkennt bei den ersten Zahlen, dass diese korrekt berechnet wurden.
+In Abbildung \ref{fig:fibCalculatorBrowser} sind zwei Bildschirm-Schnappschüsse des Fibonacci-Rechners im Browser. Links wurde die JavaScript-Version ausgeführt, rechts die MiniJava-Version. Man erkennt bei den ersten Zahlen, dass diese korrekt berechnet wurden.
 
-\begin{center}
+\begin{figure}[]
+    \centering
     \begin{tabular}{c c}
         \includegraphics[width=0.47\textwidth]{demoAnwendung/fibonacciJavaScript} & \includegraphics[width=0.47\textwidth]{demoAnwendung/fibonacciMiniJava}
     \end{tabular}
-\end{center}
+    \caption{Fibonacci-Rechner im Browser}
+    \label{fig:fibCalculatorBrowser}
+\end{figure}
 
 Während der Ausführung wurde die Laufzeit gemessen, dabei wird die gesamte Zeit ab dem Klicken des Start-Knopfs bis zum Erstellen der Tabelle berücksichtigt. Man erkennt, dass die Laufzeit der MiniJava-Version (4890 Millisekunden) im Vergleich zur JavaScript-Version (8935 Millisekunden) deutlich kürzer ist.
 
@@ -77,3 +80,6 @@ Die Codemenge ist bei JavaScript deutlich geringer, da keine Datentypen deklarie
 Der wesentliche Vorteil bei MiniJava ist die Typsicherheit, da sämtliche Zugriffe auf Objekte bereits beim Kompilieren überprüft werden und beispielsweise flüchtige Tippfehler früh erkannt werden. Bei der Typsicherheit gibt es eine einzige Ausnahme: das Aufrufen der \lstinline{handleEvent}-Event-Methode, da von der Standardbibliothek angenommen wird, dass diese Methode existiert. Würde man allerdings MiniJava um \emph{Interfaces} erweitern, könnte man dieses Problem lösen, da dann wieder der Compiler in der Lage wäre, die Anwesenheit von Methoden zu garantieren.
 
 Anhand der Laufzeitmessungen sieht man, dass die MiniJava-Variante deutlich schneller läuft. Dies ist vor allem auf den rechenintensivsten Teil, der rekursiven Berechnung für jede einzelne Zahl, des Programms zurückzuführen, der bei MiniJava ausschließlich in der virtuellen WebAssembly-Maschine läuft. Die Laufzeiten verhielten sich über mehrere Aufrufe hintereinander bei beiden Varianten stabil.
+
+\vspace{4em}
+In diesem Kapitel wurde der praktische Einsatz von MiniJava anhand des Fibonacci-Rechners demonstriert. Es wurde ebenfalls auf den Build-Prozess und die Interaktion mit dem Browser eingangen. Dieselbe Anwendung wurde ebenfalls mit JavaScript implementiert. Die beiden Implementierungen wurden miteinander verglichen.
