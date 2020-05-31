@@ -1,12 +1,109 @@
 \chapter{Anforderungen an den Compiler und die Laufzeitumgebung}
 
+In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Der im Rahmen dieser Arbeit entstandene Compiler übersetzt MiniJava-Quelltexte in WebAssembly-Module. Weiters werden essenzielle Bestandteile der Laufzeitumgebung beschrieben, sodass MiniJava sinnvoll mit der Umgebung interagieren kann.
+
 \section{Programmiersprache MiniJava}
-\subsection{Funktionsumfang}
-\subsection{Grammatik}
-\subsection{Methodenaufrufe von MiniJava nach JavaScript}
-\subsection{MiniJava-Quellcode-Verwaltung}
+
+MiniJava wurde als Untermenge der Programmiersprache Java entworfen und lässt sich vereinfacht beschreiben als \emph{Java mit weniger syntaktischem Zucker und reduzierter Objektorientierung}. Das bedeutet, dass nur die essentiellsten Sprachkonstrukte umgesetzt wurden und auf jene verzichtet wurde, die ausschließlich den Quelltext vereinfachen bzw. verkürzen. Die Syntax von MiniJava basiert auf der offiziellen Syntax von Java 8 \cite{Java8Specification}.
+
+Die Grundidee von MiniJava ist zu zeigen, wie eine höhere Programmiersprache ins Web portiert werden kann. In MiniJava-Quelltexten sollte kein WebAssembly-spezifischer Quelltext enthalten sein, so soll gezeigt werden, dass bei potenziellem Ausbau des Compilers auf den vollen Java-Sprachumfang, bestehender Java-Quelltext nahezu direkt für Web-Anwendungen übernommen werden könnte. Ausgenommen davon sind Browser-spezifische Interaktionen, wie beispielsweise für den DOM-Zugriff.
+
+In den nächsten Abschnitten wird Sprachumfang der Programmiersprache MiniJava anhand von Beispielen vorgestellt. Außerdem werden die wichtigsten Unterschiede zu Java hervorgehoben.
+
+\subsection{Terminologie-Hinweis zu Konstruktoren und Initalisierern}
+
+In der Java-Sprachsyntax sind \emph{Constructors} und \emph{Instance Initializers} als Sprachkonstrukte definiert \cite{Java8Specification}. Die darin enthaltenen Quelltexten werden nach dem Erzeugen eines Objekts ausgeführt. Zusätzlich sind \emph{Static Initializers} zum Initialieren der Klassenvariablen vorgesehen. In Listing \ref{lst:java-class} werden diese drei Konstrukte in einem Beispiel gezeigt.
+
+\lstinputlisting[label = {lst:java-class}, caption = {Beispiel für \emph{Constructor}, \emph{Instance Initializer} und \emph{Static Initializer} in Java}]{src/miniJavaLaufzeitumgebung/MyClass.java}
+
+Auf Deutsch würde man \emph{Instance Initializer} und \emph{Static Initializer} zusammengefasst als \emph{Initialisierer} und \emph{Constructor} als \emph{Konstruktor} bezeichnen.
+
+Im Zusammenhang mit MiniJava bedeuten \emph{Konstruktor} und \emph{Initialisierer} etwas anderes:
+\begin{itemize}
+    \item Ein \emph{Konstruktor} erzeugt nur das Objekt, initialisiert es aber nicht. Pro Klasse gibt es somit nur einen \emph{Konstruktor}, dieser wird nicht in MiniJava implementiert. 
+    \item \emph{Initialisierer} initialieren das Objekt, nachdem es vom \emph{Konstruktor} erzeugt wurde. \emph{Initialisierer} werden in MiniJava geschrieben und sind äquivalent zum Java-\lstinline{Constructor}. Wird in einer Klasse kein \emph{Initialisierer} definiert, kann ein Objekt nur ohne Parameter erzeugt werden. In diesem Fall wird kein \emph{Initialisierer} aufgerufen.
+\end{itemize}
+
+\emph{Konstruktoren} sind somit ein Implementierungsdetail und nicht Teil des MiniJava-Sprachumfangs. Details dazu finden sich in den Abschnitten TODO (Aufruf der Konstruktoren und Initialisierer im Bytecode) und \ref{sec:JavaScript-Codegenerierung}.
+
+\subsection{Elementare Datentypen}
+
+Es werden vier elementare Datentypen unterstützt: \lstinline{int} für 32-Bit Ganzzahlen, \lstinline{float} für 32-Bit Fließkommazahlen, \lstinline{boolean} für Wahrheitswerte und \lstinline{char} für einzelne Zeichen. Für alle vier Datentypen gibt es entsprechende Literale. In Listing \ref{lst:minijava-primitive-datatypes} werden einige Beispiele dazu gezeigt. Bei Variablen elemenaterer Datentypen wird der Wert direkt in der Variable gespeichert.
+
+\lstinputlisting[label = {lst:minijava-primitive-datatypes}, caption = {Elementare Datentypen in MiniJava}]{src/miniJavaLaufzeitumgebung/primitiveDatatypes.minijava}
+
+\subsection{Referenzdatentypen}
+
+Neben elementaren Datentypen gibt es Referenzdatentypen. Im Unterschied zu elementaren Datentypen wird in Variablen nur eine Referenz auf ein Objekt gespeichert. Zu den Referenzdatentypen zählen Klassen (siehe Abschnitt \ref{subsec:MiniJava-Klassen}) und Felder (siehe Abschnitt \ref{subsec:MiniJava-Felder}). Wie Java bietet auch MiniJava das Schlüsselwort \lstinline{null} an, wenn auf kein Objekt verwiesen werden möchte.
+
+\subsection{Klassen}
+\label{subsec:MiniJava-Klassen}
+
+Klassen sind eine Möglichkeit, eigene Referenzdatentypen zu definieren. Gleichzeitig bilden sie auch das Grundstrukturierungselement der Sprache. Klassen werden mit dem Schlüsselwort \lstinline{class} definiert. Im Unterschied zu Java können Klassen nicht von einander ableiten.
+
+Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisieren und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugreifen zu können.
+
+In Listing \ref{lst:minijava-classes} sieht man ein Beispiel für eine Klasse für zweidimensionale Punkte.
+
+\lstinputlisting[label = {lst:minijava-classes}, caption = {Definition der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/class.minijava}
+
+Klassen werden mit dem \lstinline{new}-Operator instanziert. Es kann wie in Java üblich mit dem \lstinline{.}-Operator auf die Datenkomponenten zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava-Klasse \lstinline{Point} gezeigt.
+
+\lstinputlisting[label = {lst:minijava-class-use}, caption = {Verwendung der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/instance.minijava}
+
+\subsection{Methoden}
+\label{subsec:MiniJava-Methoden}
+
+Methoden werden in Klassen definiert. Eine Methode wird innerhalb der Klasse eindeutig durch den Namen und die Typen der Formalparameter bestimmt. Eine Methode kann einen Rückgabewert liefern, falls keiner notwendig ist, wird dies mit \lstinline{void} gekennzeichnet. Der Herausspringen aus einer Methode mit einem Rückgabewert erfolgt mit der \lstinline{return}-Anweisung. In Listing \ref{lst:minijava-simple-methods} wird die MiniJava-Klasse \lstinline{Point} um zwei Methoden ergänzt.
+
+\lstinputlisting[label = {lst:minijava-simple-methods}, caption = {Methoden der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/simpleMethods.minijava}
+
+Methoden können als Objekt- oder Klassenmethode definiert werden. Objektmethoden können im Unterschied zu Klassenmethoden auf Datenkomponenten zugreifen. Klassenmethoden werden mit dem Schlüsselwort \lstinline{static} gekennzeichnet.
+
+Wie bei den Datenkomponenten und Initialisierern gibt es auch bei Methoden keine Sichtbarkeiten, jede Methode ist überall in MiniJava sichtbar. Bei Methoden gibt es allerdings eine Ergänzung: Möchte man eine MiniJava-Methode nach außen zur Verfügung stellen, sodass man sie in JavaScript aufrufen kann, muss diese mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden.
+
+Manchmal ist es nicht möglich oder gar unerwünscht, eine Methode in Java zu implementieren. In Java wurde mit dem \emph{Java Native Interface} (JNI) \cite{JNI8} und dem Schlüsselwort \lstinline{native} ein Mechanismus geschaffen, mit dem Java-Methoden in C implementiert werden können. Diese Idee wurde in MiniJava aufgegriffen, sodass es möglich ist, MiniJava-Methoden in JavaScript zu implementieren. Solche Methoden werden in MiniJava ebenfalls mit dem Schlüsselwort \lstinline{native} gekennzeichnet. Nativen Methoden sind ein elementarer Bestandteil zur Interaktion mit JavaScript.
+
+In Listing \ref{lst:minijava-advanced-methods} wird der Einsatz der drei Schlüsselwörte \lstinline{static}, \lstinline{public} und \lstinline{native} gezeigt, sowie bei der nativen Methode die Implementierung in JavaScript skizziert.
+
+\lstinputlisting[label = {lst:minijava-advanced-methods}, caption = {Weitere Beispiele für Methoden in MiniJava}]{src/miniJavaLaufzeitumgebung/advancedMethods.txt}
+
+Wie in Listing \ref{lst:minijava-advanced-methods} erkennbar, können Methoden innerhalb der selben Klasse direkt aufgerufen werden. Will man Klassenmethoden in anderen Klassen aufrufen, muss beim Aufruf zusätzlich der Klassenname angegeben werden. Objektmethoden werden immer auf ein Objekt angewendet, außer ein Objekt ruft eine eigene Objektmethode auf sich selbst auf. Beispiele dazu finden sich in Listing \ref{lst:minijava-call-methods}.
+
+\lstinputlisting[label = {lst:minijava-call-methods}, caption = {Aufruf von MiniJava-Methoden}]{src/miniJavaLaufzeitumgebung/callMethods.minijava}
+
+\subsection{Felder}
+\label{subsec:MiniJava-Felder}
+
+In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp geordnet hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über den Index. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}-Operator erzeugt, dabei wird die Größe angegeben. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
+
+\lstinputlisting[label = {lst:minijava-array}, caption = {Felder in MiniJava}]{src/miniJavaLaufzeitumgebung/array.minijava}
+
+\subsection{Zeichenketten}
+\label{subsec:MiniJava-Zeichenketten}
+
+Zeichenketten werden durch die MiniJava-Klasse \lstinline{String} abgebildet. Sie zählen somit ebenfalls zu den Referenzdatentypen. Wie in Java sind Zeichenketten unveränderlich. Zeichenketten können über Literale erzeugt werden. Weiters können Zeichenketten mit dem \lstinline{+}-Operator konkateniert werden. In Listing \ref{lst:minijava-string} finden sich einige Beispiele zum Umgang mit Zeichenketten.
+
+\lstinputlisting[label = {lst:minijava-string}, caption = {Zeichenketten in MiniJava}]{src/miniJavaLaufzeitumgebung/string.minijava}
+
+\subsection{Kontrollstrukturen}
+
+MiniJava bietet zwei Möglichkeiten an, um den Kontrollfluss zu steuern: Die binäre Verzweigung und eine Schleife.
+
+Die binäre Verzweigung wird durch die \lstinline{if}-\lstinline{else}-Anweisung realisiert. Wie in Java wird zunächst eine Bedinung ausgewertet. Ist diese wahr, wird der erste Zweig ausgeführt, ist diese falsch, wird der zweite Zweig nach dem \lstinline{else} ausgeführt. Der \lstinline{else}-Zweig ist optional und kann weggelassen werden, falls man ihn nicht benötigt. Eine \lstinline{if}-\lstinline{else}-Kaskade ist ebenfalls möglich. In Listing \ref{lst:minijava-if-else} finden sich Beispiele für die binäre Verzweigung.
+
+\lstinputlisting[label = {lst:minijava-if-else}, caption = {\lstinline{if}-\lstinline{else}-Verzweigung in MiniJava}]{src/miniJavaLaufzeitumgebung/ifElse.minijava}
+
+Als einzige Schleifenform steht die \lstinline{while}-Schleife zur Verfügung. Die anderen zwei aus Java bekannten Schleifenformen (\lstinline{for} und \lstinline{do}-\lstinline{while}) werden nicht unterstützt, lassen sich aber durch die \lstinline{while}-Schleife nachbilden. Bei der \lstinline{while}-Schleife wird vor jeder Ausführung des Schleifenrumpfs die Bedingung geprüft. Ist diese falsch, wird die Schleife abgebrochen. In Listing \ref{lst:minijava-while} findet sich ein Beispiel für die \lstinline{while}-Schleife.
+
+\lstinputlisting[label = {lst:minijava-while}, caption = {\lstinline{while}-Schleife in MiniJava}]{src/miniJavaLaufzeitumgebung/while.minijava}
+
+\subsection{Ausdrücke}
+
+\section{MiniJava-Quelltext-Verwaltung}
 
 \section{Laufzeitumgebung}
+\subsection{Abbildung der Datentypen}
 \subsection{Objekt- und Speicherverwaltung}
 \subsection{Methodenaufrufe von JavaScript nach MiniJava}
 \subsection{CommonJS-Modul}

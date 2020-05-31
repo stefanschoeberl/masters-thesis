@@ -1,0 +1,5 @@
+int i = 0;
+while (i < 10) {
+    Console.println(i);
+    i = i + 1;
+}

@@ -1,0 +1,12 @@
+class Point {
+    ...
+
+    void moveBy(float dx, float dy) {
+        this.x = this.x + dx;
+        this.y = this.y + dy;
+    }
+
+    float squaredLength() {
+        return x * x + y * y;
+    }
+}

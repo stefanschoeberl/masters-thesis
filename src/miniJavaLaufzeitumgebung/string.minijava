@@ -1,0 +1,6 @@
+String hello = "Hello";
+String world = "World!";
+Console.println(hello + " " + world);
+
+int year = 2020;
+Console.println("Year = " + year);

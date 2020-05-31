@@ -1,0 +1,17 @@
+if (number > 0) {
+    Console.println("number is positive");
+}
+
+if (count == 10) {
+    Console.println("count is 10");
+} else {
+    Console.println("count is not 10");
+}
+
+if (value == 1) {
+    Console.println("value is 1");
+} else if (value == 2) {
+    Console.println("Value is 2");
+} else {
+    Console.println("Value is something different");
+}
