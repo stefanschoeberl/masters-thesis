@@ -1,0 +1,11 @@
+int a = 1 - (-2 + 3) * 4 + 5;
+float b = a / 3f;
+boolean comparison = (15 <= a) || (4 > b) && (5 < b);
+Circle circle = new Circle();
+Rectangle rectangle = new Rectangle();
+boolean sameObject = cirle == triangle;
+float xCoordinate = rectangle.origin.x;
+Circle[] circles = new Circle[10];
+circles[2] = circle;
+circle.radius = 12.5f;
+int radius = (int) circle.radius;

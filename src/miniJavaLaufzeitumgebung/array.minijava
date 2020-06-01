@@ -1,3 +1,4 @@
 int[] a = new int[100];
 a[0] = 123;
 int value = a[0];
+int length = a.length;

@@ -36,18 +36,20 @@ Es werden vier elementare Datentypen unterstützt: \lstinline{int} für 32-Bit G
 
 Neben elementaren Datentypen gibt es Referenzdatentypen. Im Unterschied zu elementaren Datentypen wird in Variablen nur eine Referenz auf ein Objekt gespeichert. Zu den Referenzdatentypen zählen Klassen (siehe Abschnitt \ref{subsec:MiniJava-Klassen}) und Felder (siehe Abschnitt \ref{subsec:MiniJava-Felder}). Wie Java bietet auch MiniJava das Schlüsselwort \lstinline{null} an, wenn auf kein Objekt verwiesen werden möchte.
 
+Obwohl MiniJava keine Vererbungsbeziehung im klassischem Sinne unterstützt, ist dennoch die MiniJava-Klasse \lstinline{Object} definiert. Diese ist ähnlich wie in Java eine Art implizite Basisklasse für alle MiniJava-Klassen. Sie wird jedoch nur für einen einzigen Zweck eingesetzt: Methoden mit einem Formalparameter vom Typ \lstinline{Object} können mit einem Aktualparameter vom Typ einer beliebigen MiniJava-Klasse aufgerufen werden.
+
 \subsection{Klassen}
 \label{subsec:MiniJava-Klassen}
 
 Klassen sind eine Möglichkeit, eigene Referenzdatentypen zu definieren. Gleichzeitig bilden sie auch das Grundstrukturierungselement der Sprache. Klassen werden mit dem Schlüsselwort \lstinline{class} definiert. Im Unterschied zu Java können Klassen nicht von einander ableiten.
 
-Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisieren und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugreifen zu können.
+Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisieren und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um auf sich selbst zu verweisen. So kann zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugegriffen werden.
 
 In Listing \ref{lst:minijava-classes} sieht man ein Beispiel für eine Klasse für zweidimensionale Punkte.
 
 \lstinputlisting[label = {lst:minijava-classes}, caption = {Definition der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/class.minijava}
 
-Klassen werden mit dem \lstinline{new}-Operator instanziert. Es kann wie in Java üblich mit dem \lstinline{.}-Operator auf die Datenkomponenten zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava-Klasse \lstinline{Point} gezeigt.
+Klassen werden mit dem \lstinline{new}-Operator instanziert. Es kann wie in Java üblich mit dem Navigationsoperator \lstinline{.} auf Datenkomponenten und Methoden zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava-Klasse \lstinline{Point} gezeigt.
 
 \lstinputlisting[label = {lst:minijava-class-use}, caption = {Verwendung der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/instance.minijava}
 
@@ -75,7 +77,7 @@ Wie in Listing \ref{lst:minijava-advanced-methods} erkennbar, können Methoden i
 \subsection{Felder}
 \label{subsec:MiniJava-Felder}
 
-In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp geordnet hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über den Index. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}-Operator erzeugt, dabei wird die Größe angegeben. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
+In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp geordnet hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über den Index mit dem Indizierungsoperator \lstinline{[...]}. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}-Operator erzeugt, dabei wird die Größe angegeben. Die Länge eines Feldes kann über die Datenkomponente \lstinline{length} abgerufen werden. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
 
 \lstinputlisting[label = {lst:minijava-array}, caption = {Felder in MiniJava}]{src/miniJavaLaufzeitumgebung/array.minijava}
 
@@ -98,9 +100,41 @@ Als einzige Schleifenform steht die \lstinline{while}-Schleife zur Verfügung. D
 
 \lstinputlisting[label = {lst:minijava-while}, caption = {\lstinline{while}-Schleife in MiniJava}]{src/miniJavaLaufzeitumgebung/while.minijava}
 
-\subsection{Ausdrücke}
+\subsection{Ausdrücke und Operatoren}
+
+Viele aus Java bekannte Ausdrücke und Operatoren werden in MiniJava unterstützt. Die Rangfolge wurde ebenfalls aus Java übernommen \cite{JavaOperators}.
+
+Die drei numerischen Datentypen \lstinline{int}, \lstinline{float} und \lstinline{char} unterstützen die vier Grundrechenarten mit den Operatoren \lstinline{+}, \lstinline{-}, \lstinline{*} und \lstinline{/}. Ist einer der beiden Operanden vom Typ \lstinline{float}, wird der andere Operand, falls notwendig, in einen Wert vom Typ \lstinline{float} konvertiert (Typerweiterung). Sind beim Divisionsoperator beide Operanden ein ganzzahliger Typ, wird eine Ganzzahldivision durchgeführt.
+
+Die numerischen Datentypen unterstützen ebenfalls die Vergleichsoperatoren \lstinline{==}, \lstinline{!=}, \lstinline{<}, \lstinline{<=}, \lstinline{>} und \lstinline{>=}. Auch hier wird wie bei den Rechenoperatoren, wenn notwendig, eine Typerweiterung durchgeführt.
+
+Der Datentyp \lstinline{boolean} unterstützt die Vergleichsoperatoren \lstinline{==} und \lstinline{!=}, das logische Und \lstinline{&&} und das logische Oder \lstinline{||}. Die beiden logischen Operatoren werden nicht nach dem Kurzschluss-Prinzip ausgewertet, es werden immer beide Operaden ausgewertet.
+
+Referenzdatentypen unterstützen nur die Vergleichsoperatoren \lstinline{==} und \lstinline{!=}. Damit wird vergleichen, ob zwei Referenzen (nicht) auf dasselbe Objekt zeigen.
+
+Die zwei numerischen Datentypen \lstinline{int} und \lstinline{float} unterstützen das Präfix-Minus \lstinline{-}.
+
+Alle drei numerischen Datentypen können mit dem Cast-Operator in einen anderen numerischen Datentyp explizit umgewandelt werden.
+
+Zu den Ausdrücken zählen auch der Navigationsoperator \lstinline{.}, der Indizierungsoperator \lstinline{[...]} und die \lstinline{new}-Operatoren für Felder und Klassen. Diese wurden bereits in den vorherigen Abschnitten beschrieben.
+
+Sämtliche Ausdrücke können beliebig tief mit runden Klammern \lstinline{(...)} verschachtelt werden.
+
+In Listing \ref{lst:minijava-expressions} finden sich einige Beispiele zu den Audrücken und Operatoren.
+
+\lstinputlisting[label = {lst:minijava-expressions}, caption = {Ausdrücke in MiniJava}]{src/miniJavaLaufzeitumgebung/expressions.minijava}
 
 \section{MiniJava-Quelltext-Verwaltung}
+
+MiniJava-Quelltext wird in Dateien mit der Endung \emph{.minijava} organisiert. In jeder MiniJava-Datei können beliebig viele MiniJava-Klassen definiert werden. Falls eine Klasse native Methoden definiert, werden diese in einer gleichnamigen JavaScript-Datei im selben Verzeichnis implementiert.
+
+Beispiel: Die MiniJava-Klasse \lstinline{Console} wird in der Datei \emph{console.minijava} definiert und besitzt die native Methode \lstinline{println}. Die JavaScript-Implementierung von \lstinline{println} soll dann in der Datei \emph{console.js} zu finden sein.
+
+Beim Aufruf des Compilers werden die Pfade zu allen MiniJava-Quelltext-Dateien als Kommandozeilenargumente mitgegeben. Die JavaScript-Dateien müssen nicht angegeben werden, diese werden automatisch berücksichtigt. Genau aus diesem Grund müssen sie im selben Verzeichnis liegen und denselben Namen haben.
+
+Um nicht jede einzelen Datei angeben zu müssen, kann alternativ auch ein Pfad zu einem Verzeichnis als Parameter mitgegeben werden. In diesem Fall werden alle darin enthaltenen MiniJava-Quelltextdateien und die dazugehörigen JavaScript-Dateien berücksichtigt. Dabei werden Unterverzeichnisse nicht eingeschlossen.
+
+So ist es möglich, eine Standardbibliothek in einem eigenen Verzeichnis verwalten zu können. Auf diese Bibliothek können dann andere MiniJava-Projekte problemlos zugreifen.
 
 \section{Laufzeitumgebung}
 \subsection{Abbildung der Datentypen}
