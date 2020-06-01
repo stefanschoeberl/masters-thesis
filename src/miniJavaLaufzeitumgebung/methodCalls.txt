@@ -1,0 +1,18 @@
+// MiniJava
+class Utils {
+    public static int add(int a, int b) {
+        return a + b; 
+    }
+}
+
+class Counter {
+    int value;
+
+    public void increment(int delta) {
+        value = value + delta;
+    }
+}
+
+// JavaScript
+const result = runtime.staticMethod('Utils', 'add', 'int', 'int')(3, 4);
+runtime.instanceMethod(obj, 'increment', 'int')(3);
