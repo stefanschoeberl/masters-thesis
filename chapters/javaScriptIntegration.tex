@@ -1,4 +1,5 @@
 \chapter{Integration mit JavaScript}
+\label{cha:JavaScript-Integration}
 
 Im vorherigen Kapitel wurde gezeigt, wie das WebAssembly-Modul erzeugt wird. Grundsätzlich wäre dieses alleine lauffähig, funktioniert aber nicht, da Interaktion mit Ja\-va\-Script vorausgesetzt wird (zum Beispiel für Objektverwaltung, Konsolenausgaben und native Methoden), ist ein JavaScript-Gerüst rundherum notwendig, das alle Komponenten miteinander verbindet. Daher wird vom MiniJava-Compiler nicht nur ein einfache \lstinline{wasm}-Datei erzeugt, sondern ein Verzeichnis (im Quelltext \lstinline{Bundle} genannt, nachfolgend auch als \emph{Paket} bezeichnet) mit einigen JavaScript-Dateien und der \lstinline{wasm}-Datei erzeugt.
 
@@ -99,6 +100,7 @@ Mit \lstinline{charToWasm} und \lstinline{wasmToChar} kann zwischen einem Wert d
 Es muss der JavaScript-Datentyp \lstinline{string} verwendet werden, da JavaScript keinen eigenen Datentyp für einzelne Zeichen besitzt.
 
 \section{Sprachinterne Funktionalitäten}
+\label{sec:Sprachinterne-Funktionalitäten}
 
 MiniJava bietet einige Sprachfunktionalitäten an, die nicht zur Gänze in WebAssembly abgebildet werden können, da sie mit JavaScript-Objekten interagieren. Dazu zählen alle Funktionalitäten rund um Felder wie das Erstellen eines Felds, das Abfragen der Länge des Felds und das Zugreifen über einen Index. Außerdem bietet MiniJava das Konkatenieren von Zeichenketten an.
 
@@ -177,6 +179,7 @@ Nun kann ein Aufruf einer Instanzmethode durchgeführt werden. So wird beispiels
 \lstinputlisting{src/javaScriptIntegration/instanceCall.js}
 
 \section{Standardbibliothek}
+\label{sec:Standardbibliothek}
 
 Moderne Programmiersprache benötigt eine Standardbibliothek. Diese sollte einerseits Basisfunktionalitäten zur Verfügung stellen, um sinnvoll mit der Laufzeitumgebung interagieren zu können. Andererseits können hier oft verwendete Basisfunktionalitäten zur Verfügung gestellt werden, die in nahezu jeder Anwendung benötigt werden.
 

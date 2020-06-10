@@ -1,20 +1,97 @@
 \chapter{Codegenerierung für WebAssembly}
 
-\section{Compiler-Projektaufbau}
+Dieses Kapitel befasst sich mit der Generierung von WebAssembly-Bytecode. Dabei wird darauf eingegangen, wie MiniJava-Sprachkonstrukte auf WebAssembly abgebildet werden. Manche Sprachkonstrukte setzen Interaktion mit JavaScript voraus. In diesem Kapitel wird dabei nur die WebAssembly-Seite betrachtet, auf das JavaScript-Gegenstück wird in Kapitel \ref{cha:JavaScript-Integration} eingegangen. Weiters wird in diesem Kapitel auf den Aufbau der gesamten Implementierung eingegangen. Das Ergebnis der Codegenerierung in diesem Kapitel ist ein WebAssembly-Modul im Arbeitsspeicher. Auf das Schreiben des Moduls in eine Datei, sowie auf weitere erzeugte Dateien wird in Kapitel \ref{cha:JavaScript-Integration} eingegangen.
+
+\section{Gradle-Projektaufbau}
+
+Das Gradle-Projekt besteht aus fünf Gradle-Modulen:
+\begin{itemize}
+    \item Das Modul \emph{grammar} enthält die Grammatik von MiniJava in Form der ANTLR-Syntax. In der dazugehörigen \emph{build.gradle}-Datei wird die Scanner-, Parser- und Visitorgenerierung mit dem ANTLR-Gradle-Plugin konfiguriert.
+    \item Das Modul \emph{compiler} ist für das Abarbeiten des Syntaxbaums verantwortlich und erzeugt daraus ein WebAssembly-Modul.
+    \item Das Modul \emph{wasm} enthält Datenstrukturen zum Aufbau eines Web\-As\-sem\-bly-Mo\-duls im Arbeitsspeicher. Der Aufbau und die Namen dieser Datenstrukturen entsprechen der WebAssembly-Spezifikation \cite{WebAssemblySpecification}. Weiters werden Methoden zur Verfügung gestellt, um aus dem WebAssembly-Modul die textuelle Repräsentation und in weiterer Folge auch die binäre Repräsentation des Modules zu erzeugen.
+    \item Das Modul \emph{demo-nodejs} enthält ein Beispiel, wie MiniJava in einer Node.js-Kon\-so\-len\-anwendung eingesetzt werden kann. Darauf wird in Abschnitt \ref{sec:NodeJSExample} eingegangen.
+    \item Das Modul \emph{demo-browser} enthält eine Web-Anwendung, in der MiniJava eingesetzt wird. Darauf wird in Kapitel \ref{cha:DemoAnwendung} eingegangen.
+\end{itemize}
+
+Zusätzlich ist im Gradle-Projekt noch ein Hilfsmodul \emph{buildSrc} enthalten. Dieses ermöglicht, den MiniJava-Compiler in Gradle-Modulen zu verwenden. Darauf wird in Abschnitt \ref{sec:GradleTask-und-Plugin} eingegangen.
+
+Neben den Gradle-Modulen ist noch eine Standardbibliothek für MiniJava im Verzeichnis \emph{stdlib} enthalten. Datails dazu finden sich in Abschnitt \ref{sec:Standardbibliothek}.
+
+Weiters wird das Node.js-Skrip \emph{run.js} zur Verfügung gestellt, mit dem Erzeugnisse des MiniJava-Compilers direkt ausgeführt werden können, ohne sie in eine eigene Anwendung integrieren zu müssen.
 
 \section{Symboltabellen}
 
+Im Laufe der Codegenerierungen werden sämtliche Metainformationen aller zu kompilierenden MiniJava-Quelltexte in Symboltabellen verwaltet.
+
+Insgesamt werden dazu sechs Symboltabellen eingesetzt, die teilweise hierarchisch miteinander verbunden sind:
+\begin{itemize}
+    \item Die \lstinline{ClassSymbolTable} verwaltet die Klassen in MiniJava. Eine Klasse ist über den Namen eindeutig identifizierbar. Der WebAssembly-Funktionsindex des Konstruktors wird in dieser Symboltabelle abgelegt. Weitere Metainformationen der Klasse werden in den nachfolgenden drei Kindsymboltabellen, die für jede Klasse separat angelegt werden, verwaltet:
+    \begin{itemize}
+        \item Die \lstinline{MethodSymbolTable} verwaltet Methoden innerhalb einer Klasse. Eine Methode ist über den Namen und die Datentypen der Parameter eindeutig identifizierbar. Zu jeder Methode wird der WebAssembly-Funktionsindex, der Typ des Rückgabewerts gespeichert. Weiters wird gespeichert, ob die Methode mit den Schlüsselwörtern \lstinline{native}, \lstinline{public} oder \lstinline{static}  gekennzeichnet wurde.
+        \item Die \lstinline{FieldSymbolTable} verwaltet Datenkomponenten einer Klasse. Eine Datenkomponente ist über den Namen eindeutig identifizierbar. Für jede Datenkomponente wird der Datentyp und die WebAssembly-Funktionsindizes des \emph{Getters} und \emph{Setters} gespeichert.
+        \item Die \lstinline{InitializerSymbolTable} verwaltet die Initialisierer einer Klasse. Ein Initialisierer ist über die Datentypen der Parameter eindeutig identifizierbar. Für jeden Initialisierer wird der dazugehörige WebAssembly-Funktionsindex gespeichert.
+    \end{itemize}
+    \item In der \lstinline{StringLiteralSymbolTable} werden alle im MiniJava-Quelltext vorhandenen Zeichnkettenliterale gespeichert, um daraus auf die Referenz der Zeichenkette schließen zu können.
+    \item Die \lstinline{LocalVariableSymbolTable} verwaltet lokale Variablen und Parameter innerhalb eines Methoden- oder Initialisiererrumpfs. Lokale Variablen und Parameter sind über den Namen eindeutig identifizierbar, dabei werden verschachtelte Gültigkeitsbereiche mitberücksicht. Für jede lokale Variable bzw. jeden Parameter wird der Datentyp und der WebAssembly-Index gespeichert.
+\end{itemize}
+
+Bei einem Compiler-Aufruf werden mehrere MiniJava-Quelltexte gemeinsam kompiliert. Innerhalb dieses Vorgangs wird genau eine \lstinline{ClassSymbolTable}-Instanz für alle MiniJava-Klassen verwendet. Es wird ebenfalls nur eine \lstinline{StringLiteralSymbolTable}-Instanz für alle Zeichenketten-Literale eingesetzt. Beim Codegenerieren jeder Methode bzw. Initialisierers wird eine eigene \lstinline{LocalVariableSymbolTable}-Instanz verwendet, die danach nicht mehr benötigt wird.
+
 \section{Abarbeitung des Syntaxbaums in mehreren Phasen}
 
-\section{Addressräume für Funktionen}
+Da MiniJava wie Java Vorwärtsreferenzen (zum Beispiel für das Aufrufen einer Methode, die erst weiter unten im Quelltext definiert wird) unterstützen soll, ist es leider nicht möglich, den gesamten Syntaxbaum in einem Durchlauf abzuarbeiten. Daher wird der Syntaxbaum in zwei Phasen abgearbeitet:
+
+\begin{enumerate}
+    \item Deklarationsphase: In dieser Phase werden alle Klassennamen, Datenkomponenten, Initialisierer und Methoden gesammelt. Daraus wird die \lstinline{ClassSymbolTable}-Instanz mit den dazugehörigen Kindsymboltabellen aufgebaut. Genauer betrachtet wird innerhalb dieser Phase der Syntaxbaum zwei Mal abgearbeitet: Beim ersten Durchlauf werden die Klassennamen gesammelt, im zweiten Durchlauf die Datenkomponenten, Initialisierer und Methoden. Das hat den Grund, dass Datenkomponenten, Initialisierer und Methoden Vorwärtsreferenzen auf Klassen enthalten könnten, zum Beispiel als Datentyp eines Parameters. Mit Hilfe eines \lstinline{Visitors} können nur die relevanten Teile des Syntaxbaums ausgewertet werden, so wird verhindert, dass zu diesem Zeitpunkt irrelevante Teile, wie beispielsweise einzelne Anweisungen, unnötig abgearbeitet werden.
+    \item Codegenerierungsphase: Mit Hilfe der in der ersten Phase gewonnenen Metainformationen kann nun der WebAssembly-Bytecode generiert. In dieser Phase wird der Syntaxbaum genau einmal abgearbeitet. Das Ergebnis dieser Phase ist ein WebAssembly-Modul im Arbeitsspeicher.
+\end{enumerate}
+
+\section{Indexräume für Funktionen}
+
+Funktionen sind in einem WebAssembly-Modul über einen Index adressierbar. Einige MiniJava-Sprachkonstrukte, wie beispielsweise Methoden, werden auf WebAssembly-Funktionen abgebildet. Ein Teil dieser Funktionen wird direkt in WebAssembly definiert und für diese werden WebAssembly-Instruktionen generiert. Der andere Teil wird importiert, da die Implementierung der Funktion in JavaScript vorliegt.
+
+Die WebAssembly-Spezifikation sieht folgende Einschränkung zur Reihenfolge der Funktionen vor: Zunächst müssen Funktionen importiert werden, erst dürfen Funktionen (inkl. Instruktionen) definiert werden \cite{WebAssemblySpecification}. Allgemein betrachtet erhalten importierte Funktionen somit den Indexbereich von $0$ bis $n$ und in WebAssembly definierte Funktionen den Indexbereich von $n+1$ bis $m$ 
+
+Unter Berücksichtigung dieser Einschränkung werden die Funktionsindizes in der Deklarationsphase gemäß dem Schema in Tabelle \ref{tab:functionIndices} vergeben. Für nicht-native Methoden und Initialisierer müssen WebAssembly-Instruktionen generiert werden, daher bekommen sie die höchsten Funktionsindizes. Sprachinterne Funktionalitäten für Felder und Zeichenketten (siehe Abschnitt \ref{sec:Sprachinterne-Funktionalitäten}), native Methoden, Konstruktoren, \emph{Getter} und \emph{Setter} erhalten die niedrigeren Indizes.
+
+Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die darin enthaltenen Funktionen immer am selben Index erreichbar sind, dies erleichtert die Implementierung.
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{| r | l |}
+        \hline
+        $0$ & \multirow{2}{*}{Sprachinterne Funktionalitäten} \\
+        $a$ & \\
+        \hline
+        $a+1$ & \multirow{2}{*}{Native Methoden} \\
+        $b$ & \\
+        \hline
+        $b+1$ & \multirow{2}{*}{Konstruktoren} \\
+        $c$ & \\
+        \hline
+        $c+1$ & \multirow{2}{*}{\emph{Getter} und \emph{Setter}} \\
+        $d$ & \\
+        \hline \hline
+        $d+1$ & \multirow{2}{*}{Nicht-native Methoden} \\
+        $e$ & \\
+        \hline
+        $e+1$ & \multirow{2}{*}{Initialisierer} \\
+        $f$ & \\
+        \hline
+    \end{tabular}
+    \caption{Aufteilung der Indizes für die entsprechenden WebAssembly-Funktionen}
+    \label{tab:functionIndices}
+\end{table}
 
 \section{Codegenerierung für Ausdrücke}
 
 \section{Codegenerierung für Kontrollstrukturen}
-\subsection{Verzweigung (\lstinline{if-else}-Anweisung)}
+\subsection{Verzweigung (\lstinline{if}-\lstinline{else}-Anweisung)}
 \subsection{Schleife (\lstinline{while}-Anweisung)}
 
 \section{Codegenerierung für Methodenaufrufe}
+
+TODO: this-Referenz
 
 \section{Codegenerierung für Objekte}
 \subsection{Erzeugen des Objekts}
@@ -24,6 +101,8 @@
 \section{Codegenerierung für Felder}
 \subsection{Erzeugen von Feldern}
 \subsection{Lese- und Schreibzugriff mit Index}
+
+\section{Codegenerierung für Zeichenketten-Literale}
 
 \section{Hilfsklasse \lstinline{Object}}
 
