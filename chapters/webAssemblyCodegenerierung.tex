@@ -117,8 +117,17 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit
 TODO: this-Referenz
 
 \section{Codegenerierung für Objekte}
-\subsection{Erzeugen des Objekts}
-\subsection{Initialisierung}
+\subsection{Erzeugen und Initialisieren des Objekts}
+Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
+
+Zunächst muss der Funktionsindex der importieren Konstruktorfunktion aus dem Klassennamen abgeleitet werden. Dies erfolgt über die Symboltabellen, der Index des Konstruktors wurde bereits in der Deklarationsphase festgelegt. Diese Konstruktorfunktion wird mit der \lstinline{call}-Instruktion aufgerufen. Danach liegt die Referenz des erzeugten Objekts oben am Kellerspeicher.
+
+Anschließend werden die Aktualparameter ausgewertet. Aus den Datentypen dieser wird mit Hilfe der Symboltabellen der Index der in WebAssembly-definierten Funktion des Initialisierer bestimmt. Diese Funktion wird mit der \lstinline{call}-Instruktion aufgerufen. Der Initialisier liefert als Rückgabewert wieder die Referenz des Objekts. Sind keine Aktualparameter vorhanden und in der Klasse wurde auch kein Standardinitialisierer definiert, wird dieser Schritt übersprungen.
+
+Der gesamte Ausdruck liefert immer die Referenz des erzeugten Objekts. Der erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:newObject-bytecode}. Für den Fall, dass der Schritt mit dem Initialisierer übersprungen wird, besteht der generierte Bytecode ausschließlich aus der Instruktion in Zeile 1.
+
+\lstinputlisting[label = {lst:newObject-bytecode}, caption = {Vorlage für den \lstinline{new}-Ausdruck zum Erzeugen von Objekten einer Klasse}]{src/webAssemblyCodegenerierung/newObject.wasm}
+
 \subsection{\emph{Getter} und \emph{Setter}}
 
 \section{Codegenerierung für Felder}
