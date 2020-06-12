@@ -1,4 +1,4 @@
-; <condition> ;
+<evaluate condition>
 if
-    ; <then-branch> ;
+    <then-branch statements>
 end

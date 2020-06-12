@@ -1,9 +1,9 @@
 block
 +-> loop
-|       ; <condition> ;
+|       <evaluate condition>
 |       i32.eqz
-|       br_if 1 --------+
-|       ; <loop-body> ; |
-+------ br 0            |
-    end                 |
-end <-------------------+
+|       br_if 1 ---------------+
+|       <loop-body statements> |
++------ br 0                   |
+    end                        |
+end <--------------------------+

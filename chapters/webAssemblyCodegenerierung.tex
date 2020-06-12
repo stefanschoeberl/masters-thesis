@@ -86,6 +86,8 @@ Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die da
 \section{Codegenerierung für Ausdrücke}
 \label{sec:Codegenerierung-für-Ausdrücke}
 
+TODO: new, getter, setter, [], "" + "", Methodenaufrufe gehören auch zu Ausdrücken, werden in anderen Abschnitten betrachtet.
+
 \section{Codegenerierung für Kontrollstrukturen}
 WebAssembly bietet einige Instruktion zur Steuerung des Kontrollflusses an. Sämtliche Kontrollstrukturen von MiniJava werden diese abgebildet.
 
@@ -112,13 +114,18 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit
 
 \lstinputlisting[label = {lst:while-bytecode}, caption = {Vorlage für die \lstinline{while}-Schleife}]{src/webAssemblyCodegenerierung/while.wasm}
 
+\section{Codegenerierung für Methoden und Initialisierer}
+
+TODO: this-Referenz
+
 \section{Codegenerierung für Methodenaufrufe}
 
 TODO: this-Referenz
 
-\section{Codegenerierung für Objekte}
-\subsection{Erzeugen und Initialisieren des Objekts}
+\section{Codegenerierung für das Erzeugen und Initialisieren von Objekten}
 Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
+
+Da alle Objekte in JavaScript verwaltet werden, müssen sie auch in JavaScript erzeugt werden. Dafür wird ein Konstruktor als JavaScript-Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}). Diese Funktion wird im WebAssembly-Modul importiert.
 
 Zunächst muss der Funktionsindex der importieren Konstruktorfunktion aus dem Klassennamen abgeleitet werden. Dies erfolgt über die Symboltabellen, der Index des Konstruktors wurde bereits in der Deklarationsphase festgelegt. Diese Konstruktorfunktion wird mit der \lstinline{call}-Instruktion aufgerufen. Danach liegt die Referenz des erzeugten Objekts oben am Kellerspeicher.
 
@@ -128,7 +135,35 @@ Der gesamte Ausdruck liefert immer die Referenz des erzeugten Objekts. Der erzeu
 
 \lstinputlisting[label = {lst:newObject-bytecode}, caption = {Vorlage für den \lstinline{new}-Ausdruck zum Erzeugen von Objekten einer Klasse}]{src/webAssemblyCodegenerierung/newObject.wasm}
 
-\subsection{\emph{Getter} und \emph{Setter}}
+\section{Codegenerierung für den Zugriff auf Datenkomponenten}
+
+Beim lesenden Zugriff auf eine Datenkomponente wird ein \emph{Getter} aufgerufen. Dies erfolgt zum Beispiel im Ausdruck Aktualparameters oder auf der rechten Seite einer Zuweisung.
+
+Beim schreibenden Zugriff auf eine Datenkomponente wird ein \emph{Setter} aufgerufen. Dies erfolgt ausschließlich, wenn der Datenkomponente auf der linken Seite einer Zuweisung ein neuer Wert zugewiesen wird.
+
+Es gibt zwei Möglichkeiten, auf eine Datenkomponente zuzugreifen:
+\begin{itemize}
+    \item Innerhalb von Objektmethoden und Initialisieren über den Namen der Datenkomponente, zum Beispiel \lstinline{x}. In diesem Fall wird das dazugehörige Objekt über den impliziten \lstinline{this}-Parameter identifiziert.
+    \item Über den Navigationsoperator, zum Beispiel \lstinline{point.x} oder \lstinline{getPoint().x}. Dies schließt den Fall innerhalb von Objektmethoden und Initialisieren mit dem Schlüsselwort \lstinline{this} ein, zum Beispiel \lstinline{this.x}.
+\end{itemize}
+
+Der Umweg über \emph{Getter} und \emph{Setter} ist notwendig, weil alle Objekte in JavaScript verwaltet werden. Daher werden für alle Datenkomponenten \emph{Getter} und \emph{Setter} als JavaScript-Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}), die anschließend im WebAssembly-Modul importiert werden.
+
+\subsection{\emph{Getter}}
+
+Der Funktionsindex der importierten \emph{Getter}-Funktion wird mit Hilfe der Symboltabellen über den Klassennamen des Objekts und den Namen der Datenkomponenten ermittelt. Der \emph{Getter} erwartet als einzigen Parameter die Referenz des Objekts. Im Fall des impliziten oder expliziten \lstinline{this}-Parameters wird der Wert der ersten lokalen Variable verwendet, andernfalls wird der Ausdruck auf der linken Seite des Navigationsoperators ausgewertet. Der Wert der Datenkomponente, bzw. im Fall von Referenzdatentypen die Referenz darauf, liegt danach oben am Kellerspeicher. Der erzeugte Bytecode entspricht den Vorlagen in Listings \ref{lst:getterThis-bytecode} und \ref{lst:getterExpr-bytecode}.
+
+\lstinputlisting[label = {lst:getterThis-bytecode}, caption = {Vorlage für das Abfragen einer Datenkomponente mit einem \emph{Getter} und dem \lstinline{this}-Parameter}]{src/webAssemblyCodegenerierung/getterThis.wasm}
+
+\lstinputlisting[label = {lst:getterExpr-bytecode}, caption = {Vorlage für das Abfragen einer Datenkomponente mit einem \emph{Getter}, bei dem die Referenz auf das Objekt ausgewertet werden muss}]{src/webAssemblyCodegenerierung/getterExpr.wasm}
+
+\subsection{\emph{Setter}}
+
+Der Funktionsindex der importierten \emph{Setter}-Funktion wird mit Hilfe der Symboltabellen über den Klassennamen des Objekts und den Namen der Datenkomponenten ermittelt. Der \emph{Setter} erwartet als die Referenz des Objekts und den neuen Wert der Datenkomponente. Im Fall des impliziten oder expliziten \lstinline{this}-Parameters wird der Wert der ersten lokalen Variable verwendet, andernfalls wird der Ausdruck auf der linken Seite des Navigationsoperators ausgewertet. Der \emph{Setter} liefert keinen Rückgabewert. Der erzeugte Bytecode entspricht den Vorlagen in Listings \ref{lst:setterThis-bytecode} und \ref{lst:setterExpr-bytecode}.
+
+\lstinputlisting[label = {lst:setterThis-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter} und dem \lstinline{this}-Parameter}]{src/webAssemblyCodegenerierung/setterThis.wasm}
+
+\lstinputlisting[label = {lst:setterExpr-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter}, bei dem die Referenz auf das Objekt ausgewertet werden muss}]{src/webAssemblyCodegenerierung/setterExpr.wasm}
 
 \section{Codegenerierung für Felder}
 \subsection{Erzeugen von Feldern}

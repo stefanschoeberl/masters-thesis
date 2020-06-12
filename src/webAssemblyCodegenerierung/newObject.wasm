@@ -1,3 +1,3 @@
 call <constructor-index>
-; <evaluate-parameters> ;
+<evaluate parameters>
 call <initializer-index>

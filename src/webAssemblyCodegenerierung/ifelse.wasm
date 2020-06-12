@@ -1,6 +1,6 @@
-; <condition> ;
+<evaluate condition>
 if
-    ; <then-branch> ;
+    <then-branch statements>
 else
-    ; <else-branch> ;
+    <else-branch statements>
 end
