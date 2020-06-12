@@ -28,7 +28,7 @@ Insgesamt werden dazu sechs Symboltabellen eingesetzt, die teilweise hierarchisc
     \item Die \lstinline{ClassSymbolTable} verwaltet die Klassen in MiniJava. Eine Klasse ist über den Namen eindeutig identifizierbar. Der WebAssembly-Funktionsindex des Konstruktors wird in dieser Symboltabelle abgelegt. Weitere Metainformationen der Klasse werden in den nachfolgenden drei Kindsymboltabellen, die für jede Klasse separat angelegt werden, verwaltet:
     \begin{itemize}
         \item Die \lstinline{MethodSymbolTable} verwaltet Methoden innerhalb einer Klasse. Eine Methode ist über den Namen und die Datentypen der Parameter eindeutig identifizierbar. Zu jeder Methode wird der WebAssembly-Funktionsindex, der Typ des Rückgabewerts gespeichert. Weiters wird gespeichert, ob die Methode mit den Schlüsselwörtern \lstinline{native}, \lstinline{public} oder \lstinline{static}  gekennzeichnet wurde.
-        \item Die \lstinline{FieldSymbolTable} verwaltet Datenkomponenten einer Klasse. Eine Datenkomponente ist über den Namen eindeutig identifizierbar. Für jede Datenkomponente wird der Datentyp und die WebAssembly-Funktionsindizes des \emph{Getters} und \emph{Setters} gespeichert.
+        \item Die \lstinline{FieldSymbolTable} verwaltet Datenkomponenten einer Klasse. Eine Datenkomponente ist über den Namen eindeutig identifizierbar. Für jede Datenkomponente werden der Datentyp und die WebAssembly-Funktionsindizes des \emph{Getters} und \emph{Setters} gespeichert.
         \item Die \lstinline{InitializerSymbolTable} verwaltet die Initialisierer einer Klasse. Ein Initialisierer ist über die Datentypen der Parameter eindeutig identifizierbar. Für jeden Initialisierer wird der dazugehörige WebAssembly-Funktionsindex gespeichert.
     \end{itemize}
     \item In der \lstinline{StringLiteralSymbolTable} werden alle im MiniJava-Quelltext vorhandenen Zeichnkettenliterale gespeichert, um daraus auf die Referenz der Zeichenkette schließen zu können.
@@ -137,7 +137,7 @@ Der gesamte Ausdruck liefert immer die Referenz des erzeugten Objekts. Der erzeu
 
 \section{Codegenerierung für den Zugriff auf Datenkomponenten}
 
-Beim lesenden Zugriff auf eine Datenkomponente wird ein \emph{Getter} aufgerufen. Dies erfolgt zum Beispiel im Ausdruck Aktualparameters oder auf der rechten Seite einer Zuweisung.
+Beim lesenden Zugriff auf eine Datenkomponente wird ein \emph{Getter} aufgerufen. Dies erfolgt zum Beispiel in Ausdrücken in Aktualparametern oder allgemein auf der rechten Seite einer Zuweisung.
 
 Beim schreibenden Zugriff auf eine Datenkomponente wird ein \emph{Setter} aufgerufen. Dies erfolgt ausschließlich, wenn der Datenkomponente auf der linken Seite einer Zuweisung ein neuer Wert zugewiesen wird.
 
