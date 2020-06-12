@@ -1,0 +1,6 @@
+; <condition> ;
+if
+    ; <then-branch> ;
+else
+    ; <else-branch> ;
+end

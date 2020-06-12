@@ -84,10 +84,33 @@ Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die da
 \end{table}
 
 \section{Codegenerierung für Ausdrücke}
+\label{sec:Codegenerierung-für-Ausdrücke}
 
 \section{Codegenerierung für Kontrollstrukturen}
-\subsection{Verzweigung (\lstinline{if}-\lstinline{else}-Anweisung)}
-\subsection{Schleife (\lstinline{while}-Anweisung)}
+WebAssembly bietet einige Instruktion zur Steuerung des Kontrollflusses an. Sämtliche Kontrollstrukturen von MiniJava werden diese abgebildet.
+
+\subsection{\lstinline{if}-\lstinline{else}-Verzweigung}
+Die \lstinline{if}-\lstinline{else}-Verzweigung lässt sich auf die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktionen in Webassembly abbilden. Die \lstinline{if}-Instruktion nimmt den obersten Wert vom Kellerspeicher herunter und entscheidet basierend auf diesem, welcher Zweig ausgeführt wird. Daher muss zunächst Bytecode für die Bedingung generiert werden und erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend folgt die \lstinline{if}-Instruktion und Instruktionen für die Anweisungen im \emph{then}-Zweig. Falls für die \lstinline{if}-\lstinline{else}-Anweisung kein \lstinline{else}-Zweig in MiniJava implementiert wurde, kann die Verzweigung in WebAssembly direkt mit der \lstinline{end}-Instruktion abgeschlossen werden. Der erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:if-bytecode}.
+
+Wurde in MiniJava ein \lstinline{else}-Zweig implementiert, müssen vor der \lstinline{end}-Instruktion die \lstinline{else}-Instruktion und die Instruktionen des \lstinline{else}-Zweigs eingefügt werden. Der erzeugte Bytecode entspricht dann der Vorlage aus Listing \ref{lst:if-else-bytecode}.
+
+\lstinputlisting[label = {lst:if-bytecode}, caption = {Vorlage für die \lstinline{if}-\lstinline{else}-Verzweigung ohne \lstinline{else}-Zweig}]{src/webAssemblyCodegenerierung/if.wasm}
+
+\lstinputlisting[label = {lst:if-else-bytecode}, caption = {Vorlage für die \lstinline{if}-\lstinline{else}-Verzweigung mit \lstinline{else}-Zweig}]{src/webAssemblyCodegenerierung/ifelse.wasm}
+
+\subsection{\lstinline{while}-Schleife}
+
+Die \lstinline{while}-Schleife wird folgendermaßen auswertet: Am Anfang jedes Schleifendurchlaufs wird die Bedingung geprüft. Ist diese wahr, wird der Schleifenrumpf ausgeführt. Ist die Bedingung falsch, wird die Schleife abgebrochen und aus der Schleife herausgesprungen. Nach der Ausführung des Schleifenrumpfs wird zum Anfang der Schleife gesprungen und die Prüfung erfolgt erneut.
+
+Im Bytecode werden zwei Sprungziele benötigt: Einmal einmal am Ende, um aus der Schleife herauszuspringen und einmal am Anfang der Schleife, um einen neuen Durchlauf zu starten. Dafür werden die \lstinline{block}- und \lstinline{loop}-Instruktionen eingesetzt.
+
+Nach \lstinline{block}- und \lstinline{loop}-Instruktionen wird zunächst der Bytecode für das Auswerten der Bedingung generiert, das erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Danach wird das Ergebnis der Bedingung mit der \lstinline{i32.eqz}-Instruktion\footnote{\emph{EQuals Zero} für 32-Bit-Ganzzahlen: Der oberste Wert wird vom Kellerspeicher heruntergenommen. Ist dieser 0, wird 1 auf den Kellerspeicher gelegt, andernfalls wird 0 auf den Kellerspeicher gelegt.} negiert und mit \lstinline{br_if}-Instruktion. Das Negieren ist notwendig, weil die \lstinline{br_if}-Instruktion nur dann den Sprung durchführt, wenn der oberste Wert am Kellerspeicher wahr (ungleich 0) ist. Das Sprungziel der \lstinline{br_if}-Instruktion ist das Ende der Schleife, also wird das Sprungziel der \lstinline{block}-Instruktion angegeben (zweitäußerstes Ziel, Index = 1).
+
+Nun folgen die Instruktionen des Schleifenrumpfs. Am Ende wird zum Anfang der Schleife gesprungen. Dies erfolgt unbedingt mit \lstinline{br}-Instruktion. Als Sprungziel wird die \lstinline{loop}-Instruktion angegeben (erstäußerstes Ziel, Index = 0).
+
+Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit entsprechenden \lstinline{end}-In\-struk\-ti\-onen abgeschlossen. Der gesamte erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:while-bytecode}. Die darin enthaltenen Pfeile dienen nur zum Verständnis und sind beim echten Bytecode natürlich nicht enthalten.
+
+\lstinputlisting[label = {lst:while-bytecode}, caption = {Vorlage für die \lstinline{while}-Schleife}]{src/webAssemblyCodegenerierung/while.wasm}
 
 \section{Codegenerierung für Methodenaufrufe}
 
