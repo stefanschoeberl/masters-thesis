@@ -114,7 +114,7 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit
 
 \lstinputlisting[label = {lst:while-bytecode}, caption = {Vorlage für die \lstinline{while}-Schleife}]{src/webAssemblyCodegenerierung/while.wasm}
 
-\section{Codegenerierung für Methoden und Initialisierer}
+\section{Codegenerierung für nicht-native Methoden und Initialisierer}
 
 TODO: this-Referenz
 
@@ -123,7 +123,7 @@ TODO: this-Referenz
 TODO: this-Referenz
 
 \section{Codegenerierung für das Erzeugen und Initialisieren von Objekten}
-Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
+Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
 
 Da alle Objekte in JavaScript verwaltet werden, müssen sie auch in JavaScript erzeugt werden. Dafür wird ein Konstruktor als JavaScript-Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}). Diese Funktion wird im WebAssembly-Modul importiert.
 
@@ -151,7 +151,7 @@ Der Umweg über \emph{Getter} und \emph{Setter} ist notwendig, weil alle Objekte
 
 \subsection{\emph{Getter}}
 
-Der Funktionsindex der importierten \emph{Getter}-Funktion wird mit Hilfe der Symboltabellen über den Klassennamen des Objekts und den Namen der Datenkomponenten ermittelt. Der \emph{Getter} erwartet als einzigen Parameter die Referenz des Objekts. Im Fall des impliziten oder expliziten \lstinline{this}-Parameters wird der Wert der ersten lokalen Variable verwendet, andernfalls wird der Ausdruck auf der linken Seite des Navigationsoperators ausgewertet. Der Wert der Datenkomponente, bzw. im Fall von Referenzdatentypen die Referenz darauf, liegt danach oben am Kellerspeicher. Der erzeugte Bytecode entspricht den Vorlagen in Listings \ref{lst:getterThis-bytecode} und \ref{lst:getterExpr-bytecode}.
+Der Funktionsindex der importierten \emph{Getter}-Funktion wird mit Hilfe der Symboltabellen über den Klassennamen des Objekts und den Namen der Datenkomponenten ermittelt. Der \emph{Getter} erwartet als einzigen Parameter die Referenz des Objekts. Im Fall des impliziten oder expliziten \lstinline{this}-Parameters wird der Wert der ersten lokalen Variable verwendet, andernfalls wird der Ausdruck auf der linken Seite des Navigationsoperators ausgewertet. Der Wert der Datenkomponente oder im Fall von Referenzdatentypen die Referenz darauf, liegt danach oben am Kellerspeicher. Der erzeugte Bytecode entspricht den Vorlagen in Listings \ref{lst:getterThis-bytecode} und \ref{lst:getterExpr-bytecode}.
 
 \lstinputlisting[label = {lst:getterThis-bytecode}, caption = {Vorlage für das Abfragen einer Datenkomponente mit einem \emph{Getter} und dem \lstinline{this}-Parameter}]{src/webAssemblyCodegenerierung/getterThis.wasm}
 
@@ -166,8 +166,31 @@ Der Funktionsindex der importierten \emph{Setter}-Funktion wird mit Hilfe der Sy
 \lstinputlisting[label = {lst:setterExpr-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter}, bei dem die Referenz auf das Objekt ausgewertet werden muss}]{src/webAssemblyCodegenerierung/setterExpr.wasm}
 
 \section{Codegenerierung für Felder}
+Alle Felder werden auf JavaScript-Felder abgebildet, daher muss mit ihnen über importierte JavaScript-Funktionen interagiert werden.
+
 \subsection{Erzeugen von Feldern}
+
+Felder werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Name des Datentyps und die Größe des Felds bilden gemeinsam den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new int[123]}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
+
+Je nach Art des Elementdatentyps (numerisch, \lstinline{boolean}, \lstinline{char} oder Objekt) wird eine unterschiedliche JavaScript-Funktion (siehe Abschnitt \ref{subsec:Feld-Funktionen}) zum Erzeugen des Felds aufgerufen, die in das WebAssembly-Modul importiert wird.
+
+Zunächst muss der Ausdrück für die Größe des Felds auswertet werden, dies erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend wird je nach Datentyp die entsprechende importierte Funktion aufgerufen. Die Funktion liefert als Rückgabewert eine Referenz auf das Feld. Die Indizes dieser Funktionen sind fest im Compiler einprogrammiert (siehe Bereich $0$ bis $a$ in Tabelle \ref{tab:functionIndices}). Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:newArray-bytecode}.
+
+\lstinputlisting[label = {lst:newArray-bytecode}, caption = {Vorlage für das Erstellen eines Felds}]{src/webAssemblyCodegenerierung/newArray.wasm}
+
 \subsection{Lese- und Schreibzugriff mit Index}
+
+Der Zugriff auf einzelne Elemente erfolgt über den Indizierungsoperator \lstinline{[]} in MiniJava, zum Beispiel \lstinline{numbers[3]}, \lstinline{numbers[3] = 5} oder \lstinline{getArray()[3]}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
+
+Je nach Art des Elementdatentyps (\lstinline{int}, \lstinline{float}, \lstinline{boolean}, \lstinline{char} oder Objekt) werden unterschiedliche JavaScript-Funktionen zum Lesen und Schreiben eingesetzt. Hier ist im Gegensatz zum Erstellen des Felds eine Unterscheidung zwischen \lstinline{int} und \lstinline{float} notwendig, da diese auf den entsprechenden WebAssembly-Datentyp (\lstinline{i32} bzw. \lstinline{f32}) abgebildet werden und man mit Werten dieser Datentypen direkt interagiert. Wie beim Erstellen des Felds sind die Indizes dieser Funktionen ebenfalls fest im Compiler einprogrammiert.
+
+Beim lesenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selbst ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Die Funktion liefert als Rückgabewert den am angeforderten Index gespeicherten Wert oder im Fall von Referenzdatentypen die Referenz darauf. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arrayGet-bytecode}.
+
+\lstinputlisting[label = {lst:arrayGet-bytecode}, caption = {Vorlage für den lesenden Zugriff auf ein Feld}]{src/webAssemblyCodegenerierung/arrayGet.wasm}
+
+Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selbst ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Nun wird der Ausdruck für den neuen Wert ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arraySet-bytecode}.
+
+\lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld}]{src/webAssemblyCodegenerierung/arraySet.wasm}
 
 \section{Codegenerierung für Zeichenketten-Literale}
 

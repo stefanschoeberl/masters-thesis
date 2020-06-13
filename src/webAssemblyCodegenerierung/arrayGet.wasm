@@ -1,0 +1,3 @@
+<evaluate array-reference>
+<evaluate index>
+call <array-getter-index>

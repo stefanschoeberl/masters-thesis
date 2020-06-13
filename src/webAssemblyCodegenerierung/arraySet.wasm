@@ -1,0 +1,4 @@
+<evaluate array-reference>
+<evaluate index>
+<evaluate new-value>
+call <array-setter-index>
