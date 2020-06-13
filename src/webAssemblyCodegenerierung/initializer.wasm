@@ -1,0 +1,6 @@
+(type (param i32) <params ...> (result i32))
+
+(func (type <type-index>) <locals ...>
+    <initializer-body statements>
+    local.get 0
+)

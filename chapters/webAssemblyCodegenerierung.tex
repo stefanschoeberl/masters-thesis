@@ -114,9 +114,44 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit
 
 \lstinputlisting[label = {lst:while-bytecode}, caption = {Vorlage für die \lstinline{while}-Schleife}]{src/webAssemblyCodegenerierung/while.wasm}
 
-\section{Codegenerierung für nicht-native Methoden und Initialisierer}
+------------------
 
-TODO: this-Referenz
+Objektmethoden, Klassenmethoden und Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Grundsätzlich wird für alle drei Arten ein Typ (\lstinline{(type ...)}) im WebAssembly-Modul definiert, der die Schnittstelle der Methode bzw. des Initialisierer beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly-Funktion referenziert auf den entsprechenden Typ. Für diese drei Arten wird sehr ähnlicher, aber leicht unterschiedlicher Funktionsbytecode erzeugt.
+
+Objektmethoden und Initialisierer benötigen eine Referenz auf das Objekt selbst. Diese Referenz ist im Methoden- bzw. Initialisiererrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden und Initialisierer ein zusätzlichen Parameter definiert, auch \lstinline{this}-Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}-Parameter ist bei Objektmethoden und Initialisierern immer der erste Parameter.
+
+\section{Codegenerierung für nicht-native Methoden}
+
+Objektmethoden und Klassenmethoden werden auf in WebAssembly definierte Funktionen abgebildet. Dabei wird ein Funktionstyp (\lstinline{(type ...)}) im WebAssembly-Modul definiert, der die Schnittstelle der Funktion beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly-Funktion referenziert auf den entsprechenden Typ.
+
+\subsection{\lstinline{this}-Parameter}
+Objektmethoden benötigen eine Referenz auf das Objekt selbst. Diese Referenz ist im Methodenrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden ein zusätzlichen Parameter definiert, auch \lstinline{this}-Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}-Parameter ist bei Objektmethoden immer der erste Parameter.
+
+\subsection{Rückgabetyp}
+Falls in MiniJava ein Rückgabetyp (ungleich \lstinline{void}) für die Methode definiert wurde, muss dieser in der Funktionsdefinition mit \lstinline{(result ...)} angegeben werden. Zusätzlich wird als letzte Instruktion im Funktionsrumpf \lstinline{unreachable} eingefügt, Details dazu folgen im nächsten Abschnitt.
+
+Der generierte Bytecode für die gesamte Methode entspricht der Vorlage in Listing \ref{lst:method-bytecode}. Teile in eckigen Klammern werden nur wenn benötigt generiert.
+
+\lstinputlisting[label = {lst:method-bytecode}, caption = {Vorlage für Objekt- und Klassenmethoden}]{src/webAssemblyCodegenerierung/method.wasm}
+
+\subsection{\lstinline{unreachable}-Instruktion}
+Auf den ersten Blick erscheint es nicht nachvollziehbar, warum bei Funktionen mit Rückgabetyp am Ende die \lstinline{unreachable}-Instruktion generiert wird, da die Methoden, die einen Rückgabewert liefern, immer über die MiniJava-\lstinline{return}-Anweisung verlassen werden. Die \lstinline{return}-Anweisung wird auf die \lstinline{return}-Instruktion abgebildet.
+
+WebAssembly-Module werden validiert, zum Beispiel beim Einsatz von \lstinline{wat2wasm}. Der Validator kann dabei prüfen, ob vor dem Ausführen der \lstinline{return}-Instruktion immer ein Wert oben am Kellerspeicher liegt. Weiters prüft der Validator, ob am Ende einer Funktion mit Rückgabewert immer ein Wert oben am Kellerspeicher liegt. In gewissen Fällen ist es jedoch möglich, dass eine WebAssembly-Funktion zur Laufzeit immer korrekt ablaufen würde, aber vom Validator als ungültig erkannt wird.
+
+Ein Beispiel für so eine Funktion findet sich in Listing \ref{lst:unreachable-problem}. Die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktion liefert immer einen Rückgabewert, egal welcher Zweig ausgeführt wird. Die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktion ist allerdings aus WebAssembly-Sicht ein Ausdruck, der selbst einen Wert liefern könnte. Die Instruktion ist vergleichbar zum ternären Operator \lstinline{?:} in Java. Da in diesem Fall die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktion keinen Wert liefert, nimmt der WebAssembly-Validator an, dass nach dem Ausführen der \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktion der Kellerspeicher leer ist und die Funktion keinen Rückgabewert liefern kann.
+
+\lstinputlisting[label = {lst:unreachable-problem}, caption = {Beispiel für eine Funktion, zwar korrekt ausgeführt werden könnte, aber nicht korrekt validierbar ist}]{src/webAssemblyCodegenerierung/unreachableExample.wasm}
+
+In einem GitHub-Issue \cite{WebAssemblyUnreachableWorkaround} wurde dieses Problem diskutiert. Als einfache Lösung für dieses Problem wird vorgeschlagen, die \lstinline{unreachable}-Instruktion am Ende der Funktion hinzuzufügen. Dadurch kommt es aus Sicht des Validators immer zu einem Laufzeitfehler, und die Funktion liefert \emph{nie} einen Rückgabewert, da die Ausführung \emph{abgebrochen wird}.
+
+Der Nachteil bei dieser Vorangehensweise ist, dass man selber dafür sorgen muss, dass alle Zweige der Methode mit der \lstinline{return}-Anweisung verlassen werden, sodass nie das Ende der Funktion erreicht wird, da es sonst tatsächlich zu einem Laufzeit kommt.
+
+\section{Codegenerierung für Initialisierer}
+
+Initialisierer werden ebenfalls auf in WebAssembly definierte Funktionen abgebildet. Wie bei Objektmethoden wird auch hier ein \lstinline{this}-Parameter als erster Parameter verwendet. Weiters wurde festgelegt, dass Initialisierer immer die Referenz auf das Objekt als Rückgabewert liefern müssen. Dies erfolgt automatisch ohne eine explizite Anweisung in MiniJava, daher wird als letzte Instruktion im Initialisierer \lstinline{local.get 0} generiert. Der generierte Bytecode für den gesamten Initialisierer entspricht der Vorlage in Listing \ref{lst:initializer-bytecode}.
+
+\lstinputlisting[label = {lst:initializer-bytecode}, caption = {Vorlage für Initialisierer}]{src/webAssemblyCodegenerierung/initializer.wasm}
 
 \section{Codegenerierung für Methodenaufrufe}
 

@@ -86,6 +86,8 @@ Funktionen können mit der \lstinline{call}-Instruktion aufgerufen werden. Die I
 
 Eine Funktion kann frühzeitig mit der \lstinline{return}-Instruktion verlassen werden. Liefert die Funktion einen Rückgabewert, muss dieser vor der \lstinline{return}-Instruktion oben am Kellerspeicher liegen.
 
+Ein Laufzeitfehler kann bewusst mit der \lstinline{unreachable}-Instruktion ausgelöst werden. Diese Instruktion wird immer als Trap ausgewertet.
+
 \subsection{Aktueller Entwicklungsstand und zukünftige Entwicklungen}
 Wie bereits beschrieben wurde im MVP von WebAssembly nur die allernotwendigste Funktionalität spezifiziert und implementiert. Neue Funktionalitäten durchlaufen einen Standardisierungsprozess \cite{WebAssemblyW3CProcess}. Dieser besteht aus 6 Phasen, die Phasen werden ab 0 beginnend nummeriert:
 

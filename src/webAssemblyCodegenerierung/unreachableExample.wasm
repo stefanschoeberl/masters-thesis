@@ -1,0 +1,12 @@
+(type (result i32))
+
+(func (type 0)
+    i32.const 1
+    if
+        i32.const 100
+        return
+    else
+        i32.const 200
+        return
+    end
+)

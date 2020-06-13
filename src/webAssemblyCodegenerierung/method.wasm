@@ -1,0 +1,6 @@
+(type [ (param i32) ] <params ...> [ (result <result-type>) ] )
+
+(func (type <type-index>) <locals ...>
+    <method-body statements>
+    [ unreachable ]
+)
