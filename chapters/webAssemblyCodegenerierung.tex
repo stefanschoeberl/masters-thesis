@@ -88,8 +88,22 @@ Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die da
 
 TODO: new, getter, setter, [], "" + "", Methodenaufrufe gehören auch zu Ausdrücken, werden in anderen Abschnitten betrachtet.
 
-\section{Codegenerierung für Kontrollstrukturen}
-WebAssembly bietet einige Instruktion zur Steuerung des Kontrollflusses an. Sämtliche Kontrollstrukturen von MiniJava werden diese abgebildet.
+\section{Codegenerierung für Anweisungen}
+
+\subsection{Deklaration lokaler Variablen}
+
+\subsection{Zuweisung}
+
+\subsection{Methodenaufruf als Anweisung}
+Methodenaufrufe gehören zu den Ausdrücken. Als einzige Form der Ausdrücke dürfen sie auch direkt als Anweisung verwendet werden. Hier wird zunächst Bytecode für den Methodenaufruf selbst erzeugt, Details dazu finden sich in Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe}. Liefert die aufgerufene Methode einen Rückgabewert, liegt dieser nach dem Aufruf oben am Kellerspeicher. Da der Rückgabewert jedoch nicht verwertet wird, muss er nach dem Methodenaufruf mit der \lstinline{drop}-Instruktion vom Kellerspeichert entfernt werden. Im Fall einer Methode ohne Rückgabewert (\lstinline{void}) ist die \lstinline{drop}-Instruktion nicht notwendig, da nach dem Methodenaufruf kein Rückgabewert oben am Kellerspeicher liegt. Der generierte Bytecode entspricht der Vorlage in Listing \ref{lst:methodCall-statement-bytecode}.
+
+\lstinputlisting[label = {lst:methodCall-statement-bytecode}, caption = {Vorlage für Methodenaufrufe als Anweisung}]{src/webAssemblyCodegenerierung/methodCallStatement.wasm}
+
+\subsection{Blockanweisung}
+
+Für die Blockanweisung gibt es kein WebAssembly-Äquivalent, da in WebAssembly keine Gültigkeitsbereiche definiert werden können. Somit wird sie nur zur Compile-Zeit dazu verwendet, am Anfang der Blockanweisung in der \lstinline{LocalVariableSymbolTable} einen neuen Gültigkeitsbereich zu beginnen und am Ende der Blockanweisung den Gültigkeitsbereich wieder zu entfernen.
+
+\subsection{\lstinline{return}-Anweisung}
 
 \subsection{\lstinline{if}-\lstinline{else}-Verzweigung}
 Die \lstinline{if}-\lstinline{else}-Verzweigung lässt sich auf die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktionen in Webassembly abbilden. Die \lstinline{if}-Instruktion nimmt den obersten Wert vom Kellerspeicher herunter und entscheidet basierend auf diesem, welcher Zweig ausgeführt wird. Daher muss zunächst Bytecode für die Bedingung generiert werden und erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend folgt die \lstinline{if}-Instruktion und Instruktionen für die Anweisungen im \emph{then}-Zweig. Falls für die \lstinline{if}-\lstinline{else}-Anweisung kein \lstinline{else}-Zweig in MiniJava implementiert wurde, kann die Verzweigung in WebAssembly direkt mit der \lstinline{end}-Instruktion abgeschlossen werden. Der erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:if-bytecode}.
@@ -148,6 +162,7 @@ Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Wie b
 \lstinputlisting[label = {lst:initializer-bytecode}, caption = {Vorlage für Initialisierer}]{src/webAssemblyCodegenerierung/initializer.wasm}
 
 \section{Codegenerierung für Methodenaufrufe}
+\label{sec:Codegenerierung-für-Methodenaufrufe}
 
 Ausdrücke von Methodenaufrufen können verschiedenen Formen annehmen, dabei lassen sich folgende drei Fälle unterscheiden:
 \begin{enumerate}
