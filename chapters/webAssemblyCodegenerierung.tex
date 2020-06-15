@@ -114,12 +114,6 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}-Instruktionen mit
 
 \lstinputlisting[label = {lst:while-bytecode}, caption = {Vorlage für die \lstinline{while}-Schleife}]{src/webAssemblyCodegenerierung/while.wasm}
 
-------------------
-
-Objektmethoden, Klassenmethoden und Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Grundsätzlich wird für alle drei Arten ein Typ (\lstinline{(type ...)}) im WebAssembly-Modul definiert, der die Schnittstelle der Methode bzw. des Initialisierer beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly-Funktion referenziert auf den entsprechenden Typ. Für diese drei Arten wird sehr ähnlicher, aber leicht unterschiedlicher Funktionsbytecode erzeugt.
-
-Objektmethoden und Initialisierer benötigen eine Referenz auf das Objekt selbst. Diese Referenz ist im Methoden- bzw. Initialisiererrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden und Initialisierer ein zusätzlichen Parameter definiert, auch \lstinline{this}-Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}-Parameter ist bei Objektmethoden und Initialisierern immer der erste Parameter.
-
 \section{Codegenerierung für nicht-native Methoden}
 
 Objektmethoden und Klassenmethoden werden auf in WebAssembly definierte Funktionen abgebildet. Dabei wird ein Funktionstyp (\lstinline{(type ...)}) im WebAssembly-Modul definiert, der die Schnittstelle der Funktion beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly-Funktion referenziert auf den entsprechenden Typ.
@@ -149,7 +143,7 @@ Der Nachteil bei dieser Vorangehensweise ist, dass man selber dafür sorgen muss
 
 \section{Codegenerierung für Initialisierer}
 
-Initialisierer werden ebenfalls auf in WebAssembly definierte Funktionen abgebildet. Wie bei Objektmethoden wird auch hier ein \lstinline{this}-Parameter als erster Parameter verwendet. Weiters wurde festgelegt, dass Initialisierer immer die Referenz auf das Objekt als Rückgabewert liefern müssen. Dies erfolgt automatisch ohne eine explizite Anweisung in MiniJava, daher wird als letzte Instruktion im Initialisierer \lstinline{local.get 0} generiert. Der generierte Bytecode für den gesamten Initialisierer entspricht der Vorlage in Listing \ref{lst:initializer-bytecode}.
+Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Wie bei Objektmethoden wird auch hier ein \lstinline{this}-Parameter als erster Parameter verwendet. Weiters wurde festgelegt, dass Initialisierer immer die Referenz auf das Objekt als Rückgabewert liefern müssen. Dies erfolgt automatisch ohne eine explizite Anweisung in MiniJava, daher wird als letzte Instruktion im Initialisierer \lstinline{local.get 0} generiert. Der generierte Bytecode für den gesamten Initialisierer entspricht der Vorlage in Listing \ref{lst:initializer-bytecode}.
 
 \lstinputlisting[label = {lst:initializer-bytecode}, caption = {Vorlage für Initialisierer}]{src/webAssemblyCodegenerierung/initializer.wasm}
 
