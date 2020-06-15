@@ -1,0 +1,3 @@
+[ local.get 0 ]
+<evaluate parameters>
+call <method-index>

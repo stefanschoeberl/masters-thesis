@@ -155,7 +155,45 @@ Initialisierer werden ebenfalls auf in WebAssembly definierte Funktionen abgebil
 
 \section{Codegenerierung für Methodenaufrufe}
 
-TODO: this-Referenz
+Ausdrücke von Methodenaufrufen können verschiedenen Formen annehmen, dabei lassen sich folgende drei Fälle unterscheiden:
+\begin{enumerate}
+    \item Aufruf von Methoden derselben Klasse über den Namen der Methode, zum Beispiel \lstinline{methodName(param1, ...)}. Klassenmethoden können immer so aufgerufen werden, Objektmethoden auf sich selbst nur von anderen Objektmethoden derselben Klasse ausgehend. Hier besteht der Ausdruck aus zwei Teilen: dem Methodennamen und einer Aktualparameterliste.
+    \item Aufruf von Klassenmethoden anderer Klassen, zum Beispiel \lstinline{Math.add(x, y)}. Hier besteht der Ausdruck aus drei Teilen: dem Klassennamen, dem Methodennamen und einer Aktualparameterliste.
+    \item Aufruf von Methoden auf Objekte, zum Beispiel \lstinline{point.moveBy(x, y)}. Hier besteht der Ausdruck aus drei Teilen: einem Ausdruck für ein Objekt, dem Methodennamen und einer Aktualparameterliste. Somit fallen in diese Kategorie ebenfalls Ausdrücke wie zum Beispiel \lstinline{getPoint().moveBy(x, y)}. Es können sowohl Objektmethoden, als auch Klassenmethoden auf Objekte aufgerufen werden.
+\end{enumerate}
+
+Zunächst wird der Klassenname der Methode bestimmt, je nach Fall erfolgt dies auf unterschiedliche Art:
+\begin{enumerate}
+    \item Der Compiler weiß zu jeder Zeit, in welcher Klasse sich die aktuell abgearbeitete Methode befindet. Somit ist kein weiterer Schritt notwendig.
+    \item Der Klassenname ist direkt im Quelltext angegeben und wird aus dem Syntaxbaum ausgelesen.
+    \item Es wird der Ausdruck für das Objekt ausgewertet. Dabei erhält der Compiler die Typinformation des Ausdrucks. In dieser Typinformation ist der Typname enthalten.
+\end{enumerate}
+
+Dabei ist folgendes zu beachten: Fälle 2 und 3 und drei könnten syntaktisch ident aussehen. So könnte der Ausdruck \lstinline{point.moveBy(x, y)} entweder so interpretiert werden, dass eine Klassenmethode der Klasse \lstinline{point} oder eine Objektmethode der Variable \lstinline{point} aufgerufen wird. Um diese Mehrdeutigkeit aufzulösen, wird in der folgenden Reihenfolge bei Namenskollisionen priorisiert: lokale Variable bzw. Parameter, dann Datenkomponente und zum Schluss Klassenname.
+
+Nun wird Code für die Auswertung der Aktualparameter generiert. Aus dem Syntaxbaum wird der Name der Methode ausgelesen. Aus dem Klassennamen, dem Methodennamen und der Datentypen der Aktualparameter wird mit Hilfe der Symboltabellen die Metainformation der Methode bestimmt. Die relevanten Metainformationen sind der Index der WebAssembly-Funktion und ob es sich um eine Klassen- oder Objektmethode handelt.
+
+Bei Objektmethoden wird ein zusätzlicher Parameter, der \lstinline{this}-Parameter benötigt. Daher muss vor dem Aufruf der Methode sichergestellt werden, dass dieser vor allen anderen Parametern am Kellerspeicher vorhanden ist. Im Gegensatz dazu wird bei Klassenmethoden kein \lstinline{this}-Parameter übergeben. Je nach Fall, muss der \lstinline{this}-Parameter hinzugefügt oder entfernt werden:
+
+\begin{enumerate}
+    \item Bei Aufruf einer Klassenmethoden muss hier nichts mehr verändert werden. Wird eine Objektmethode aufgerufen, wird die Instruktion \lstinline{local.get 0} vor den Instruktion zum Auswerten der Aktualparameter eingefügt. Somit wird der \lstinline{this}-Parameter weitergegeben.
+    \item In diesem Fall ist nichts mehr zu tun.
+    \item Wird eine Objektmethode aufgerufen, ist nichts weiter zu tun, da der \lstinline{this}-Parameter bereits durch das Auswerten des Objekt-Ausdrucks am Kellerspeicher liegt. Wird jedoch eine Klassenmethode aufgerufen, muss der \lstinline{this}-Parameter vom Kellerspeicher entfernt werden. Dazu wird die \lstinline{drop}-Instruktion vor den Instruktion zum Auswerten der Aktualparameter eingefügt. Es können nicht einfach die Instruktionen zum Auswerten des Objekt-Ausdrucks entfernt werden, da diese Seiteneffekte beinhalten könnten.
+\end{enumerate}
+
+Zum Schluss wird die Methode mit der \lstinline{call}-Instruktion aufgerufen.
+
+Der generierte Bytecode für Fall 1 entspricht der Vorlage in Listing \ref{lst:method-call1-bytecode}. Die Instruktion für das auslesen des \lstinline{this}-Parameters wird nur beim Aufruf einer Objektmethode generiert.
+
+Der generierte Bytecode für Fall 2 entspricht der Vorlage in Listing \ref{lst:method-call2-bytecode}.
+
+Der generierte Bytecode für Fall 1 entspricht der Vorlage in Listing \ref{lst:method-call3-bytecode}. Die \lstinline{drop}-Instruktion wird nur beim Aufruf einer Klassenmethode generiert.
+
+\lstinputlisting[label = {lst:method-call1-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 1)}]{src/webAssemblyCodegenerierung/methodCall1.wasm}
+
+\lstinputlisting[label = {lst:method-call2-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 2)}]{src/webAssemblyCodegenerierung/methodCall2.wasm}
+
+\lstinputlisting[label = {lst:method-call3-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 3)}]{src/webAssemblyCodegenerierung/methodCall3.wasm}
 
 \section{Codegenerierung für das Erzeugen und Initialisieren von Objekten}
 Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.

@@ -1,0 +1,4 @@
+<evaluate object>
+[ drop ]
+<evaluate parameters>
+call <method-index>
