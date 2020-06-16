@@ -121,7 +121,30 @@ Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Wie b
 \section{Codegenerierung für Ausdrücke}
 \label{sec:Codegenerierung-für-Ausdrücke}
 
-TODO: new, getter, setter, [], "" + "", Methodenaufrufe gehören auch zu Ausdrücken, werden in anderen Abschnitten betrachtet.
+In diesem Abschnitt wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden. Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in diesem Abschnitt nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
+\begin{itemize}
+    \item Erzeugen von Objekten über den \lstinline{new}-Operator(siehe Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten})
+    \item Lesen von Datenkomponenten, direkt oder über den Navigationsoperator (siehe Abschnitt \ref{sec:Codegenerierung-für-den-Zugriff-auf-Datenkomponenten})
+    \item Erzeugen von Feldern über den \lstinline{new}-Operator (siehe Abschnitt \ref{subsec:Erzeugen-von-Feldern})
+    \item Lesezugriff auf Felder über den \lstinline{[]}-Operator (siehe Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index})
+    \item Aufruf von Methoden (siehe Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe})
+\end{itemize}
+
+\subsection{Abarbeitung des Syntaxbaums}
+
+\subsection{Schlüsselwort \lstinline{this}}
+\subsection{Schlüsselwort \lstinline{null}}
+\subsection{Literale elementarer Datentypen}
+\subsection{Zeichenketten-Literale}
+
+Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTable} alle im MiniJava-Quelltext vorkommenden Zeichenketten-Literale. Jedem Literal wird eine eindeutige Referenz zugewiesen. Kommt das gleiche Zeichenketten-Literal mehrfach im Quelltext vor, wird dieselbe Referenz verwendet. Diese Referenz wird mit der \lstinline{i32.const}-Instruktion als Konstante auf den Kellerspeicher gelegt. Der generierte Bytecode entspricht der Vorlage in Listing.
+
+\lstinputlisting[label = {lst:string-literal-bytecode}, caption = {Vorlage für Zeichenkettenliterale}]{src/webAssemblyCodegenerierung/string-literal.wasm}
+
+\subsection{Unäre Operatoren}
+-, cast
+\subsection{Binäre Operatoren}
+arithmetisch, vergleich, boolean
 
 \section{Codegenerierung für Anweisungen}
 
@@ -238,6 +261,7 @@ Der generierte Bytecode für Fall 1 entspricht der Vorlage in Listing \ref{lst:m
 \lstinputlisting[label = {lst:method-call3-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 3)}]{src/webAssemblyCodegenerierung/methodCall3.wasm}
 
 \section{Codegenerierung für das Erzeugen und Initialisieren von Objekten}
+\label{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten}
 Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Klassename und eine Aktualparameterliste bilden gemeinsam den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new Point(1f, 2f)}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
 
 Da alle Objekte in JavaScript verwaltet werden, müssen sie auch in JavaScript erzeugt werden. Dafür wird ein Konstruktor als JavaScript-Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}). Diese Funktion wird im WebAssembly-Modul importiert.
@@ -251,6 +275,7 @@ Der gesamte Ausdruck liefert immer die Referenz des erzeugten Objekts. Der erzeu
 \lstinputlisting[label = {lst:newObject-bytecode}, caption = {Vorlage für den \lstinline{new}-Ausdruck zum Erzeugen von Objekten einer Klasse}]{src/webAssemblyCodegenerierung/newObject.wasm}
 
 \section{Codegenerierung für den Zugriff auf Datenkomponenten}
+\label{sec:Codegenerierung-für-den-Zugriff-auf-Datenkomponenten}
 
 Beim lesenden Zugriff auf eine Datenkomponente wird ein \emph{Getter} aufgerufen. Dies erfolgt zum Beispiel in Ausdrücken in Aktualparametern oder allgemein auf der rechten Seite einer Zuweisung.
 
@@ -285,6 +310,7 @@ Der Funktionsindex der importierten \emph{Setter}-Funktion wird mit Hilfe der Sy
 Alle Felder werden auf JavaScript-Felder abgebildet, daher muss mit ihnen über importierte JavaScript-Funktionen interagiert werden.
 
 \subsection{Erzeugen von Feldern}
+\label{subsec:Erzeugen-von-Feldern}
 
 Felder werden mit dem \lstinline{new}-Operator in MiniJava erzeugt. Der \lstinline{new}-Operator, der Name des Datentyps und die Größe des Felds bilden gemeinsam den \lstinline{new}-Ausdruck, zum Beispiel \lstinline{new int[123]}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
 
@@ -308,8 +334,6 @@ Beim lesenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selb
 Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selbst ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Nun wird der Ausdruck für den neuen Wert ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arraySet-bytecode}.
 
 \lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/arraySet.wasm}
-
-\section{Codegenerierung für Zeichenketten-Literale}
 
 \section{Methodensuche und die Hilfsklasse \lstinline{Object}}
 
