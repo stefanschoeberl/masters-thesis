@@ -2,6 +2,8 @@
 
 Dieses Kapitel befasst sich mit der Generierung von WebAssembly-Bytecode. Dabei wird darauf eingegangen, wie MiniJava-Sprachkonstrukte auf WebAssembly abgebildet werden. Manche Sprachkonstrukte setzen Interaktion mit JavaScript voraus. In diesem Kapitel wird dabei nur die WebAssembly-Seite betrachtet, auf das JavaScript-Gegenstück wird in Kapitel \ref{cha:JavaScript-Integration} eingegangen. Weiters wird in diesem Kapitel auf den Aufbau der gesamten Implementierung eingegangen. Das Ergebnis der Codegenerierung in diesem Kapitel ist ein WebAssembly-Modul im Arbeitsspeicher. Auf das Schreiben des Moduls in eine Datei, sowie auf weitere erzeugte Dateien wird in Kapitel \ref{cha:JavaScript-Integration} eingegangen.
 
+Beim Generieren von Bytecode wird in diesem Kapitel davon ausgegangen, dass sämtlicher zu kompilierender MiniJava-Quelltext semantisch korrekt ist. Das bedeutet, dass ausschließlich der Schönwetterfall betrachtet wird, in dem zum Beispiel Variablen vor der Verwendung deklariert werden, Variablen nicht doppelt deklariert werden, aufzurufenden Methoden existieren oder verwendete Datentypen in Ausdrücken zu einander kompatibel sind. Auf die Fehlerbehandlung wird nicht eingangen, da dies aufgrund des großen Umfangs an Fehlerfällen den Rahmen sprengen würde und der Fokus dieses Kapitels auf der Codegenerierung liegt, die syntaktisch und semantisch korrekten MiniJava-Quelltext voraussetzt.
+
 \section{Gradle-Projektaufbau}
 
 Das Gradle-Projekt besteht aus fünf Gradle-Modulen:
