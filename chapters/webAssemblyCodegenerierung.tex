@@ -121,7 +121,16 @@ Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Wie b
 \section{Codegenerierung für Ausdrücke}
 \label{sec:Codegenerierung-für-Ausdrücke}
 
-In diesem Abschnitt wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden. Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in diesem Abschnitt nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
+\subsection{Abarbeitung des Syntaxbaums}
+Der Syntaxbaum wird von einem \lstinline{Visitor} abgearbeitet. Der \lstinline{Visitor} delegiert je nach Ausdruckstyp im Syntaxbaums das Abarbeiten des Ausdrucks an einen eignene Codegenerator. Jeder Codegenerator ist für die Codegenierung eines Teilbereich der Ausdrücke verantwortlich. Diese Aufteilung verbessert die Lesbarkeit und Struktierung des Compilers.
+
+Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaums wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}-Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}-Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}-Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können.
+
+TODO: Grafik mit Vistors
+
+In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden. Weiters wird bei jedem Ausdruck angegeben, zu welchem statischen Datentyp dieser auswertet wird.
+
+Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in den nachfolgenden Abschnitten nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
 \begin{itemize}
     \item Erzeugen von Objekten über den \lstinline{new}-Operator(siehe Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten})
     \item Lesen von Datenkomponenten, direkt oder über den Navigationsoperator (siehe Abschnitt \ref{sec:Codegenerierung-für-den-Zugriff-auf-Datenkomponenten})
@@ -129,8 +138,7 @@ In diesem Abschnitt wird beschrieben, auf welche Bytecode-Instruktionen Ausdrüc
     \item Lesezugriff auf Felder über den \lstinline{[]}-Operator (siehe Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index})
     \item Aufruf von Methoden (siehe Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe})
 \end{itemize}
-
-\subsection{Abarbeitung des Syntaxbaums}
+TODO: Typen für komplexe Ausdrücke
 
 \subsection{Schlüsselwort \lstinline{this}}
 \subsection{Schlüsselwort \lstinline{null}}
