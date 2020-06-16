@@ -1,3 +1,4 @@
 <evaluate object-reference>
 <evaluate new-value>
+[ <type-conversion> ]
 call <setter-index>

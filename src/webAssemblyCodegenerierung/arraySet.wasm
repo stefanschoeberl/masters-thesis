@@ -1,4 +1,5 @@
 <evaluate array-reference>
 <evaluate index>
 <evaluate new-value>
+[ <type-conversion> ]
 call <array-setter-index>

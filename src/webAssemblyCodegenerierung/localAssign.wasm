@@ -1,4 +1,3 @@
-local.get 0
 <evaluate new-value>
 [ <type-conversion> ]
-call <setter-index>
+local.set <local-index>

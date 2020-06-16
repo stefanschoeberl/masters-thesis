@@ -94,7 +94,36 @@ TODO: new, getter, setter, [], "" + "", Methodenaufrufe gehören auch zu Ausdrü
 
 \subsection{Deklaration lokaler Variablen}
 
+Deklarationen werden nicht 1:1 auf WebAssembly-Instruktionen abgebildet. Sie werden zunächst in der \lstinline{LocalVariableSymbolTable} verwaltet. Nach dem Abarbeiten einer Methode wird aus den in dieser Symboltabelle gesammelten Informationen die Liste der lokalen Variablen abgeleitet. Diese Liste wird am Anfang der entsprechenden WebAssembly-Funktion (siehe \lstinline{<locals...>}-Platzhalter in Listing \ref{lst:method-bytecode}) im Bytecode eingefügt.
+
 \subsection{Zuweisung}
+Eine Zuweisung besteht aus einem \lstinline{=}-Operator mit jeweils einem Ausdruck auf der linken und rechten Seite des Operators. Das Ausführen dieser Anweisung erfolgt in drei Schritten:
+\begin{enumerate}
+    \item Auswerten des Ausdrucks auf der rechten Seite des Zuweisungsoperators.
+    \item Implizite Typkonvertierung, falls notwendig und möglich, durchführen.
+    \item Neuen Wert im Ziel (linke Seite des Zuweisungsoperators) abspeichern.
+\end{enumerate}
+
+Der erste Schritt, das Auswerten des Ausdrucks auf der rechten Seite des Zuweisungsoperators, erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben.
+
+Üblicherweise müssen die Datentypen auf der linken und rechten Seite des Operators übereinstimmen, ansonsten ist die Zuweisung nicht möglich. Davon ausgenommen ist das Zuweisen von \lstinline{null}\footnote{Das \lstinline{null}-Literal wird im Compiler auf einen eigenen Datentyp, \lstinline{NullType}, abgebildet.} zu einer Referenztyp- oder Feldtyp-Variable, dies ist immer möglich. Weiters ist eine implizite Konvertierung von elementaren Datentypen in folgenden Fällen möglich:
+\begin{itemize}
+    \item Konvertieren von Werten der Datentypen \lstinline{int} oder \lstinline{char} in Werte des Datentyp \lstinline{float}: \lstinline{int} und \lstinline{char} werden auf denselben WebAssembly-Datentyp (\lstinline{i32}) abgebildet. Die Konvertierung erfolgt mit der Instruktion \lstinline{f32.convert_i32_s}.
+    \item Konvertieren von Werten des Datentyps \lstinline{char} in Werte des Datentyp \lstinline{int}: \lstinline{char} und \lstinline{int} werden auf denselben WebAssembly-Datentyp abgebildet, somit genügt es, den Wert danach als Zeichen zu interpretieren und es ist keine Konvertierungsinstruktion notwendig.
+\end{itemize}
+
+Der dritte Schritt, das Speichern in das Zuweisungsziel, erfolgt je nach Art des Ziels unterschiedlich. Folgende drei Fälle sind möglich:
+\begin{itemize}
+    \item Lokale Variable einschließlich Parametern
+    \item Feld an einem Index
+    \item Datenkomponente
+\end{itemize}
+
+Beim Speichern in eine lokale Variable wird zunächst über die \lstinline{LocalVariableSymbolTable} der Index der lokalen Variable bestimmt. Anschließend wird der neue Wert mit der Instruktion \lstinline{local.set} in die lokale Variable geschrieben. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:localAssign-bytecode}.
+
+\lstinputlisting[label = {lst:localAssign-bytecode}, caption = {Vorlage für Zuweisungen in lokale Variablen}]{src/webAssemblyCodegenerierung/localAssign.wasm}
+
+Der Zugriff auf Felder und Datenkomponenten erfolgt über importierte JavaScript-Funktionen. Die Details für die Schreiboperationen finden sich in Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index} für Felder und in Abschnitt \ref{subsec:Zugriff-auf-Datenkomponenten-Setter} für Datenkomponenten.
 
 \subsection{Methodenaufruf als Anweisung}
 Methodenaufrufe gehören zu den Ausdrücken. Als einzige Form der Ausdrücke dürfen sie auch direkt als Anweisung verwendet werden. Hier wird zunächst Bytecode für den Methodenaufruf selbst erzeugt, Details dazu finden sich in Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe}. Liefert die aufgerufene Methode einen Rückgabewert, liegt dieser nach dem Aufruf oben am Kellerspeicher. Da der Rückgabewert jedoch nicht verwertet wird, muss er nach dem Methodenaufruf mit der \lstinline{drop}-Instruktion vom Kellerspeichert entfernt werden. Im Fall einer Methode ohne Rückgabewert (\lstinline{void}) ist die \lstinline{drop}-Instruktion nicht notwendig, da nach dem Methodenaufruf kein Rückgabewert oben am Kellerspeicher liegt. Der generierte Bytecode entspricht der Vorlage in Listing \ref{lst:methodCall-statement-bytecode}.
@@ -102,10 +131,12 @@ Methodenaufrufe gehören zu den Ausdrücken. Als einzige Form der Ausdrücke dü
 \lstinputlisting[label = {lst:methodCall-statement-bytecode}, caption = {Vorlage für Methodenaufrufe als Anweisung}]{src/webAssemblyCodegenerierung/methodCallStatement.wasm}
 
 \subsection{Blockanweisung}
-
-Für die Blockanweisung gibt es kein WebAssembly-Äquivalent, da in WebAssembly keine Gültigkeitsbereiche definiert werden können. Somit wird sie nur zur Compile-Zeit dazu verwendet, am Anfang der Blockanweisung in der \lstinline{LocalVariableSymbolTable} einen neuen Gültigkeitsbereich zu beginnen und am Ende der Blockanweisung den Gültigkeitsbereich wieder zu entfernen.
+Für die Blockanweisung gibt es kein WebAssembly-Äquivalent, da in WebAssembly keine Gültigkeitsbereiche innerhalb von Funktionen definiert werden können. Somit wird sie nur zur Compile-Zeit dazu verwendet, am Anfang der Blockanweisung in der \lstinline{LocalVariableSymbolTable} einen neuen Gültigkeitsbereich zu beginnen und am Ende der Blockanweisung den Gültigkeitsbereich wieder zu entfernen.
 
 \subsection{\lstinline{return}-Anweisung}
+Mit der \lstinline{return}-Anweisung wird die aktuelle Methode mit einem Rückgabewert verlassen. Zunächst wird der Rückgabewert ausgewertet. Dieser ist ein Ausdruck und wird in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben ausgewertet. Danach folgt die \lstinline{return}-Instruktion. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:return-bytecode}.
+
+\lstinputlisting[label = {lst:return-bytecode}, caption = {Vorlage für die \lstinline{return}-Anweisung}]{src/webAssemblyCodegenerierung/return.wasm}
 
 \subsection{\lstinline{if}-\lstinline{else}-Verzweigung}
 Die \lstinline{if}-\lstinline{else}-Verzweigung lässt sich auf die \lstinline{if}-\lstinline{else}-\lstinline{end}-Instruktionen in Webassembly abbilden. Die \lstinline{if}-Instruktion nimmt den obersten Wert vom Kellerspeicher herunter und entscheidet basierend auf diesem, welcher Zweig ausgeführt wird. Daher muss zunächst Bytecode für die Bedingung generiert werden und erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend folgt die \lstinline{if}-Instruktion und Instruktionen für die Anweisungen im \emph{then}-Zweig. Falls für die \lstinline{if}-\lstinline{else}-Anweisung kein \lstinline{else}-Zweig in MiniJava implementiert wurde, kann die Verzweigung in WebAssembly direkt mit der \lstinline{end}-Instruktion abgeschlossen werden. Der erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:if-bytecode}.
@@ -242,12 +273,13 @@ Der Funktionsindex der importierten \emph{Getter}-Funktion wird mit Hilfe der Sy
 \lstinputlisting[label = {lst:getterExpr-bytecode}, caption = {Vorlage für das Abfragen einer Datenkomponente mit einem \emph{Getter}, bei dem die Referenz auf das Objekt ausgewertet werden muss}]{src/webAssemblyCodegenerierung/getterExpr.wasm}
 
 \subsection{\emph{Setter}}
+\label{subsec:Zugriff-auf-Datenkomponenten-Setter}
 
 Der Funktionsindex der importierten \emph{Setter}-Funktion wird mit Hilfe der Symboltabellen über den Klassennamen des Objekts und den Namen der Datenkomponenten ermittelt. Der \emph{Setter} erwartet als die Referenz des Objekts und den neuen Wert der Datenkomponente. Im Fall des impliziten oder expliziten \lstinline{this}-Parameters wird der Wert der ersten lokalen Variable verwendet, andernfalls wird der Ausdruck auf der linken Seite des Navigationsoperators ausgewertet. Der \emph{Setter} liefert keinen Rückgabewert. Der erzeugte Bytecode entspricht den Vorlagen in Listings \ref{lst:setterThis-bytecode} und \ref{lst:setterExpr-bytecode}.
 
-\lstinputlisting[label = {lst:setterThis-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter} und dem \lstinline{this}-Parameter}]{src/webAssemblyCodegenerierung/setterThis.wasm}
+\lstinputlisting[label = {lst:setterThis-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter} und dem \lstinline{this}-Parameter, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/setterThis.wasm}
 
-\lstinputlisting[label = {lst:setterExpr-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter}, bei dem die Referenz auf das Objekt ausgewertet werden muss}]{src/webAssemblyCodegenerierung/setterExpr.wasm}
+\lstinputlisting[label = {lst:setterExpr-bytecode}, caption = {Vorlage für das Schreiben einer Datenkomponente mit einem \emph{Setter}, bei dem die Referenz auf das Objekt ausgewertet werden muss, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/setterExpr.wasm}
 
 \section{Codegenerierung für Felder}
 Alle Felder werden auf JavaScript-Felder abgebildet, daher muss mit ihnen über importierte JavaScript-Funktionen interagiert werden.
@@ -263,6 +295,7 @@ Zunächst muss der Ausdrück für die Größe des Felds auswertet werden, dies e
 \lstinputlisting[label = {lst:newArray-bytecode}, caption = {Vorlage für das Erstellen eines Felds}]{src/webAssemblyCodegenerierung/newArray.wasm}
 
 \subsection{Lese- und Schreibzugriff mit Index}
+\label{subsec:Lese-und-Schreibzugriff-mit-Index}
 
 Der Zugriff auf einzelne Elemente erfolgt über den Indizierungsoperator \lstinline{[]} in MiniJava, zum Beispiel \lstinline{numbers[3]}, \lstinline{numbers[3] = 5} oder \lstinline{getArray()[3]}. Nachfolgend wird der für solche Ausdrücke erzeugte Bytecode beschrieben.
 
@@ -274,10 +307,10 @@ Beim lesenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selb
 
 Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selbst ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Nun wird der Ausdruck für den neuen Wert ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arraySet-bytecode}.
 
-\lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld}]{src/webAssemblyCodegenerierung/arraySet.wasm}
+\lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/arraySet.wasm}
 
 \section{Codegenerierung für Zeichenketten-Literale}
 
-\section{Hilfsklasse \lstinline{Object}}
+\section{Methodensuche und die Hilfsklasse \lstinline{Object}}
 
 \section{Exportieren von Methoden}
