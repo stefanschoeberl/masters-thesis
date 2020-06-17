@@ -127,6 +127,7 @@ Der Syntaxbaum wird von einem \lstinline{Visitor} abgearbeitet. Der \lstinline{V
 Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaums wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}-Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}-Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}-Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können.
 
 TODO: Grafik mit Vistors
+TODO: eventuell Grafik mit Beispielsyntaxbaum
 
 In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden. Weiters wird bei jedem Ausdruck angegeben, zu welchem statischen Datentyp dieser auswertet wird.
 
@@ -141,8 +142,37 @@ Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in d
 TODO: Typen für komplexe Ausdrücke
 
 \subsection{Schlüsselwort \lstinline{this}}
+
+Das Schlüsselwort \lstinline{this} kann nur in Objektmethoden eingesetzt werden, da die Referenz auf das eigene Objekt über den sogenannten \lstinline{this}-Parameter. Der \lstinline{this}-Parameter ist der erste Parameter in der Parameterliste und gleichzeitig auch die erste lokale Variable in WebAssembly. Das Schlüsselwort \lstinline{this} wird somit durch auslesen dieses Paramters ausgewertet. Dies erfolgt mit der \lstinline{local.get}-Instruktion. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:this-bytecode}.
+
+\lstinputlisting[label = {lst:this-bytecode}, caption = {Vorlage für das Schlüsselwort \lstinline{this}}]{src/webAssemblyCodegenerierung/this.wasm}
+
 \subsection{Schlüsselwort \lstinline{null}}
+
+Das Schlüsselwort \lstinline{null} steht für eine Referenz, die auf kein Objekt zeigt und wird intern wird auf $0$ abgebildet. Daher wird zur Laufzeit beim Auswerten von \lstinline{null} eine Konstante mit dem Wert $0$ auf den Kellerspeicher mit der \lstinline{i32.const}-Instruktion gelegt.
+
+\lstinputlisting[label = {lst:null-bytecode}, caption = {Vorlage für das Schlüsselwort \lstinline{null}}]{src/webAssemblyCodegenerierung/null.wasm}
+
 \subsection{Literale elementarer Datentypen}
+
+Für alle vier elementare Datentypen können Werte mittels Literale erzeugt werden. Beim Auswerten eines Literals wird zur Laufzeit eine Konstante auf den Kellerspeicher gelegt. Je nach Datentyp erfolgt dies leicht unterschiedlich.
+
+\lstinline{int}-Literale werden auf die \lstinline{i32.const}-Instruktion abgebildet. Die Instruktion erhält als Argument den numerischen Wert des Literals. In der textuellen Repräsentation des Bytecodes wird der Wert als Dezimalzahl-Zeichenkette dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:literalInt-bytecode}.
+
+\lstinputlisting[label = {lst:literalInt-bytecode}, caption = {Vorlage für \lstinline{int}-Literale}]{src/webAssemblyCodegenerierung/literalInt.wasm}
+
+\lstinline{float}-Literale werden auf die \lstinline{f32.const}-Instruktion abgebildet. Die Instruktion erhält als Argument den numerischen Wert des Literals. In der textuellen Repräsentation des Bytecodes wird der Wert als Dezimalzahl-Zeichenkette, mit Dezimalpunkt falls notwendig, dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:literalFloat-bytecode}.
+
+\lstinputlisting[label = {lst:literalFloat-bytecode}, caption = {Vorlage für \lstinline{float}-Literale}]{src/webAssemblyCodegenerierung/literalFloat.wasm}
+
+\lstinline{char}-Literale werden auf die \lstinline{i32.const}-Instruktion abgebildet. Die Instruktion erhält als Argument den ASCII-Wert des Literals. In der textuellen Repräsentation des Bytecodes wird der Wert als Dezimalzahl-Zeichenkette dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:literalChar-bytecode}.
+
+\lstinputlisting[label = {lst:literalChar-bytecode}, caption = {Vorlage für \lstinline{char}-Literale}]{src/webAssemblyCodegenerierung/literalChar.wasm}
+
+\lstinline{boolean}-Literale gibt es als Schlüsselwörter \lstinline{true} und \lstinline{false}. Beide werden auf die \lstinline{i32.const}-Instruktion abgebildet. In WebAssembly wird der Wert $0$ als falsch und ein Wert ungleich $0$ als wahr interpretiert. Daher werden \lstinline{true} und \lstinline{false} auf $1$ und $0$ abgebildet. Der erzeugte Bytecode für beide Literale entspricht den Vorlagen in Listing \ref{lst:literalBoolean-bytecode}.
+
+\lstinputlisting[label = {lst:literalBoolean-bytecode}, caption = {Vorlage für \lstinline{char}-Literale}]{src/webAssemblyCodegenerierung/literalBoolean.wasm}
+
 \subsection{Zeichenketten-Literale}
 
 Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTable} alle im MiniJava-Quelltext vorkommenden Zeichenketten-Literale. Jedem Literal wird eine eindeutige Referenz zugewiesen. Kommt das gleiche Zeichenketten-Literal mehrfach im Quelltext vor, wird dieselbe Referenz verwendet. Diese Referenz wird mit der \lstinline{i32.const}-Instruktion als Konstante auf den Kellerspeicher gelegt. Der generierte Bytecode entspricht der Vorlage in Listing.
@@ -150,7 +180,7 @@ Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTab
 \lstinputlisting[label = {lst:string-literal-bytecode}, caption = {Vorlage für Zeichenkettenliterale}]{src/webAssemblyCodegenerierung/string-literal.wasm}
 
 \subsection{Unäre Operatoren}
--, cast
+-, cast und ()
 \subsection{Binäre Operatoren}
 arithmetisch, vergleich, boolean
 
