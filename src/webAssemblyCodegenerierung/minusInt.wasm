@@ -1,0 +1,3 @@
+i32.const 0
+<evaluate operand>
+i32.sub

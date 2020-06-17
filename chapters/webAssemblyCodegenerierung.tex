@@ -180,7 +180,18 @@ Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTab
 \lstinputlisting[label = {lst:string-literal-bytecode}, caption = {Vorlage für Zeichenkettenliterale}]{src/webAssemblyCodegenerierung/string-literal.wasm}
 
 \subsection{Unäre Operatoren}
--, cast und ()
+Zu den unären Operatoren gehören in MiniJava das Präfix-Minus \lstinline{-} zur Negation eines numerischen Werts und der \emph{Cast}-Operator zur expliziten Typumwandlung. Ganz genau genommen hat der \emph{Cast}-Operator zwei Operanden, einen Datentyp und einen Ausdruck. Der Datentyp wird allerdings nur zur Compile-Zeit verwendet. Somit hat er zur Laufzeit nur \emph{einen} Operanden, daher wird er ebenfalls in diesem Abschnitt behandelt.
+
+TODO: Der - Operator wird nur für int und float unterstützt, je nach typ wird unterschiedlicher bytecode erzeugt
+
+WebAssembly bietet keine Instruktion an, um einen ganzzahligen Wert zu negieren. Daher wird ein Ausdruck \lstinline{-expr} auf den Ausdruck \lstinline{0 - expr} abgebildet. Je nach Datentyp des Operanden werden unterschiedliche Instruktionen generiert. Der erzeugte Bytecode für das Negieren von \lstinline{int}- und \lstinline{float}-Werten entspricht den Vorlagen in Listings \ref{lst:minusInt-bytecode} und \ref{lst:minusFloat-bytecode}.
+
+\lstinputlisting[label = {lst:minusInt-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{int}-Werte}]{src/webAssemblyCodegenerierung/minusInt.wasm}
+
+\lstinputlisting[label = {lst:minusFloat-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{float}-Werte}]{src/webAssemblyCodegenerierung/minusFloat.wasm}
+
+TODO f32.neg
+
 \subsection{Binäre Operatoren}
 arithmetisch, vergleich, boolean
 
