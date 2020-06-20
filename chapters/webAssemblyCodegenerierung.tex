@@ -268,7 +268,7 @@ Wie bei den anderen binären Operationen, müssen zunächst die Operanden ausgew
 
 \subsection{Deklaration lokaler Variablen}
 
-Deklarationen werden nicht 1:1 auf WebAssembly-Instruktionen abgebildet. Sie werden zunächst in der \lstinline{LocalVariableSymbolTable} verwaltet. Nach dem Abarbeiten einer Methode bzw. eines Initialisierers wird aus den in dieser Symboltabelle gesammelten Informationen die Liste der lokalen Variablen abgeleitet. Diese Liste wird am Anfang der entsprechenden WebAssembly-Funktion (siehe \lstinline{<locals...>}-Platzhalter in Listings \ref{lst:method-bytecode} und \ref{lst:initializer-bytecode}) im Bytecode eingefügt.
+Deklarationen werden nicht 1:1 auf WebAssembly-Instruktionen abgebildet. Sie werden zunächst in der \lstinline{LocalVariableSymbolTable} verwaltet. Nach dem Abarbeiten einer Methode bzw. eines Initialisierers wird aus den in dieser Symboltabelle gesammelten Informationen die Liste der lokalen Variablen abgeleitet. Diese Liste wird am Anfang der entsprechenden WebAssembly-Funktion (siehe \lstinline{<locals...>}-Platzhalter in Listings \ref{lst:method-bytecode} und \ref{lst:initializer-bytecode} auf Seiten \pageref{lst:method-bytecode} und \pageref{lst:initializer-bytecode}) im Bytecode eingefügt.
 
 \subsection{Zuweisung}
 Eine Zuweisung besteht aus einem \lstinline{=}-Operator mit jeweils einem Ausdruck auf der linken und rechten Seite des Operators. Das Ausführen dieser Anweisung erfolgt in drei Schritten:
