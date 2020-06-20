@@ -1,0 +1,5 @@
+<evaluate left-operand>
+[ <left-type-promotion> ]
+<evaluate right-operand>
+[ <right-type-promotion> ]
+<operator-instruction>

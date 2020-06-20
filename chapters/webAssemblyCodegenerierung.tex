@@ -4,7 +4,7 @@ Dieses Kapitel befasst sich mit der Generierung von WebAssembly-Bytecode. Dabei 
 
 Beim Generieren von Bytecode wird in diesem Kapitel davon ausgegangen, dass sämtlicher zu kompilierender MiniJava-Quelltext semantisch korrekt ist. Das bedeutet, dass ausschließlich der Schönwetterfall betrachtet wird, in dem zum Beispiel Variablen vor der Verwendung deklariert werden, Variablen nicht doppelt deklariert werden, aufzurufenden Methoden existieren oder verwendete Datentypen in Ausdrücken zu einander kompatibel sind. Auf die Fehlerbehandlung wird nicht eingangen, da dies aufgrund des großen Umfangs an Fehlerfällen den Rahmen sprengen würde und der Fokus dieses Kapitels auf der Codegenerierung liegt, die syntaktisch und semantisch korrekten MiniJava-Quelltext voraussetzt.
 
-Der für ein Sprachkonstrukt generierte Bytecode wird in diesem Kapitel schablonenartig als \emph{Vorlage} gezeigt. Der Bytecode in diesen Vorlagen ist in der textuellen Repräsentation von WebAssembly dargestellt. Darin befinden sich Platzhalter (gekenntzeichnet durch spitze Klammern \lstinline{<...>}), die beispielsweise auf generierten Bytecode anderer Sprachkonstrukte oder Compile-Zeit-Konstanten verweisen. Weiters kann es vorkommen, dass Teile der Vorlage nur in bestimmten Fällen generiert werden. Diese Teile werden durch eckige Klammern \lstinline{[...]} gekennzeichnet.
+Der für ein Sprachkonstrukt generierte Bytecode wird in diesem Kapitel schablonenartig als \emph{Vorlage} gezeigt. Der Bytecode in diesen Vorlagen ist in der textuellen Repräsentation von WebAssembly dargestellt. Darin befinden sich Platzhalter (gekenntzeichnet durch spitze Klammern \lstinline{<...>}), die beispielsweise auf generierten Bytecode anderer Sprachkonstrukte, andere Instruktionen oder Compile-Zeit-Konstanten verweisen. Weiters kann es vorkommen, dass Teile der Vorlage nur in bestimmten Fällen generiert werden. Diese Teile werden durch eckige Klammern \lstinline{[...]} gekennzeichnet.
 
 \section{Gradle-Projektaufbau}
 
@@ -218,6 +218,51 @@ Bei der expliziten Typumwandlung wird abhängig vom Zieldatentyp und vom Datenty
 
 \subsection{Binäre Operatoren}
 arithmetisch, vergleich, boolean
+
+MiniJava bietet eine Vielzahl an binären Operatoren an. Die Operatoren lassen sich in vier Kategorien einteilen:
+\begin{enumerate}
+    \item Numerische Operatoren zum Rechnen und Vergleichen für die elementaren Datentypen \lstinline{int}, \lstinline{float} und \lstinline{char}
+    \item Boolsche Operatoren
+    \item Vergleichsoperatoren für Referenzdatentypen
+    \item Zeichenketten-Konkatenation mit dem \lstinline{+}-Operator
+\end{enumerate}
+
+Für die ersten drei Kategorien wird ähnlicher Bytecode erzeugt. Dabei wird Code für das Auswerten der beiden Operanden erzeugt. Hat bei numerischen Operanden mindestens einer der Operanden den Datentyp \lstinline{float}, wird für den anderen Operanden zusätzlich Bytecode für eine implizite Typumwandlung erzeugt. Diese Umwandlung in Werte des Datentyps \lstinline{float} ist nur für Werte des Typs \lstinline{int} oder \lstinline{char} mit der Instruktion \lstinline{f32.convert_i32_s} möglich.
+
+Anhand der Datentypen der Operanden (nach der impliziten Typumwandlungen) wird die Instruktion ermittelt, die die Operation schlussendlich durchführt. Die Operatoren werden mit den dazugehörigen Instruktionen in Tabelle \ref{tab:binaryOperators} dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{| c | c | c | c | c |}
+        \hline
+        \multirow{2}{*}{Operator} & \multicolumn{4}{c|}{Datentyp der Operanden} \\
+         & {\lstinline!int!} oder {\lstinline!char!} & {\lstinline!boolean!} & {\lstinline!float!} & Referenz \\
+        \hline
+        {\lstinline!+!} & {\lstinline!i32.add!} & - & {\lstinline!f32.add!} & - \\
+        {\lstinline!-!} & {\lstinline!i32.sub!} & - & {\lstinline!f32.sub!} & - \\
+        {\lstinline!*!} & {\lstinline!i32.mul!} & - & {\lstinline!f32.mul!} & - \\
+        {\lstinline!/!} & {\lstinline!i32.div_s!} & - & {\lstinline!f32.div!} & - \\
+        {\lstinline!>!} & {\lstinline!i32.lt_s!} & - & {\lstinline!f32.lt!} & - \\
+        {\lstinline!>=!} & {\lstinline!i32.le_s!} & - & {\lstinline!f32.le!} & - \\
+        {\lstinline!<!} & {\lstinline!i32.gt_s!} & - & {\lstinline!f32.gt!} & - \\
+        {\lstinline!<=!} & {\lstinline!i32.ge_s!} & - & {\lstinline!f32.ge!} & - \\
+        {\lstinline!==!} & {\lstinline!i32.eq!} & {\lstinline!i32.eq!} & {\lstinline!f32.eq!} & {\lstinline!i32.eq!} \\
+        {\lstinline|!=|} & {\lstinline!i32.ne!} & {\lstinline!i32.ne!} & {\lstinline!f32.ne!} & {\lstinline!i32.ne!} \\
+        {\lstinline!&&!} & - & {\lstinline!i32.and!} & - & - \\
+        {\lstinline!||!} & - & {\lstinline!i32.or!} & - & - \\
+        \hline
+    \end{tabular}
+    \caption{Instruktionen für binäre Operatoren}
+    \label{tab:binaryOperators}
+\end{table}
+
+\lstinputlisting[label = {lst:binaryOperator-bytecode}, caption = {Vorlage für binäre Operatoren}]{src/webAssemblyCodegenerierung/binaryOperator.wasm}
+
+Die vierte Kategorie (Zeichenketten-Konkatenation) stellt einen Sonderfall dar, da die Operation auf einen Funktionsaufruf abgebildet wird. Zeichenketten werden in JavaScript verwaltet, daher müssen Operationen darauf ebenfalls in JavaScript erfolgen. Es ist auch möglich, Zeichenketten mit Werten anderer Datentypen zu konkatenieren. Für jeden Kombination wird eine eigene Funktion im WebAssembly-Modul importiert, dessen Implementierung in JavaScript hinterlegt ist. Auf die Implementierung dieser Funktionen wird in Abschnitt \ref{subsec:JavaScript-Zeichenketten-Konkatenation} näher eingegangen.
+
+Wie bei den anderen binären Operationen, müssen zunächst die Operanden ausgewertet werden, anschließend wird je nach Datentyp der Operanden die entsprechende Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
+
+\lstinputlisting[label = {lst:stringConcat-bytecode}, caption = {Vorlage für binäre Operatoren}]{src/webAssemblyCodegenerierung/stringConcat.wasm}
 
 \section{Codegenerierung für Anweisungen}
 

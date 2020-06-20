@@ -1,0 +1,3 @@
+<evaluate left-operand>
+<evaluate right-operand>
+call <concat-function-index>

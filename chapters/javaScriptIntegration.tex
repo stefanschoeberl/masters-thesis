@@ -135,6 +135,7 @@ Die Funktion für das Abfragen der Länge des Felds ist typunabhängig, daher gi
 \lstinputlisting{src/javaScriptIntegration/arrayLength.js}
 
 \subsection{Zeichenketten-Konkatenation}
+\label{subsec:JavaScript-Zeichenketten-Konkatenation}
 
 Alle Verwendungen des MiniJava-Konkatenationsoperators \lstinline{+} werden auf JavaScript-Funktionen abgebildet. Dabei muss zumindest auf einer Seite des Operators ein Mi\-ni\-Ja\-va-\lstinline{String} stehen. Abhängig vom Datentyp auf der anderen Seite des Operators gibt es (ähnlich wie bei den Feldern) eine eigene Implementierung. Im WebAssembly-Modul werden die Funktionen über einen Funktionsnamen importiert, der folgendem Schema entspricht: \\
 \lstinline{+_<left-type>_<right-type>}
