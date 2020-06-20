@@ -1,3 +1,2 @@
-f32.const 0
 <evaluate operand>
-f32.sub
+f32.neg

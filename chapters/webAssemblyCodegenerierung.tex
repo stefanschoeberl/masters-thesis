@@ -4,6 +4,8 @@ Dieses Kapitel befasst sich mit der Generierung von WebAssembly-Bytecode. Dabei 
 
 Beim Generieren von Bytecode wird in diesem Kapitel davon ausgegangen, dass sämtlicher zu kompilierender MiniJava-Quelltext semantisch korrekt ist. Das bedeutet, dass ausschließlich der Schönwetterfall betrachtet wird, in dem zum Beispiel Variablen vor der Verwendung deklariert werden, Variablen nicht doppelt deklariert werden, aufzurufenden Methoden existieren oder verwendete Datentypen in Ausdrücken zu einander kompatibel sind. Auf die Fehlerbehandlung wird nicht eingangen, da dies aufgrund des großen Umfangs an Fehlerfällen den Rahmen sprengen würde und der Fokus dieses Kapitels auf der Codegenerierung liegt, die syntaktisch und semantisch korrekten MiniJava-Quelltext voraussetzt.
 
+Der für ein Sprachkonstrukt generierte Bytecode wird in diesem Kapitel schablonenartig als \emph{Vorlage} gezeigt. Der Bytecode in diesen Vorlagen ist in der textuellen Repräsentation von WebAssembly dargestellt. Darin befinden sich Platzhalter (gekenntzeichnet durch spitze Klammern \lstinline{<...>}), die beispielsweise auf generierten Bytecode anderer Sprachkonstrukte oder Compile-Zeit-Konstanten verweisen. Weiters kann es vorkommen, dass Teile der Vorlage nur in bestimmten Fällen generiert werden. Diese Teile werden durch eckige Klammern \lstinline{[...]} gekennzeichnet.
+
 \section{Gradle-Projektaufbau}
 
 Das Gradle-Projekt besteht aus fünf Gradle-Modulen:
@@ -182,15 +184,37 @@ Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTab
 \subsection{Unäre Operatoren}
 Zu den unären Operatoren gehören in MiniJava das Präfix-Minus \lstinline{-} zur Negation eines numerischen Werts und der \emph{Cast}-Operator zur expliziten Typumwandlung. Ganz genau genommen hat der \emph{Cast}-Operator zwei Operanden, einen Datentyp und einen Ausdruck. Der Datentyp wird allerdings nur zur Compile-Zeit verwendet. Somit hat er zur Laufzeit nur \emph{einen} Operanden, daher wird er ebenfalls in diesem Abschnitt behandelt.
 
-TODO: Der - Operator wird nur für int und float unterstützt, je nach typ wird unterschiedlicher bytecode erzeugt
+Das Präfixminus wird für die Datentypen \lstinline{int} und \lstinline{float} unterstützt, je nach Datentyp wird unterschiedlicher Bytecode erzeugt.
 
-WebAssembly bietet keine Instruktion an, um einen ganzzahligen Wert zu negieren. Daher wird ein Ausdruck \lstinline{-expr} auf den Ausdruck \lstinline{0 - expr} abgebildet. Je nach Datentyp des Operanden werden unterschiedliche Instruktionen generiert. Der erzeugte Bytecode für das Negieren von \lstinline{int}- und \lstinline{float}-Werten entspricht den Vorlagen in Listings \ref{lst:minusInt-bytecode} und \ref{lst:minusFloat-bytecode}.
-
-\lstinputlisting[label = {lst:minusInt-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{int}-Werte}]{src/webAssemblyCodegenerierung/minusInt.wasm}
+Für den Datentyp \lstinline{float} wird die \lstinline{f32.neg}-Instruktion eingesetzt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:minusFloat-bytecode}.
 
 \lstinputlisting[label = {lst:minusFloat-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{float}-Werte}]{src/webAssemblyCodegenerierung/minusFloat.wasm}
 
-TODO f32.neg
+Für ganzzahlige Werte bietet WebAssembly keinen Negationsoperator an. Daher wird ein Ausdruck \lstinline{-expr} als \lstinline{0 - expr} abgebildet. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:minusInt-bytecode}.
+
+\lstinputlisting[label = {lst:minusInt-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{int}-Werte}]{src/webAssemblyCodegenerierung/minusInt.wasm}
+
+Bei der expliziten Typumwandlung wird abhängig vom Zieldatentyp und vom Datentyp des zu konvertierendem Werts eine Umwandlungsinstruktion (falls notwendig) gewählt. Die Wahl der Instruktion erfolgt zur Compile-Zeit. Die verwendeten Instruktionen werden in Tabelle \ref{tab:castOperators} dargestellt. Ist der Datentyp des Operanden und der Zieldatentyp gleich, ist eine explizite Typumwandlung ist immer möglich, dabei wird keine Umwandlungsinstruktion generiert. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:cast-bytecode}.
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{| c | c | c |}
+        \hline
+        Datentyp des Operanden & Zieldatentyp & Instruktion \\
+        \hline
+        {\lstinline!int!} & {\lstinline!float!} & {\lstinline!f32.convert_i32_s!} \\
+        {\lstinline!int!} & {\lstinline!char!} & - \\
+        {\lstinline!float!} & {\lstinline!int!} & {\lstinline!i32.trunc_f32_s!} \\
+        {\lstinline!float!} & {\lstinline!char!} & {\lstinline!i32.trunc_f32_s!} \\
+        {\lstinline!char!} & {\lstinline!int!} & - \\
+        {\lstinline!char!} & {\lstinline!float!} & {\lstinline!f32.convert_i32_s!} \\
+        \hline
+    \end{tabular}
+    \caption{Instruktionen für die explizite Typumwandlung}
+    \label{tab:castOperators}
+\end{table}
+
+\lstinputlisting[label = {lst:cast-bytecode}, caption = {Vorlage für die explizite Typumwandlung mit dem \emph{Cast}-Operator}]{src/webAssemblyCodegenerierung/cast.wasm}
 
 \subsection{Binäre Operatoren}
 arithmetisch, vergleich, boolean
