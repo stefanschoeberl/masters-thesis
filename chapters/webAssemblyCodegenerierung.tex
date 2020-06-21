@@ -371,11 +371,11 @@ Der generierte Bytecode für Fall 2 entspricht der Vorlage in Listing \ref{lst:m
 
 Der generierte Bytecode für Fall 1 entspricht der Vorlage in Listing \ref{lst:method-call3-bytecode}. Die \lstinline{drop}-Instruktion wird nur beim Aufruf einer Klassenmethode generiert.
 
-\lstinputlisting[label = {lst:method-call1-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 1)}]{src/webAssemblyCodegenerierung/methodCall1.wasm}
+\lstinputlisting[label = {lst:method-call1-bytecode}, caption = {Vorlage für Methodenaufrufe (Fall 1)}]{src/webAssemblyCodegenerierung/methodCall1.wasm}
 
-\lstinputlisting[label = {lst:method-call2-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 2)}]{src/webAssemblyCodegenerierung/methodCall2.wasm}
+\lstinputlisting[label = {lst:method-call2-bytecode}, caption = {Vorlage für Methodenaufrufe (Fall 2)}]{src/webAssemblyCodegenerierung/methodCall2.wasm}
 
-\lstinputlisting[label = {lst:method-call3-bytecode}, caption = {Vorlage für Methodenaufruf (Fall 3)}]{src/webAssemblyCodegenerierung/methodCall3.wasm}
+\lstinputlisting[label = {lst:method-call3-bytecode}, caption = {Vorlage für Methodenaufrufe (Fall 3)}]{src/webAssemblyCodegenerierung/methodCall3.wasm}
 
 \section{Codegenerierung für das Erzeugen und Initialisieren von Objekten}
 \label{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten}
@@ -453,5 +453,34 @@ Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld 
 \lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/arraySet.wasm}
 
 \section{Methodensuche und die Hilfsklasse \lstinline{Object}}
+
+MiniJava unterstützt keine Vererbungsbeziehungen. Da es jedoch in manchen Fällen sehr nützlich sein kann, wenn Methoden mit einem Parameter eines beliebigen Referenzdatentyps aufgerufen werden können, wird dafür die Klasse \lstinline{Object} verwendet. Ein einfaches Beispiel für solche Methoden ist \lstinline{Console.println(Object a)}, die jedes beliebige Objekt auf der Konsole ausgeben soll. So wird erspart, dass eine Ausgabemethode für jeden eigenen Datentyp implementiert werden muss. Diese Klasse \lstinline{Object} bildet somit eine Art implizite Basisklasse für aller MiniJava-Klassen.
+
+In Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe} wurde beschrieben, wie Bytecode für Methodenaufrufe erzeugt wird. Dort wird über den Klassennamen, Methodennamen und die Datentypen der Aktualparameter der WebAssembly-Funktionsindex der aufzurufenden Methode mit Hilfe der Symboltabellen bestimmt. Dieser Vorgang wird folgendermaßen ergänzt, Methoden mit Parametern vom Typ \lstinline{Object} zu berücksichtigen:
+
+\begin{enumerate}
+    \item Wurde eine Methode in den Symboltabellen gefunden, bei denen die Datentypen der Formalparameter und die Datentypen der Aktualparamater 1:1 übereinstimmen, wird diese Methode verwendet.
+    \item Wurde keine Methode gefunden, werden alle möglichen Kombination durchprobiert, sämtliche Referenzdatentypen in der Datentypliste der Aktualparameter mit dem Datentyp \lstinline{Object} zu ersetzen. Mit diesen neuen Aktualparameterlisten wird wiederum in den Symboltabellen nach einer passenden Methode gesucht.
+\end{enumerate}
+
+Dieser Vorgang wird anhand einiger Beispiele in Listing \ref{lst:methodSearch} veranschaulicht.
+
+\lstinputlisting[label = {lst:methodSearch}, caption = {Beispiele für Methodensuche}]{src/webAssemblyCodegenerierung/methodSearch.minijava}
+
+Nachfolgend wird auf die vier Aufrufe im Detail eingegangen:
+\begin{itemize}
+    \item 1. Aufruf in Zeile 4: Die Aktualparameterliste ist \lstinline{[String, int]}. Es ist eine Methode mit der Formalparameterliste \lstinline{[String, int]} vorhanden, daher wird die 1. Methode aufgerufen.
+    \item 2. Aufruf in Zeile 5: Die Aktualparameterliste ist \lstinline{[Point, int]}. Es ist keine Methode mit einer gleichen Formalparameterliste vorhanden. Nun werden alle Referenzdatentypen in der Aktualparameterliste durch \lstinline{Object} ersetzt. Da nur ein Parameter ein Referenzdatentyp ist, gibt es nur eine Möglichkeit: \lstinline{[Object, int]}. Es ist eine Methode mit dieser Formalparameterliste vorhanden, daher wird die 2. Methode aufgerufen.
+    \item 3. Aufruf in Zeile 7: Die Aktualparameterliste ist \lstinline{[String, String, int]}. Es ist eine Methode mit der Formalparameterliste \lstinline{[String, String, int]} vorhanden, daher wird die 3. Methode aufgerufen.
+    \item 4. Aufruf in Zeile 8: Die Aktualparameterliste ist \lstinline{[String, Point, int]}. Es ist keine Methode mit einer gleichen Formalparameterliste vorhanden. Nun werden alle Referenzdatentypen in der Aktualparameterliste durch \lstinline{Object} ersetzt. Dafür gibt es 3 Kombinationsmöglichkeiten:
+    \begin{enumerate}
+        \item \lstinline{[String, Object, int]}
+        \item \lstinline{[Object, Point, int]}
+        \item \lstinline{[Object, Object, int]}
+    \end{enumerate}
+    Zur ersten Möglichkeit passt die Formalparameterliste einer Methode, daher wird die 4. Methode aufgerufen. Zu den anderen zwei Möglichkeiten gibt es keine passende Methode.
+\end{itemize}
+
+Das Verhalten für den Fall nicht definiert, dass es für mehr als eine Kombinationsmöglichkeit eine passende Methode gibt. Wenn beispielsweise in der \lstinline{Main}-Klasse eine weitere Methode mit der Signatur \lstinline{static void compute(Object a, Object b, int x)} definiert wäre, ist der 4. Aufruf in Zeile 8 nicht mehr eindeutig auflösbar. In diesem Fall wird eine beliebige passende Methode aufgerufen. Daher muss beim Programmieren in MiniJava beim Umgang mit \lstinline{Object} darauf geachtet werden, keine Mehrdeutigkeiten zu erzeugen.
 
 \section{Exportieren von Methoden}

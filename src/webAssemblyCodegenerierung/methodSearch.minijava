@@ -1,0 +1,26 @@
+class Utils {
+    static void compute(String a, int x) { ... }
+    static void compute(Object a, int x) { ... }
+
+    static void compute(String a, String b, int x) { ... }
+    static void compute(String a, Object b, int x) { ... }
+}
+
+class Main {
+    static void compute(String a, int x) { ... }
+    static void compute(Object a, int x) { ... }
+
+    static void compute(String a, String b, int x) { ... }
+    static void compute(String a, Object b, int x) { ... }
+
+    public static void main() {
+        String text = "Hello World!";
+        Point point = new Point(1f, 2f);
+
+        compute(text, 123);
+        compute(point, 123);
+
+        compute(text, text, 123);
+        compute(text, point, 123);
+    }
+}
