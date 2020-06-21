@@ -258,7 +258,7 @@ Anhand der Datentypen der Operanden (nach der impliziten Typumwandlungen) wird d
 
 \lstinputlisting[label = {lst:binaryOperator-bytecode}, caption = {Vorlage für binäre Operatoren}]{src/webAssemblyCodegenerierung/binaryOperator.wasm}
 
-Die vierte Kategorie (Zeichenketten-Konkatenation) stellt einen Sonderfall dar, da die Operation auf einen Funktionsaufruf abgebildet wird. Zeichenketten werden in JavaScript verwaltet, daher müssen Operationen darauf ebenfalls in JavaScript erfolgen. Es ist auch möglich, Zeichenketten mit Werten anderer Datentypen zu konkatenieren. Für jeden Kombination wird eine eigene Funktion im WebAssembly-Modul importiert, dessen Implementierung in JavaScript hinterlegt ist. Auf die Implementierung dieser Funktionen wird in Abschnitt \ref{subsec:JavaScript-Zeichenketten-Konkatenation} näher eingegangen.
+Die vierte Kategorie (Zeichenketten-Konkatenation) stellt einen Sonderfall dar, da die Operation auf einen Funktionsaufruf abgebildet wird. Zeichenketten werden in JavaScript verwaltet, daher müssen Operationen darauf ebenfalls in JavaScript erfolgen. Es ist auch möglich, Zeichenketten mit Werten anderer Datentypen zu konkatenieren. Für jeden Kombination der Datentypen auf der linken und rechten Seite des Operators wird eine eigene Funktion im WebAssembly-Modul importiert, dessen Implementierung in JavaScript hinterlegt ist. Auf die Implementierung dieser Funktionen wird in Abschnitt \ref{subsec:JavaScript-Zeichenketten-Konkatenation} näher eingegangen.
 
 Wie bei den anderen binären Operationen, müssen zunächst die Operanden ausgewertet werden, anschließend wird je nach Datentyp der Operanden die entsprechende Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
 
