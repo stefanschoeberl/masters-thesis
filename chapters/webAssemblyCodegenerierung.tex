@@ -502,7 +502,7 @@ Für jede zu exportierende Methode wird ein Export mit dem externen Bezeichner i
 
 \section{Importieren von nativen Methoden}
 
-Methoden können mit dem Schlüsselwort \lstinline{native} gekennzeichnet werden, um sie in JavaScript zu implementieren. Um sie in MiniJava/WebAssembly aufrufen zu können, müssen sie über einen zweistufigen Bezeichner ins WebAssembly-Modul importiert werden. Der erste Teil dieses Bezeichners (Modulname) ist für native Methoden immer \lstinline{"native"}. Der zweite Teil des Bezeichners (Funktionsname) entspricht dem Schema für externe Namen, das auch für das Exportieren von Methoden verwendet wird, siehe Listing \ref{lst:externalName} in Abschnitt \ref{sec:Exportieren-von-Methoden}.
+Methoden können mit dem Schlüsselwort \lstinline{native} gekennzeichnet werden, um sie in JavaScript zu implementieren. Um sie in MiniJava/WebAssembly aufrufen zu können, müssen sie über einen zweistufigen Bezeichner ins WebAssembly-Modul importiert werden. Der erste Teil dieses Bezeichners (Modulname) ist für native Methoden immer \lstinline{"native"}. Der zweite Teil des Bezeichners (Funktionsname) entspricht dem Schema für externe Namen, das auch für das Exportieren von Methoden verwendet wird, siehe Listing \ref{lst:externalName} auf Seite \pageref{lst:externalName}.
 
 Für jede native Methode wird ein Import angelegt. Die Reihenfolge der Imports entspricht der in der Deklarationsphase vergebenen Funktionsindizes. Wie bei nicht-nativen Methoden muss auch für native Methoden ein Funktionstyp (\lstinline{(type ...)}) im Web\-As\-sem\-bly-Mo\-dul definiert werden, der die Schnittstelle der Funktion beschreibt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:import-bytecode}.
 
