@@ -131,9 +131,9 @@ Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip
 TODO: Grafik mit Vistors
 TODO: eventuell Grafik mit Beispielsyntaxbaum
 
-In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden. Weiters wird bei jedem Ausdruck angegeben, zu welchem statischen Datentyp dieser auswertet wird.
+In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden.
 
-Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in den nachfolgenden Abschnitten nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
+Die Codegenerierung einiger Ausdrücke ist etwas aufwendiger, daher wird in den nachfolgenden Abschnitten nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
 \begin{itemize}
     \item Erzeugen von Objekten über den \lstinline{new}-Operator(siehe Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten})
     \item Lesen von Datenkomponenten, direkt oder über den Navigationsoperator (siehe Abschnitt \ref{sec:Codegenerierung-für-den-Zugriff-auf-Datenkomponenten})
@@ -141,7 +141,6 @@ Die Codegenerierung bestimmter Ausdrücke ist etwas aufwendiger, daher wird in d
     \item Lesezugriff auf Felder über den \lstinline{[]}-Operator (siehe Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index})
     \item Aufruf von Methoden (siehe Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe})
 \end{itemize}
-TODO: Typen für komplexe Ausdrücke
 
 \subsection{Schlüsselwort \lstinline{this}}
 
