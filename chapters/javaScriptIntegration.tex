@@ -44,7 +44,7 @@ Auf die praktische Verwendung des gesamten Pakets wird in diesem Kapitel nicht e
 
 Wie im vorherigen Abschnitt beschrieben, wird beim Kompilieren Ja\-va\-Script-Quell\-text in der Datei \emph{module.js} generiert.
 
-Beim Erzeugen des Bytecodes wurden bereits für die Zeichenketten-Literale Referenzen (ab 1 beginnend) festgelegt. Daher müssen später zur Laufzeit die Zeichenketten-Literale in der Reihenfolge der zuvor zugewiesenen Referenzen (siehe Abschnitt TODO) registriert werden. Dies muss erfolgen, bevor das WebAssembly-Modul gestartet wird, da zu diesem Zeitpunkt noch keine Objekte erstellt wurden. So wird garantiert, dass sich die Referenzen nicht verschieben.
+Beim Erzeugen des Bytecodes wurden bereits für die Zeichenketten-Literale Referenzen (ab 1 beginnend) festgelegt. Daher müssen später zur Laufzeit die Zeichenketten-Literale in der Reihenfolge der zuvor zugewiesenen Referenzen (siehe Abschnitt \ref{subsec:Zeichenketten-Literale}) registriert werden. Dies muss erfolgen, bevor das WebAssembly-Modul gestartet wird, da zu diesem Zeitpunkt noch keine Objekte erstellt wurden. So wird garantiert, dass sich die Referenzen nicht verschieben.
 
 Außerdem muss für jede Klasse ein Konstruktur generiert werden. Dieser hat die Aufgabe, ein JavaScript-Objekt zu erzeugen, in dem alle Datenkomponenten mit einem (je nach Datentyp) sinnvollen Platzhalterwert initialisiert werden. Außerdem wird der entsprechende MiniJava-Datentyp mit dem Objekt verknüpft. Die Konstrukturen liefern als Rückgabewert eine Referenz des erzeugten Objekts.
 
@@ -150,7 +150,7 @@ Da das Konkatenieren für die einzelnen Datentypen ähnlich funktioniert, werden
 
 \section{Methodenaufrufe von JavaScript nach MiniJava}
 
-Alle MiniJava-Methoden, die mit dem Schlüsselwort \lstinline{public} gekennzeichnet wurden, werden als Funktion im WebAssembly-Modul exportiert. Dabei wird dieselbe Benennungskonvention wie für das Importieren von nativen Methoden verwendet (siehe Abschnitt TODO).
+Alle MiniJava-Methoden, die mit dem Schlüsselwort \lstinline{public} gekennzeichnet wurden, werden als Funktion im WebAssembly-Modul exportiert, siehe Abschnitt \ref{sec:Exportieren-von-Methoden}.
 
 In der JavaScript-Klasse \lstinline{Runtime} wird die Funktion \lstinline{findMethod} zur Verfügung gestellt, die aus dem Klassennamen, dem Methodennamen und der Liste der Eingabeparametertypen den exportierten WebAssembly-Funktionsnamen ableitet. Anschließend wird die Funktion aus der \lstinline{exports}-Datenstruktur der WebAssembly-Modulinstanz abgerufen.
 
@@ -170,7 +170,7 @@ Nun kann eine Klassenmethode aufgerufen werden. So wird beispielsweise die Mini\
 
 \subsection{Aufruf von Objektmethoden}
 
-Objektmethoden können nicht wie Klassenmethoden aufgerufen werden, da zunächst der Typ des Objekts, für welches die Methode aufgerufen wird, bestimmt werden muss. Damit dies möglich ist, muss das Empfängerobjekt bereits mit \lstinline{runtime.wasmRefType} registriert sein. Anschließend kann mit \lstinline{findMethod} die Methode gesucht werden. Da Objektmethoden per Konvention als ersten Parameter eine Referenz auf das Empfängerobjekt erwarten (\lstinline{this}-Referenz, siehe Abschnitt TODO), muss die Referenz als erster Parameter beim Aufruf eingefügt werden:
+Objektmethoden können nicht wie Klassenmethoden aufgerufen werden, da zunächst der Typ des Objekts, für welches die Methode aufgerufen wird, bestimmt werden muss. Damit dies möglich ist, muss das Empfängerobjekt bereits mit \lstinline{runtime.wasmRefType} registriert sein. Anschließend kann mit \lstinline{findMethod} die Methode gesucht werden. Da Objektmethoden per Konvention als ersten Parameter eine Referenz auf das Empfängerobjekt erwarten (\lstinline{this}-Parameter, siehe Abschnitt \ref{subsec:this-Parameter}), muss die Referenz als erster Parameter beim Aufruf eingefügt werden:
 
 \lstinputlisting{src/javaScriptIntegration/runtimeInstanceMethod.js}
 

@@ -92,6 +92,7 @@ Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die da
 Objektmethoden und Klassenmethoden werden auf in WebAssembly definierte Funktionen abgebildet. Dabei wird ein Funktionstyp (\lstinline{(type ...)}) im WebAssembly-Modul definiert, der die Schnittstelle der Funktion beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly-Funktion referenziert auf den entsprechenden Typ.
 
 \subsection{\lstinline{this}-Parameter}
+\label{subsec:this-Parameter}
 Objektmethoden benötigen eine Referenz auf das Objekt selbst. Diese Referenz ist im Methodenrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden ein zusätzlichen Parameter definiert, auch \lstinline{this}-Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}-Parameter ist bei Objektmethoden immer der erste Parameter.
 
 \subsection{Rückgabetyp}
@@ -175,6 +176,7 @@ Für alle vier elementare Datentypen können Werte mittels Literale erzeugt werd
 \lstinputlisting[label = {lst:literalBoolean-bytecode}, caption = {Vorlage für \lstinline{char}-Literale}]{src/webAssemblyCodegenerierung/literalBoolean.wasm}
 
 \subsection{Zeichenketten-Literale}
+\label{subsec:Zeichenketten-Literale}
 
 Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTable} alle im MiniJava-Quelltext vorkommenden Zeichenketten-Literale. Jedem Literal wird eine eindeutige Referenz zugewiesen. Kommt das gleiche Zeichenketten-Literal mehrfach im Quelltext vor, wird dieselbe Referenz verwendet. Diese Referenz wird mit der \lstinline{i32.const}-Instruktion als Konstante auf den Kellerspeicher gelegt. Der generierte Bytecode entspricht der Vorlage in Listing.
 
