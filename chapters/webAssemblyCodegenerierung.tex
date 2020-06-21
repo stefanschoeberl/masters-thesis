@@ -484,3 +484,29 @@ Nachfolgend wird auf die vier Aufrufe im Detail eingegangen:
 Das Verhalten für den Fall nicht definiert, dass es für mehr als eine Kombinationsmöglichkeit eine passende Methode gibt. Wenn beispielsweise in der \lstinline{Main}-Klasse eine weitere Methode mit der Signatur \lstinline{static void compute(Object a, Object b, int x)} definiert wäre, ist der 4. Aufruf in Zeile 8 nicht mehr eindeutig auflösbar. In diesem Fall wird eine beliebige passende Methode aufgerufen. Daher muss beim Programmieren in MiniJava beim Umgang mit \lstinline{Object} darauf geachtet werden, keine Mehrdeutigkeiten zu erzeugen.
 
 \section{Exportieren von Methoden}
+\label{sec:Exportieren-von-Methoden}
+
+Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, sie aus JavaScript aufgerufen zu können. Dafür muss die für eine Methode generierte Funktion im WebAssembly-Modul exportiert werden. Jeder exportierten Funktion muss ein Name gegeben werden, der innerhalb eines WebAssembly-Moduls eindeutig ist. Da in MiniJava Methoden mit demselben Namen in mehreren Klassen definiert werden können, reicht der Methodenname dafür alleine nicht aus. Weiters kann eine Methode innerhalb einer Klasse überladen werden. Daher wird gemeinsam aus dem Klassennamen, dem Methodennamen und den Datentypen der Formalparameterliste der Methode nach dem Schema in Listing \ref{lst:externalName} ein eindeutiger externer Bezeichner abgeleitet.
+
+\lstinputlisting[label = {lst:externalName}, caption = {Schema für externe Bezeichner}]{src/webAssemblyCodegenerierung/externalName.txt}
+
+Da als Bezeichner für Klassennamen und Methodennamen die Zeichen \lstinline{'.'} und \lstinline{'#'} nicht erlaubt sind, können sie problemlos als Trennzeichen verwendet werden. Weiters muss nicht darauf Rücksicht genommen werden, ob es sich um eine Klassen- oder Objektmethode handelt, da innerhalb einer Klasse nicht zwei Methoden mit demselben Namen und den selben Parametern einmal mit und einmal ohne dem Schlüsselwort \lstinline{static} definiert werden dürfen. In Listing \ref{lst:externalNameExamples} finden sich einige Beispiele, die das Schema veranschaulichen sollen.
+
+\lstinputlisting[label = {lst:externalNameExamples}, caption = {Beispiele für abgeleitete Namen zum exportieren von Methoden}]{src/webAssemblyCodegenerierung/externalNameExamples.minijava}
+
+Für jede zu exportierende Methode wird ein Export mit dem externen Bezeichner im WebAssembly-Modul angelegt, der Index der entsprechenden Funktion wird über die Symboltabellen ermittelt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:export-bytecode}.
+
+\lstinputlisting[label = {lst:export-bytecode}, caption = {Vorlage für den Export einer Methode}]{src/webAssemblyCodegenerierung/export.wasm}
+
+\section{Importieren von nativen Methoden}
+
+Methoden können mit dem Schlüsselwort \lstinline{native} gekennzeichnet werden, um sie in JavaScript zu implementieren. Um sie in MiniJava/WebAssembly aufrufen zu können, müssen sie über einen zweistufigen Bezeichner ins WebAssembly-Modul importiert werden. Der erste Teil dieses Bezeichners (Modulname) ist für native Methoden immer \lstinline{"native"}. Der zweite Teil des Bezeichners (Funktionsname) entspricht dem Schema für externe Namen, das auch für das Exportieren von Methoden verwendet wird, siehe Listing \ref{lst:externalName} in Abschnitt \ref{sec:Exportieren-von-Methoden}.
+
+Für jede native Methode wird ein Import angelegt. Die Reihenfolge der Imports entspricht der in der Deklarationsphase vergebenen Funktionsindizes. Wie bei nicht-nativen Methoden muss auch für native Methoden ein Funktionstyp (\lstinline{(type ...)}) im Web\-As\-sem\-bly-Mo\-dul definiert werden, der die Schnittstelle der Funktion beschreibt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:import-bytecode}.
+
+\lstinputlisting[label = {lst:import-bytecode}, caption = {Vorlage für den Import einer Methode}]{src/webAssemblyCodegenerierung/import.wasm}
+
+\vspace{4em}
+In diesem Kapitel wurde beschrieben, wie aus MiniJava-Quelltext ein WebAssembly-Modul erzeugt wird. Dabei wurde gezeigt, wie sämtliche MiniJava-Sprachkonstrukte auf WebAssembly-Bytecode abgebildet werden.
+
+Im nächsten Kapitel geht es mit der JavaScript-Laufzeitumbung weiter, die notwendig ist, um das WebAssembly-Modul lauffähig zu machen.

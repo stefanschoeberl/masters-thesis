@@ -1,0 +1,15 @@
+class Main {
+    public static void main() { ... }                    =>  Main.main
+}
+
+class Utils {
+    public static void add(int a, int b) { ... }         =>  Utils.add#int#int
+    public static void add(int a, int b, int c) { ... }  =>  Utils.add#int#int#int
+    public static void println(String s) { ... }         =>  Utils.println#String
+    public static void sort(int[] a) { ... }             =>  Utils.sort#int[]
+}
+
+class Point {
+    public void move(float dx, float dy) { ... }         =>  Point.move#float#float
+    public float length() { ... }                        =>  Point.length
+}
