@@ -2,10 +2,65 @@
 
 \section{Motivation}
 
+WebAssembly \cite{WebAssemblyWebsite} ist eine relativ neue (2017) Technologie mit dem Ziel, eine sprachunabhängige Plattform fürs Web zu schaffen. Da nur JavaScript von Browsern unterstützt wird, ist man auf diese Sprache beschränkt. Früher konnte man auch Java-Applets mit Java entwickeln, die direkt im Browser ausgeführt werden konnten. Aktuelle Browserversionen unterstützen diese Technologie mittlerweile nicht mehr und Oracle stellt ebenfalls die Unterstützung ein \cite{OracleJavaSESupportRoadmap}.
+
+Anders sieht es bei Sprachen wie beispielsweise TypeScript aus: Um diese im Browser auszuführen, muss der Quelltext zunächst in JavaScript mit einem Transpiler übersetzt werden. Anschließend muss der resultierende JavaScript-Code vom Browser zur Laufzeit interpretiert werden \cite{TypeScript}.
+
+WebAssembly verfolgt einen alternativen Ansatz, in dem eine Laufzeitumgebung in Form einer Stackmachine vom Browser zur Verfügung gestellt wird, so ähnlich wie früher mit Java-Applets. Über eine JavaScript-Schnittstelle können zur Laufzeit Module geladen werden, die in der Stackmachine ausgeführt werden. Module müssen in Form eines eigenen Bytecodes zur Verfügung stehen.
+
+Ein geeigneter Compiler kann nun eine (beliebige) Programmiersprache in diesen Bytecode übersetzen. So ist ein Konvertieren des Quelltextes über einen Transpiler nicht mehr notwendig.
+
+WebAssembly ist nicht als Alternative, sondern als Ergänzung zu JavaScript zu sehen. Ein Ziel ist, bestehenden Quelltext wiederverwenden zu können, auch wenn dieser in einer anderen Programmiersprache geschrieben wurde. Mit JavaScript werden die einzelnen Komponenten anschließend miteinander verbunden.
+
+Damit dieses Ziel erreicht werden kann, müssen Compiler verschiedener Sprachen in der Lage sein, WebAssembly-Bytecode zu erzeugen.
+
 \section{Problemstellung}
+
+Die Problemstellung für diese Masterarbeit lässt sich in folgende Fragen aufteilen:
+
+\begin{itemize}
+	\item Was ist WebAssembly, welche Möglichkeiten bietet WebAssembly und welche Einschränkungen gibt es?
+	\item Wie kann ein Compiler, der eine Programmiersprache nach WebAssembly übersetzt, implementiert und getestet werden?
+	\item Wie werden typische Sprachkonstrukte einer Programmiersprache auf Web\-Assem\-bly-Befehle abgebildet?
+	\item Wie wird die Schnittstelle zum Browser entworfen und auf welche Aspekte muss dabei geachtet werden?
+\end{itemize}
 
 \section{Ziele}
 
+Die Fragen der Problemstellung sollen auf auf Basis einer praktischen Implementierung beantwortet werden.
+
+Ziel ist es, einen Compiler zu entwickeln, der MiniJava (eine Untermenge von Java) nach WebAssembly übersetzt. Die Eingabe ist MiniJava-Quelltext, die Ausgabe ein WebAssembly-Modul samt Laufzeitumgebung für JavaScript. Der gesamte Compiler wird in Kotlin entwickelt. Das Compiler-Frontend (Scanner und Parser) wird mit ANTLR 4 generiert.
+
+Schlussendlich soll es möglich sein, in MiniJava eine kleine typische Web-Anwendung zu entwickeln.
+
+Weiters wird eine minimale Standardbilbiothek entworfen. Diese stellt essentielle Schnittstellen für die Konsole und den DOM-Zugriff zur Verfügung.
+
+Es gibt bereits einige Technologien, die auf WebAssembly aufbauenn. Auf drei ausgewählte wird in dieser Arbeit eingangen:
+\begin{itemize}
+    \item Emscripten \cite{Emscripten}
+    \item Rust \cite{RustWasmWebsite}
+    \item Blazor \cite{Blazor}
+\end{itemize}
+MiniJava unterscheidet sich vom grundsätzlichen Ansatz sehr stark von diesen drei Technologien. Beim Verwenden dieser Technologien sind im eigenen Quelltext Fragmente enthalten, die darauf hindeuten, dass JavaScript/WebAssembly im Spiel ist (Emscripten/Rust). Blazor 
+
+Weiters sollen Objekte in MiniJava 1:1 auf JavaScript-Objekte abgebildet werden. Dieser Ansatz findet sich so in keiner der drei Technologien.
+
+Insgesamt soll mit MiniJava ein alternativer Ansatz versucht werden, eine (neue) Programmiersprache ins Web über WebAssembly zu bringen.
+
 \section{Aufbau der Arbeit}
 
+Die Arbeit ist in aufeinander aufbauende Kapitel aufgeteilt:
+\begin{enumerate}
+    \setcounter{enumi}{1}
+    \item \emph{Technische Grundlagen:} Die Implementierung dieser Arbeit baut auf diversen Technologien auf. In diesem Kapitel werden die für diese Arbeit notwendigen Technologien beschrieben. Ein besonderer Fokus liegt hier auf WebAssembly und ANTLR, es wird aber auch auf diverse Hilfstechnologien eingegangen. Zum Schluss werden drei aktuelle Technologien im Detail betrachtet, die bereits WebAssembly-Unterstützung anbieten.
+    \item \emph{Anforderungen an den Compiler und die Laufzeitumgebung:} In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Dieses Kapitel ist als Art Anforderungskatalog für den Compiler und die Laufzeitumgebung zu sehen.
+    \item \emph{Codegenerierung für WebAssembly:} In diesem Kapitel wird gezeigt, wie aus MiniJava-Quelltext ein WebAssembly-Modul erzeugt wird. Dabei wird insbesonders gezeigt, wie die Sprachkonstrukte auf WebAssembly abgebildet werden. 
+    \item \emph{Integration mit JavaScript:} Das erzeugte WebAssembly-Modul benötigt zur Ausführung noch eine Laufzeitumgebung, auf diese wird in diesem Kapitel eingangen. Die Laufzeitumgebung ist in JavaScript implementiert. Weiters wird vom Compiler auch JavaScript-Quelltext generiert, um das Modul ausführen zu können.
+    \item \emph{Testen des Compilers und Integration des Compilers in Gradle:} Um eine korrekte Funktion des Compilers zu gewährleisten, muss er getestet werden. Auf diesen Aspekt wird in diesem Kapitel im Detail eingangen. Weiters wird gezeigt, wie der Compiler in Gradle integriert werden kann, um ihn so in eigenen Projekten verwenden zu können. Diese Integration wird anhand einer Konsolenanwendung veranschaulicht.
+    \item \emph{Demo-Anwendungen im Browser:} In diesem Kapitel wird ein Fibonacci-Rechner als Web-Anwendung präsentiert, um die praktische Anwendung von MiniJava zu demonstrieren. Weiters wird hier kurz auf die Standardbibliothek für die Abbildung von DOM-Zugriffen eingangen.
+\end{enumerate}
+
+Zum Schluss werden die Ergebnisse der Arbeit zusammengefasst und ein Ausblick auf mögliche Erweiterungen gegeben.
+
 \section{Verweis auf Quelltext}
+Der Quellcode des gesamten Compilers und der Demo-Beispiele steht auf GitHub zum Download zur Verfügung: \url{https://github.com/stefanschoeberl/TODO}
