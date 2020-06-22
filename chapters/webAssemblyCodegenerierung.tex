@@ -127,10 +127,14 @@ Initialisierer werden auf in WebAssembly definierte Funktionen abgebildet. Wie b
 \subsection{Abarbeitung des Syntaxbaums}
 Der Syntaxbaum wird von einem \lstinline{Visitor} abgearbeitet. Der \lstinline{Visitor} delegiert je nach Ausdruckstyp im Syntaxbaums das Abarbeiten des Ausdrucks an einen eignene Codegenerator. Jeder Codegenerator ist für die Codegenierung eines Teilbereich der Ausdrücke verantwortlich. Diese Aufteilung verbessert die Lesbarkeit und Struktierung des Compilers.
 
-Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaums wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}-Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}-Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}-Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können.
+Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaums wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}-Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}-Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}-Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können. Der Ablauf zum Codegenerieren wird in Abbildung \ref{fig:codegenerators} anhand eines einfachen Beispiels dargestellt.
 
-TODO: Grafik mit Vistors
-TODO: eventuell Grafik mit Beispielsyntaxbaum
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{webAssemblyCodegenerierung/codegenerators}
+    \caption{Beispiel für die Codegenerierung des Ausdrucks \lstinline{1+2}. Der Visitor entscheidet anhand der Art des Ausdrucks, welcher Codegenerator verwendet wird. Zunächst wird Code für das Auswerten des linken Teilausdruck ausgewertet, dann Code für den rechten Teilausdruck. Zum Auswerten der Teilausdrücke wird die Kontrolle zurück an den Visitor gegeben. Zum Schluss wird die Instruktion für die Addition direkt generiert.}
+    \label{fig:codegenerators}
+\end{figure}
 
 In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode-Instruktionen Ausdrücke in MiniJava abgebildet werden.
 
