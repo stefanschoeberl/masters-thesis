@@ -200,7 +200,7 @@ Für ganzzahlige Werte bietet WebAssembly keinen Negationsoperator an. Daher wir
 
 \lstinputlisting[label = {lst:minusInt-bytecode}, caption = {Vorlage für den unären Operator \lstinline{-} für \lstinline{int}-Werte}]{src/webAssemblyCodegenerierung/minusInt.wasm}
 
-Bei der expliziten Typumwandlung wird abhängig vom Zieldatentyp und vom Datentyp des zu konvertierendem Werts eine Umwandlungsinstruktion (falls notwendig) gewählt. Die Wahl der Instruktion erfolgt zur Compile-Zeit. Die verwendeten Instruktionen werden in Tabelle \ref{tab:castOperators} dargestellt. Ist der Datentyp des Operanden und der Zieldatentyp gleich, ist eine explizite Typumwandlung ist immer möglich, dabei wird keine Umwandlungsinstruktion generiert. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:cast-bytecode}.
+Bei der expliziten Typumwandlung wird abhängig vom Zieldatentyp und vom Datentyp des zu konvertierenden Werts eine Umwandlungsinstruktion (falls notwendig) gewählt. Die Wahl der Instruktion erfolgt zur Compile-Zeit. Die verwendeten Instruktionen werden in Tabelle \ref{tab:castOperators} dargestellt. Ist der Datentyp des Operanden und der Zieldatentyp gleich, ist eine explizite Typumwandlung ist immer möglich, dabei wird keine Umwandlungsinstruktion generiert. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:cast-bytecode}.
 
 \begin{table}[]
     \centering
@@ -223,7 +223,6 @@ Bei der expliziten Typumwandlung wird abhängig vom Zieldatentyp und vom Datenty
 \lstinputlisting[label = {lst:cast-bytecode}, caption = {Vorlage für die explizite Typumwandlung mit dem \emph{Cast}-Operator}]{src/webAssemblyCodegenerierung/cast.wasm}
 
 \subsection{Binäre Operatoren}
-arithmetisch, vergleich, boolean
 
 MiniJava bietet eine Vielzahl an binären Operatoren an. Die Operatoren lassen sich in vier Kategorien einteilen:
 \begin{enumerate}
