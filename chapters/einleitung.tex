@@ -35,32 +35,52 @@ Schlussendlich soll es möglich sein, in MiniJava eine kleine typische Web-Anwen
 
 Weiters wird eine minimale Standardbilbiothek entworfen. Diese stellt essentielle Schnittstellen für die Konsole und den DOM-Zugriff zur Verfügung.
 
-Es gibt bereits einige Technologien, die auf WebAssembly aufbauenn. Auf drei ausgewählte wird in dieser Arbeit eingangen:
+Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausgewählte wird in dieser Arbeit kurz eingangen:
 \begin{itemize}
-    \item Emscripten \cite{Emscripten}
+    \item Emscripten \cite{Emscripten} für C und C++
     \item Rust \cite{RustWasmWebsite}
     \item Blazor \cite{Blazor}
 \end{itemize}
-MiniJava unterscheidet sich vom grundsätzlichen Ansatz sehr stark von diesen drei Technologien. Beim Verwenden dieser Technologien sind im eigenen Quelltext Fragmente enthalten, die darauf hindeuten, dass JavaScript/WebAssembly im Spiel ist (Emscripten/Rust). Blazor 
 
-Weiters sollen Objekte in MiniJava 1:1 auf JavaScript-Objekte abgebildet werden. Dieser Ansatz findet sich so in keiner der drei Technologien.
+Beim Einsatz von Emscripten und Rust ist im C/C++/Rust-Quelltext ersichtlich, dass JavaScript oder WebAssembly verwendet wird. Bei Emscripten sind das beispielsweise Einschlüsse von JavaScript-Fragmenten oder bei Rust müssen spezielle Attribute eingefügt werden. Blazor ist ein Framework zum Entwickeln von Web-Anwendungen und bietet somit eine Komplettlösung an. Hier kann bestehender C\#{}-Code unter gewissen Voraussetzungen wiederverwendet werden.
+
+Mit MiniJava soll ein alternativer Ansatz versucht werden: MiniJava-Quelltext soll im Unterschied zu Emscripten und Rust keine Hinweise darauf enthalten, dass der kompilierte Quelltext schlussendlich mit JavaScript und WebAssembly interagiert. Mit MiniJava auch kein Framework aufgebaut werden wie bei Blazor. Weiters sollen Objekte in MiniJava 1:1 auf JavaScript-Objekte abgebildet werden, dadurch soll beispielsweise direkter Zugriff auf den DOM ermöglicht werden. Dieser Ansatz findet sich so in keiner der drei Technologien. Schnittstellen zur Laufzeitumgebung werden in MiniJava über native Methoden umgesetzt. Dieses Sprachkonstrukt ist aus Java bekannt.
 
 Insgesamt soll mit MiniJava ein alternativer Ansatz versucht werden, eine (neue) Programmiersprache ins Web über WebAssembly zu bringen.
 
 \section{Aufbau der Arbeit}
 
-Die Arbeit ist in aufeinander aufbauende Kapitel aufgeteilt:
+Die Arbeit ist in aufeinander aufbauende Kapitel gegliedert:
 \begin{enumerate}
     \setcounter{enumi}{1}
     \item \emph{Technische Grundlagen:} Die Implementierung dieser Arbeit baut auf diversen Technologien auf. In diesem Kapitel werden die für diese Arbeit notwendigen Technologien beschrieben. Ein besonderer Fokus liegt hier auf WebAssembly und ANTLR, es wird aber auch auf diverse Hilfstechnologien eingegangen. Zum Schluss werden drei aktuelle Technologien im Detail betrachtet, die bereits WebAssembly-Unterstützung anbieten.
     \item \emph{Anforderungen an den Compiler und die Laufzeitumgebung:} In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Dieses Kapitel ist als Art Anforderungskatalog für den Compiler und die Laufzeitumgebung zu sehen.
-    \item \emph{Codegenerierung für WebAssembly:} In diesem Kapitel wird gezeigt, wie aus MiniJava-Quelltext ein WebAssembly-Modul erzeugt wird. Dabei wird insbesonders gezeigt, wie die Sprachkonstrukte auf WebAssembly abgebildet werden. 
+    \item \emph{Codegenerierung für WebAssembly:} In diesem Kapitel wird gezeigt, wie aus Mi\-ni\-Ja\-va-Quell\-text ein WebAssembly-Modul erzeugt wird. Dabei wird insbesonders gezeigt, wie die Sprachkonstrukte auf WebAssembly abgebildet werden. 
     \item \emph{Integration mit JavaScript:} Das erzeugte WebAssembly-Modul benötigt zur Ausführung noch eine Laufzeitumgebung, auf diese wird in diesem Kapitel eingangen. Die Laufzeitumgebung ist in JavaScript implementiert. Weiters wird vom Compiler auch JavaScript-Quelltext generiert, um das Modul ausführen zu können.
     \item \emph{Testen des Compilers und Integration des Compilers in Gradle:} Um eine korrekte Funktion des Compilers zu gewährleisten, muss er getestet werden. Auf diesen Aspekt wird in diesem Kapitel im Detail eingangen. Weiters wird gezeigt, wie der Compiler in Gradle integriert werden kann, um ihn so in eigenen Projekten verwenden zu können. Diese Integration wird anhand einer Konsolenanwendung veranschaulicht.
     \item \emph{Demo-Anwendungen im Browser:} In diesem Kapitel wird ein Fibonacci-Rechner als Web-Anwendung präsentiert, um die praktische Anwendung von MiniJava zu demonstrieren. Weiters wird hier kurz auf die Standardbibliothek für die Abbildung von DOM-Zugriffen eingangen.
 \end{enumerate}
 
 Zum Schluss werden die Ergebnisse der Arbeit zusammengefasst und ein Ausblick auf mögliche Erweiterungen gegeben.
+
+\section{Architektur des Gesamtsystems}
+
+Um zu Beginn einen Überblick zu geben, wird in Abbildung \ref{fig:architecture} die Architektur des Gesamtsystems dargestellt. Nachfolgend werden die wichtigsten Abläufe im Workflow beschrieben:
+\begin{enumerate}
+    \item Die Eingaben des Compilers sind MiniJava- und Ja\-va\-Script-Quelltexte. Die Ja\-va\-Script-Quelltexte enthalten die Implementierung nativer Methoden.
+    \item Die MiniJava-Quelltexte werden vom genierten Scanner und Parser analysiert und in Syntaxbäume umgewandelt. Diese Syntaxbäume werden mit \emph{Visitors} und Codegeneratoren zu einem WebAssembly-Modul (als Datenstruktur im Arbeitsspeicher) verarbeitet. Dabei werden ebenfalls Metainformationen über den MiniJava-Quelltext gesammelt.
+    \item Der Paketgenerator erzeugt aus dem Modul, den Meta-Informationen und den JavaScript-Quelltexten ein Paket. Ein Paket ist ein Verzeichnis mit einer definierten Struktur. Darin ist unter anderem das WebAssembly-Modul als Datei enthalten.
+    \item Das Laufzeitsystem lädt in der Laufzeitumgebung das Paket, dabei wird die Web\-As\-sem\-bly-API eingesetzt. Daraus entsteht ein lauffähiges Modul.
+    \item Nun kann das Modul gestartet werden und Ausgaben auf der Konsole oder visuell im DOM erzeugen.
+\end{enumerate}
+
+
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{einleitung/architecture}
+    \caption{Architektur des Gesamtsystems}
+    \label{fig:architecture}
+\end{figure}
 
 \section{Verweis auf Quelltext}
 Der Quellcode des gesamten Compilers und der Demo-Beispiele steht auf GitHub zum Download zur Verfügung: \url{https://github.com/stefanschoeberl/TODO}
