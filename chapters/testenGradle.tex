@@ -22,9 +22,9 @@ Beim Durchführen des Tests wird im Hintergrund eine Datei (\emph{main.minijava}
 
 Hilfsmethoden wie \lstinline{compileAndRunInMainClass} starten den Compiler und führen das erzeugte Modul aus. Am Ende wird die Konsolenausgabe als Zeichenkette zurückgegeben.
 
-Unter Zuhilfenahme von AssertJ lassen sich die erwarteten Ergebnisse fast wie ein englischer Satz elegant formulieren, zum Beispiel: \lstinline{assertThat(...).containsExactly(...)} \cite{AssertJ}.
+Unter Zuhilfenahme von AssertJ lassen sich die erwarteten Ergebnisse bei der Ausführung des Testfalls fast wie ein englischer Satz elegant formulieren, zum Beispiel: \lstinline{assertThat(...).containsExactly(...)} \cite{AssertJ}.
 
-Es ist auch möglich, native Methoden auf diese Art zu testen. In diesem Fall wird zusätzlich ein Stück JavaScript-Quelltext mitgegeben. Dieser Quelltext wird in die Datei \emph{main.js} gespeichert, die ebenfalls im temporären Verzeichnis liegt. In Listing ??? findet sich ein einfaches Beispiel für so einen Testfall.
+Es ist auch möglich, native Methoden auf diese Art zu testen. In diesem Fall wird zusätzlich ein Stück JavaScript-Quelltext mitgegeben. Dieser Quelltext wird in die Datei \emph{main.js} gespeichert, die ebenfalls im temporären Verzeichnis liegt. In Listing \ref{lst:native-test} findet sich ein einfaches Beispiel für so einen Testfall.
 
 \lstinputlisting[label = {lst:native-test}, caption = {Testfall für native MiniJava-Methoden}]{src/testenGradle/nativeTest.kt}
 
