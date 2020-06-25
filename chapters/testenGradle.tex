@@ -13,9 +13,10 @@ Grundsätzlich stehen zwei Ansätze zum Testen zur Verfügung:
 
 Es wurde der zweite Ansatz gewählt, da er während des Entwickels eine größere Flexibilität bietet. Die finale Architektur des Compilers entstand erst im Laufe der Entwicklung. Am Anfang war zu erwarten, dass sich interne Strukturen des Compilers laufend ändern könnten. Klassische Unit-Tests müsste man bei größeren Architekturänderungen immer wieder anpassen. Bei Tests, die den gesamten Prozess vom Kompileren bis zum Ausführen als Black-Box betrachten, ist eine Änderung nicht notwendig, da bei den einzigen zwei Schnittstellen (MiniJava-Quelltext und Konsolenausgabe) zwischen Implementierung und Tests keine Änderungen zu erwarten sind. Außerdem bilden alle Testfälle gemeinsam eine Art Spezifikation für die Programmiersprache.
 
-Als Testframework wird JUnit 5 \cite{JUnit} in Kombination mit AssertJ \cite{AssertJ} eingesetzt. Nachfolgend wird ein ein Beispiel für einen einfachen Testfall dargestellt:
+Als Testframework wird JUnit 5 \cite{JUnit} in Kombination mit AssertJ \cite{AssertJ} eingesetzt. In Listing \ref{lst:simple-test} wird ein ein Beispiel für einen einfachen Testfall dargestellt.
 
-\lstinputlisting{src/testenGradle/simpleTest.kt}
+\pagebreak
+\lstinputlisting[label = {lst:simple-test}, caption = {Einfacher Testfall}]{src/testenGradle/simpleTest.kt}
 
 Beim Durchführen des Tests wird im Hintergrund eine Datei (\emph{main.minijava}) mit dem zu testenden MiniJava-Quelltext angelegt. JUnit 5 bietet die Annotation \lstinline{@TempDir} an, mit der ein temporäres Verzeichnis für jeden Testfall angelegt wird, das nach Ablauf der Tests wieder gelöscht wird \cite{JUnit}. So werden die Testfälle voneinander isoliert.
 
@@ -23,12 +24,11 @@ Hilfsmethoden wie \lstinline{compileAndRunInMainClass} starten den Compiler und 
 
 Unter Zuhilfenahme von AssertJ lassen sich die erwarteten Ergebnisse fast wie ein englischer Satz elegant formulieren, zum Beispiel: \lstinline{assertThat(...).containsExactly(...)} \cite{AssertJ}.
 
-Es ist auch möglich, native Methoden auf diese Art zu testen. In diesem Fall wird zusätzlich ein Stück JavaScript-Quelltext mitgegeben. Dieser Quelltext wird in die Datei \emph{main.js} gespeichert, die ebenfalls im temporären Verzeichnis liegt.
+Es ist auch möglich, native Methoden auf diese Art zu testen. In diesem Fall wird zusätzlich ein Stück JavaScript-Quelltext mitgegeben. Dieser Quelltext wird in die Datei \emph{main.js} gespeichert, die ebenfalls im temporären Verzeichnis liegt. In Listing ??? findet sich ein einfaches Beispiel für so einen Testfall.
 
-Nachfolgend ein einfaches Beispiel für so einen Testfall:
+\lstinputlisting[label = {lst:native-test}, caption = {Testfall für native MiniJava-Methoden}]{src/testenGradle/nativeTest.kt}
 
-\lstinputlisting{src/testenGradle/nativeTest.kt}
-
+\pagebreak
 \section{Gradle-Task und -Plugin}
 \label{sec:GradleTask-und-Plugin}
 
@@ -36,21 +36,22 @@ Es ist möglich, den MiniJava-Compiler direkt, zum Beispiel über die Kommandoze
 
 In der Gradle-Dokumentation \cite{Gradle} wird beschrieben, wie eigene Erweiterungen für Gradle implementiert werden können. Nachfolgend werden die notwendigen Schritte erläutert, die speziell für den MiniJava-Compiler notwendig sind, um ihn in Gradle zu integrieren.
 
-Zunächst wird ein eigener Task (\lstinline{MiniJavaCompilationTask}) definiert, der das Kompilieren von MiniJava-Quelltext kapselt. Dieser Task ist von \lstinline{JavaExec} abgeleitet. Der \lstinline{JavaExec}-Task wird von Gradle zur Verfügung gestellt und kann, ähnlich wie die java-Komman\-dozeile, kompilierte Bytecode-Klassen ausführen. Im \lstinline{MiniJavaCompilationTask} wird der \lstinline{JavaExec}-Task konfiguriert, damit er die Hauptklasse des Compilers (\lstinline{MainKt}) mit den gewünschten Parametern aufruft:
+Zunächst wird ein eigener Task (\lstinline{MiniJavaCompilationTask}) definiert, der das Kompilieren von MiniJava-Quelltext kapselt. Der Quelltext des Tasks ist in Listing \ref{lst:minijava-compilation-task} zu finden. Dieser Task ist vom \lstinline{JavaExec}-Task abgeleitet. Der \lstinline{JavaExec}-Task wird von Gradle zur Verfügung gestellt und kann, ähnlich wie die java-Komman\-dozeile, kompilierte Bytecode-Klassen ausführen. Im \lstinline{MiniJavaCompilationTask} wird der \lstinline{JavaExec}-Task konfiguriert, damit er die Hauptklasse des Compilers (\lstinline{MainKt}) mit den gewünschten Parametern aufruft.
 
-\lstinputlisting{src/testenGradle/MiniJavaCompilationTask.groovy}
+\lstinputlisting[label = {lst:minijava-compilation-task}, caption = {Gradle-Task zum Kompilieren von MiniJava-Quelltexten}]{src/testenGradle/MiniJavaCompilationTask.groovy}
 
+\pagebreak
 Der \lstinline{MiniJavaCompilationTask} bietet zusätzlich noch die Methoden \lstinline{inputDirs} und \lstinline{outputDir} an, mit denen der Task konfiguriert werden kann. Die Methoden speichern die übergebenen Verzeichnisnamen und leiten daraus die Parameter für den Compiler ab (\lstinline{updateArg}). Über \lstinline{inputs.dir(...)} und \lstinline{outputs.dir(...)} können in Gradle Metainformationen für den Task definiert werden, die beschreiben, von welchen Dateien der Task abhängig ist und welche Dateien der Task produziert. So kann Gradle den Build-Prozess optimieren, indem beispielsweise nur dann der MiniJava-Compiler ausgeführt wird, wenn sich eine MiniJava-Quelltext-Datei verändert hat.
 
-Der \lstinline{JavaExec}-Task benötigt zum Ausführen einen Klassenpfad, in dem die MiniJava-Compiler-Klassen enthalten sind. Dieser Klassenpfad hat einen eigenen Namen (\lstinline{project.configurations.minijava}) und ist unabhängig von anderen, die in Gradle definiert sind (wie beispielsweise \lstinline{implementation}, \lstinline{testImplementation} und \lstinline{compileOnly})
+Der \lstinline{JavaExec}-Task benötigt zum Ausführen einen Klassenpfad, in dem die MiniJava-Compiler-Klassen enthalten sind. Dieser Klassenpfad wird über eigenen Namen angesprochen (\lstinline{project.configurations.minijava}) und ist unabhängig von anderen, die in Gradle definiert sind, wie beispielsweise \lstinline{implementation}, \lstinline{testImplementation} und \lstinline{compileOnly}.
 
-Der \lstinline{minijava}-Klassenpfad muss daher zunächst im Gradle-Projekt definiert werden. Dies ist mit Hilfe eines eigenen Plugins möglich:
+Der \lstinline{minijava}-Klassenpfad muss daher zunächst im Gradle-Projekt definiert werden. Dies ist mit Hilfe eines eigenen Plugins möglich. Der Quelltext des Plugins findet sich in Listing \ref{lst:minijava-gradle-plugin}.
 
-\lstinputlisting{src/testenGradle/MiniJavaPlugin.groovy}
+\lstinputlisting[label = {lst:minijava-gradle-plugin}, caption = {Gradle-Plugin}]{src/testenGradle/MiniJavaPlugin.groovy}
 
-Damit andere Gradle-Projekte das Plugin finden, gibt es mehrere Möglichkeiten. Bei der hier eingesetzten Variante genügt es, im Gradle-Wurzelprojekt ein Verzeichnis \lstinline{buildSrc} zu erstellen, in dem der Quelltext vom Task und Plugin gemäß folgender Verzeichnisstruktur abgelegt wird:
+Damit andere Gradle-Projekte das Plugin finden, gibt es mehrere Möglichkeiten. Bei der hier eingesetzten Variante genügt es, im Gradle-Wurzelprojekt ein Verzeichnis \lstinline{buildSrc} zu erstellen, in dem der Quelltext vom Task und Plugin gemäß der Verzeichnisstruktur in Listing \ref{lst:buildSrc-structure} abgelegt wird.
 
-\lstinputlisting{src/testenGradle/buildSrc.txt}
+\lstinputlisting[label = {lst:buildSrc-structure}, caption = {Aufbau des buildSrc-Moduls}]{src/testenGradle/buildSrc.txt}
 
 Weiters ist darin die Datei \emph{dev.ssch.minijava.properties} notwendig, in welcher der Name der Plugin-Klasse definiert wird:
 
@@ -58,18 +59,15 @@ Weiters ist darin die Datei \emph{dev.ssch.minijava.properties} notwendig, in we
 
 \lstinline{dev.ssch.minijava} im Dateinamen dieser Datei ist der Bezeichner, unter dem das Plugin von anderen Gradle-Projekten gefunden werden kann.
 
+\pagebreak
 \section{Integration von MiniJava in eine Node.js-Konsolenanwendung}
 \label{sec:NodeJSExample}
 
-Auf Basis der Vorbereitungen im vorherigen Abschnitt kann der Compiler nun in eigenen Projekten eingesetzt werden. Nachfolgend wird die Konfiguration in Gradle, sowie das Einbinden in eine Node.js-Konsolenanwendung demonstriert.
+Auf Basis der Vorbereitungen im vorherigen Abschnitt kann der Compiler nun in eigenen Projekten eingesetzt werden. Nachfolgend wird die Konfiguration in Gradle, sowie das Einbinden in eine Node.js-Konsolenanwendung demonstriert. Die Struktur der Node.js-Konsolenanwendung ist in Listing \ref{lst:demo-nodejs-structure} dargestellt. Die vorgenommene Konfiguration in der Datei \emph{build.gradle} ist in Listing \ref{lst:demo-nodejs-build-gradle} zu finden.
 
-Die Node.js-Konsolenanwendung ist folgendermaßen strukturiert:
+\lstinputlisting[label = {lst:demo-nodejs-structure}, caption = {Aufbau der Node.js-Konsolenanwendung}]{src/testenGradle/demo-nodejs.txt}
 
-\lstinputlisting{src/testenGradle/demo-nodejs.txt}
-
-In der Datei \emph{build.gradle} wird folgende Konfiguration vorgenommen:
-
-\lstinputlisting{src/testenGradle/build.gradle}
+\lstinputlisting[label = {lst:demo-nodejs-build-gradle}, caption = {build.gradle}]{src/testenGradle/build.gradle}
 
 Nachfolgend einige Erklärungen zu \emph{build.gradle}:
 \begin{itemize}
@@ -78,11 +76,10 @@ Nachfolgend einige Erklärungen zu \emph{build.gradle}:
     \item In den Zeilen 12 bis 15 wird der vorher definierte Task instanziert und mit zwei Quelltext-Verzeichnissen (Standardbibliothek und das \emph{minijava}-Verzeichnis) und dem Ausgabe-Verzeichnis (\emph{build/wasm-module}) parametrisiert.
 \end{itemize}
 
-Die Standardbibliothek befindet sich außerhalb des Projektverzeichnisses, um sie in verschiedenen Projekten wiederverwenden zu können.
+Die Standardbibliothek befindet sich außerhalb des Projektverzeichnisses, um sie in verschiedenen Projekten wiederverwenden zu können. In der Datei \emph{index.js} kann nun das kompilierte MiniJava-Modul, wie in Node.js üblich, mit \lstinline{require} importiert und anschließend aufgerufen werden. Der Inhalt dieses Skripts ist in Listing \ref{lst:demo-nodejs-index-js} zu finden.
 
-In der Datei \emph{index.js} kann nun das kompilierte MiniJava-Modul, wie in Node.js üblich, mit \lstinline{require} importiert und anschließend aufgerufen werden:
-
-\lstinputlisting{src/testenGradle/index.js}
+\pagebreak
+\lstinputlisting[label = {lst:demo-nodejs-index-js}, caption = {index.js}]{src/testenGradle/index.js}
 
 Das Projekt kann nun mit \lstinline{node index.js} gestartet werden.
 
