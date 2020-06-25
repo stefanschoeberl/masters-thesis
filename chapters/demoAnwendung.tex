@@ -10,19 +10,9 @@ Der Fokus des Fibonacci-Rechners liegt darauf, MiniJava in einem abgeschlossenen
 
 Zum Vergleich wurden diesselben Anforderungen zur Gänze in JavaScript implementiert. Ziel ist dabei lediglich ein Vergleich zwischen den Programmiersprachen und nicht eine idente oder gar deckungsgleiche Implementierung.
 
-In diesem Kapitel werden nur relevante Code-Ausschnitte gezeigt. Die vollständige Implementierung findet sich im Git-Repository.
+In diesem Kapitel werden nur relevante Quelltext-Ausschnitte gezeigt. Die vollständige Implementierung findet sich im Git-Repository.
 
-Der Fibonacci-Rechner wurde auf der folgenden Sofware- und Hardware-Konfiguration getestet:
-\begin{itemize}
-    \item Browser: Google Chrome (Mac) 81.0.4044.122 64-Bit
-    \item Betriebssystem: macOS 10.15.4
-    \item Hardware: MacBook Pro (15-inch, 2018)
-    \begin{itemize}
-        \item CPU: 2,6 GHz 6-Core Intel Core i7
-        \item RAM: 16 GB 2400 MHz DDR4
-    \end{itemize}
-\end{itemize}
-
+\pagebreak
 \section{Implementierung in MiniJava}
 
 Nachfolgend findet sich die Implementierung des Fibonacci-Rechners in MiniJava.
@@ -42,7 +32,7 @@ Nachfolgend findet sich die Implementierung des Fibonacci-Rechners in JavaScript
 
 Zusätzlich zur Basis-Standardbibliothek wird eine eigene für den Browser mitkompiliert. Diese enthält Funktionalitäten, die auf Browser-Schnittstellen abgebildet werden (Implementierungdetails sind im nächsten Abschnitt zu finden).
 
-Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly-Modul vom Web-Server mit dem MIME-Type \lstinline{application/wasm} bereitgestellt wird, sonst kann es zu Laufzeitfehlern kommen \cite{MDNWebAssembly}. Zu Testzwecken reicht dafür das NPM-Modul \lstinline{lite-server}\footnote{\url{https://www.npmjs.com/package/lite-server}} vollkommen aus. Für produktiven Einsatz sollte man diesen Aspekt bei der Konfiguration des Web-Servers beachten. Im Git-Repository findet sich eine lauffähige Konfiguration für den Apache HTTP Server in Form eines \emph{Dockerfiles}.
+Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly-Modul vom Web-Server mit dem MIME-Type \lstinline{application/wasm} bereitgestellt wird, sonst kann es zu Laufzeitfehlern kommen \cite{MDNWebAssembly}. Zu Entwicklungs- und Testzwecken reicht dafür das NPM-Modul \lstinline{lite-server}\footnote{\url{https://www.npmjs.com/package/lite-server}} vollkommen aus. Für produktiven Einsatz sollte man diesen Aspekt bei der Konfiguration des Web-Servers beachten. Im Git-Repository findet sich eine lauffähige Konfiguration für den Apache HTTP Server in Form eines \emph{Dockerfiles}.
 
 \section{Auszug aus der Standardbibliothek für den Browser}
 
@@ -72,11 +62,22 @@ In Abbildung \ref{fig:fibCalculatorBrowser} sind zwei Bildschirm-Schnappschüsse
 
 Während der Ausführung wurde die Laufzeit gemessen, dabei wird die gesamte Zeit ab dem Klicken des Start-Knopfs bis zum Erstellen der Tabelle berücksichtigt. Man erkennt, dass die Laufzeit der MiniJava-Version (4890 Millisekunden) im Vergleich zur JavaScript-Version (8935 Millisekunden) deutlich kürzer ist.
 
+Der Fibonacci-Rechner wurde auf der folgenden Sofware- und Hardware-Konfiguration getestet:
+\begin{itemize}
+    \item Browser: Google Chrome (Mac) 81.0.4044.122 64-Bit
+    \item Betriebssystem: macOS 10.15.4
+    \item Hardware: MacBook Pro (15-inch, 2018)
+    \begin{itemize}
+        \item CPU: 2,6 GHz 6-Core Intel Core i7
+        \item RAM: 16 GB 2400 MHz DDR4
+    \end{itemize}
+\end{itemize}
+
 \section{Vergleich JavaScript und MiniJava}
 
-Insgesamt sieht, man dass die Implementierung aus Codesicht sehr ähnlich sind. Sämtliche Anforderungen wurden von beiden Varianten erfüllt.
+Insgesamt sieht, man dass die Implementierung aus Quelltextsicht sehr ähnlich sind. Sämtliche Anforderungen wurden von beiden Varianten erfüllt.
 
-Die Codemenge ist bei JavaScript deutlich geringer, da keine Datentypen deklariert werden müssen, sondern diese direkt verwendet werden können. Außerdem bietet JavaScript im Vergleich zu MiniJava mehr syntaktische Konstrukte wie beispielsweise die \lstinline{for}-Schleife oder Lambda-Ausdrücke. 
+Die Quelltextmenge ist bei JavaScript deutlich geringer, da keine Datentypen deklariert werden müssen, sondern diese direkt verwendet werden können. Außerdem bietet JavaScript im Vergleich zu MiniJava mehr syntaktische Konstrukte wie beispielsweise die \lstinline{for}-Schleife oder Lambda-Ausdrücke. 
 
 Der wesentliche Vorteil bei MiniJava ist die Typsicherheit, da sämtliche Zugriffe auf Objekte bereits beim Kompilieren überprüft werden und beispielsweise flüchtige Tippfehler früh erkannt werden. Bei der Typsicherheit gibt es eine einzige Ausnahme: das Aufrufen der \lstinline{handleEvent}-Event-Methode, da von der Standardbibliothek angenommen wird, dass diese Methode existiert. Würde man allerdings MiniJava um \emph{Interfaces} erweitern, könnte man dieses Problem lösen, da dann wieder der Compiler in der Lage wäre, die Anwesenheit von Methoden zu garantieren.
 
