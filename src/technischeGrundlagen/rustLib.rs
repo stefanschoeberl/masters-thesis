@@ -7,6 +7,8 @@ extern {
     fn alert(s: &str);
 }
 
+
+
 #[wasm_bindgen]
 pub struct Point {
     x: u32,

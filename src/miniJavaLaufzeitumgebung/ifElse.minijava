@@ -1,6 +1,4 @@
-if (number > 0) {
-    Console.println("number is positive");
-}
+if (number > 0) Console.println("number is positive");
 
 if (count == 10) {
     Console.println("count is 10");

@@ -1,17 +1,17 @@
 \chapter{Technische Grundlagen}
 \label{cha:Technische-Grundlagen}
 
-In diesem Kapitel werden die technischen Grundlagen beschrieben, auf denen der Mi\-ni\-Ja\-va-Compilers aufgebaut ist. Dazu zählen primär WebAssembly und ANTLR. Weiters wird kurz auf die wichtigsten Hilfstechnologien eingegangen. Außerdem wird anhand ausgewählter Beispielen gezeigt, welche aktuellen Technologien WebAssembly bereits einsetzen oder unterstützen.
+In diesem Kapitel werden die technischen Grundlagen beschrieben, auf denen der Mi\-ni\-Ja\-va-Compilers aufgebaut ist. Dazu zählen primär WebAssembly und ANTLR. Weiters wird kurz auf die wichtigsten Hilfstechnologien eingegangen. Außerdem wird anhand ausgewählter Beispiele gezeigt, welche aktuellen Technologien WebAssembly bereits einsetzen oder unterstützen.
 
 \section{WebAssembly}
 \subsection{Hintergrund und Motivation}
-WebAssembly ist ein Bytecode mit dem Ziel, eine sprachunabhängige Plattform fürs Web zu schaffen \cite{WebAssemblyWebsite} \cite{WebAssemblySpecification}. So können neue Programmiersprachen (wie zum Beispiel C, C++ oder Rust) und hochperformanter Anwendungen ins Web gebracht werden.
+WebAssembly ist ein Bytecode mit dem Ziel, eine sprachunabhängige Plattform fürs Web zu schaffen \cite{WebAssemblyWebsite} \cite{WebAssemblySpecification}. So können neue Programmiersprachen (wie zum Beispiel C, C++ oder Rust) und hochperformante Anwendungen ins Web gebracht werden.
 
 Da Browser ausschließlich JavaScript unterstützen, musste bisher der Quelltext anderer Programmiersprachen mit einen Transpiler in JavaScript konvertiert werden. Beispielsweise übernimmt bei TypeScript diese Aufgabe der TypeScript-Compiler \emph{tsc} \cite{TypeScript}.
 
 JavaScript muss im Browser zur Laufzeit interpretiert werden, gegenbenfalls wird Just-In-Time kompiliert \cite{MDNJavaScript}. Dies ist natürlich mit einem gewissen Mehraufwand verbunden. Hier verspricht WebAssembly Performanceverbesserungen, da der Bytecode einfacher geladen werden kann (verglichen mit dem Parsen einer Skriptsprache) \cite{WebAssemblySpecification}.
 
-Man könnte auf den ersten Blick vermuten, dass WebAssembly etwas mit "Assembler" aufgrund des ähnlichen Namen gemeinsam hat und man sich daher Gedanken zur Sicherheit machen könnte. Hier gibt WebAssembly ein klares Sicherheitsmodell vor: Vereinfacht beschrieben läuft sämtlicher WebAssembly-Bytecode im Browser in einer isolierten Umgebung und besitzt nicht mehr Rechte beim Ausführen als klassischer JavaScript-Quelltext \cite{WebAssemblyWebsite} \cite{WebAssemblyW3CPressStandard}.
+Man könnte auf den ersten Blick vermuten, dass WebAssembly etwas mit \emph{Assembler} aufgrund des ähnlichen Namen gemeinsam hat und man sich daher Gedanken zur Sicherheit machen könnte. Hier gibt WebAssembly ein klares Sicherheitsmodell vor: Vereinfacht beschrieben läuft sämtlicher WebAssembly-Bytecode im Browser in einer isolierten Umgebung und besitzt nicht mehr Rechte beim Ausführen als JavaScript-Quelltext \cite{WebAssemblyWebsite} \cite{WebAssemblyW3CPressStandard}.
 
 Im Rahmen eines MVP (Minimum Viable Product) entstand die erste Version für Web\-Assembly, in der nur die notwendigsten Funktionalitäten implementiert wurden, um mit WebAssembly überhaupt arbeiten zu können. \cite{WebAssemblyWebsite}. WebAssembly wird seit 2017 in den vier großen Browsern (Mozilla Firefox, Google Chrome, Apple Safari und Microsoft Edge) unterstützt. Seit Dezember 2019 ist WebAssembly ein offizieller Web-Standard des W3C (World Wide Web Consortium) \cite{WebAssemblyW3CPressStandard}.
 
@@ -19,7 +19,7 @@ WebAssembly trifft in der Spezifikation keine Annahmen zur Laufzeitumgebung. Auc
 
 \subsection{Konzepte}
 \label{subsec:WebAssembly-Konzepte}
-WebAssembly stellt eine sehr elementare Programmiersprache dar, in der Spezifikation werden für diese einige Konzepte \cite{WebAssemblySpecification} definiert. Nachfolgend werden diese vorgestellt und erklärt.
+WebAssembly-Bytecode stellt eine sehr elementare Programmiersprache dar, in der Spezifikation werden für diese einige Konzepte \cite{WebAssemblySpecification} definiert. Nachfolgend werden diese vorgestellt und erklärt.
 
 \begin{description}
     \item[Datentypen] WebAssembly definiert vier Datentypen, zwei für Ganzzahlen und zwei für Fließkommazahlen, jeweils als 32-Bit- und 64-Bit-Variante. Der 32-Bit-Ganz\-zahl\-typ wird ebenfalls für Wahrheitswerte und für Speicheradressen verwendet. Die Ganzzahltypen können sowohl für vorzeichenbehafte und vorzeichenlose Zahlen verwendet werden, abhängig von den konkreten Operation darauf werden sie entsprechend interpretiert. Die zwei Ganzzahltypen werden mit \lstinline{i32} und \lstinline{i64} abgekürzt, die zwei Fließkommatypen mit \lstinline{f32} und \lstinline{f64}.
@@ -27,7 +27,7 @@ WebAssembly stellt eine sehr elementare Programmiersprache dar, in der Spezifika
     \item[Traps] Instruktionen können (absichtlich oder unbeabsichtigt) Laufzeitfehler in Form von Traps erzeugen, die zu einem sofortigen Abbruch der Ausführung führen. Die Behandlung dieser erfolgt in der Laufzeitumgebung und nicht direkt in WebAssembly.
     \item[Funktionen] Instruktionen werden in Funktionen gekapselt. Funktionen können beliebig viele Eingangsparameter, maximal einen Ausgangsparameter und beliebig viele lokale Variablen definieren. Funktionen können andere Funktionen oder sich selbst rekursiv aufrufen.
     \item[Tabellen] In Tabellen können derzeit Funktionen abgelegt werden, auf die über einen Index zugegriffen werden kann. Auf diese Art und Weise können beispielsweise Funktionszeiger umgesetzt werden. 
-    \item[Linearer Speicher] Linearer Speicher ist ein zusammendhängendes Byte-Feld, auf das lesend und schreibend zugegriffen werden kann. Der Zugriff erfolgt über Instruktionen mit einen Index. Beim Erstellen des Speichers wird eine initale Größe definiert, der Speicher kann zur Laufzeit dynamisch wachsen.
+    \item[Linearer Speicher] Linearer Speicher ist ein zusammendhängendes Byte-Feld, auf das lesend und schreibend zugegriffen werden kann. Der Zugriff erfolgt mit eigenen Instruktionen über einen Index. Beim Erstellen des Speichers wird eine initale Größe definiert, der Speicher kann zur Laufzeit dynamisch wachsen.
     \item[Module] In einem Modul werden sämtliche Bestandteile von WebAssembly, darunter Funktionen, Tabellen, Imports und Exports, definiert. Weitere Details zu Modulen finden sich in Abschnitt \ref{subsec:WebAssembly-Module}.
 \end{description}
 
@@ -35,11 +35,11 @@ Die Spezifikation fordert nicht, dass Laufzeitumgebungen einen echten Kellerspei
 
 \subsection{Module}
 \label{subsec:WebAssembly-Module}
-Module sind das Herzstück von WebAssembly. Sämtliche Bestandteile wie beispielsweise Funktionen werden als eine Einheit gemeinsam in Form eines Moduls zusammgefasst \cite{WebAssemblySpecification}.
+Module sind das Herzstück von WebAssembly. Sämtliche Bestandteile wie beispielsweise Funktionen und deren Implementierung werden als eine Einheit gemeinsam in Form eines Moduls zusammgefasst \cite{WebAssemblySpecification}.
 
-Ein Modul kann textuell oder binär repräsentiert werden. In der Spezifikation werden sämtliche WebAssembly-Konstrukte in Form einer abstrakten Syntax definiert. Die beiden Darstellungsformen sind somit als Instanzierung dieser abstrakten Syntax zu verstehen. Die abstrakte Syntax definiert eine Art Baumstruktur. Beide Darstellungeformen sind ineinander umwandelbar. Die binäre Form ist für das Deployment vorgesehen, während die textuelle Form als lesbare Darstellung für Menschen gedacht ist \cite{WebAssemblySpecification} \cite{MDNWebAssembly}. Zeilenkommentare sind in der textuellen Darstellung mit \lstinline{;;} möglich.
+Ein Modul kann textuell oder binär repräsentiert werden. In der Spezifikation werden sämtliche WebAssembly-Konstrukte in Form einer abstrakten Syntax definiert. Die beiden Darstellungsformen sind somit als Instanzierung dieser abstrakten Syntax zu verstehen. Die abstrakte Syntax definiert eine Baumstruktur. Beide Darstellungeformen sind ineinander umwandelbar. Die binäre Form ist für das Deployment vorgesehen, während die textuelle Form als lesbare Darstellung für Menschen gedacht ist \cite{WebAssemblySpecification} \cite{MDNWebAssembly}. Zeilenkommentare sind in der textuellen Darstellung mit \lstinline{;;} möglich.
 
-Die textuelle Darstellung erfolgt in Form von so genannten S-Expressions \cite{WebAssemblySpecification}. Mit diesen können Bäume sehr einfach dargestellt werden. Ein Knoten wird durch \lstinline{(<name> ...)} Ausdrücke beschrieben, zwischen den Klammern befindet sich (durch Leerzeichen getrennt) zuerst der Name/Typ des Knoten, anschließend folgen beliebig viele Werte (zum Beispiel Zahlen oder Zeichenketten) oder Kindknoten \cite{MDNWebAssembly}. In Listing \ref{lst:s-expressions} wird dies in einem kleinen Beispiel verdeutlicht.
+Die textuelle Darstellung erfolgt in Form von so genannten S-Expressions \cite{WebAssemblySpecification}. Mit diesen können Bäume sehr einfach dargestellt werden. Ein Knoten wird durch \lstinline{(<name> ...)} Ausdrücke beschrieben, zwischen den Klammern befindet sich (durch Leerzeichen getrennt) zuerst der Name/Typ des Knoten, anschließend folgen beliebig viele Werte (zum Beispiel Zahlen oder Zeichenketten) oder Kindknoten \cite{MDNWebAssembly}. In Listing \ref{lst:s-expressions} wird dies anhand eines kleinen Beispiels verdeutlicht.
 
 \lstinputlisting[label={lst:s-expressions}, caption = Beispiel für S-Expressions: Knoten a besitzt den Wert 111 und zwei Kindknoten. Diese Kindknoten b und c besitzen jeweils den Wert 222 und 333.]{src/technischeGrundlagen/sExpressionExample.txt}
 
@@ -51,35 +51,35 @@ In einem Modul können verschiedene Komponenten definiert werden. Nachfolgend wi
     \item[Funktionstypen] Ein Funktionstyp definiert die Schnittstelle einer Funktion. Dabei werden die Datentypen der Eingangs- und Ausgangsparameter beschrieben. Auf diese Funktionstypen kann beim Definieren von Funktionen über einen Index referenziert werden. Beispielsweise würde der Typ einer Funktion, die zwei 32-Bit-Ganzzahlen annimmt und eine 32-Bit Fließkommazahl liefert folgendermaßen definiert werden: \lstinputlisting{src/technischeGrundlagen/modulesType.wat}
     \item[Funktionen] Eine Funktion besteht aus der Signatur und einer Folge an Bytecode-Instruktionen. Die Signatur kann in der textuellen Darstellung direkt bei der Funktion definiert werden. Alternativ kann auf einen bestehenden Funktionstyp referenziert werden. In einer Funktion können beliebig viele lokale Variablen definiert werden. Angenommen der vorher definierte Funktionstyp wäre am Index \lstinline{3} erreichbar, könnte man auf folgende zwei Arten eine Funktion mit einer lokalen Variable (64-Bit Ganzzahl) definieren: \lstinputlisting{src/technischeGrundlagen/modulesFunc.wat}
     Eine Funktion ist über einen Index adressierbar. Dieser Index wird über die Definitionsreihenfolge der Funktionen festgelegt, also erhält die 1. Funktion den Index 0, die 2. Funktion den Index 1 usw.
-    \item[Tabellen und Einträge] In Tabellen können Funktionsindizes an einem Index hinterlegt werden. Damit könnten beispielsweise indirekte Funktionsaufrufe mit Funktionszeigern umgesetzt werden. Da für diese Arbeit diese Konzept nicht relevant ist, wird darauf nicht weiter detailliert eingegangen.
+    \item[Tabellen und Einträge] In Tabellen können Funktionsindizes an einem Index hinterlegt werden. Damit könnten beispielsweise indirekte Funktionsaufrufe mit Funktionszeigern umgesetzt werden. Da für diese Arbeit dieses Konzept nicht relevant ist, wird darauf nicht weiter detailliert eingegangen.
     \item[Linearer Speicher und dessen Initialisierung] Frei verwendbarer Speicher kann im Modul definiert werden, dabei wird eine Initalgröße (in Anzahl der Pages, eine Page ist 64KiB groß) angegeben. Der initale Inhalt des Speichers wird über das \lstinline{data}-Konstrukt definiert. So würde man beispielsweise einen Speicher definieren (mit Mindestgröße einer Page) und die Zeichenkette \lstinline{"Hello"} an Index 0 ablegen: \lstinputlisting{src/technischeGrundlagen/modulesMemory.wat}
     \item[Globale Variablen] Auf eine globale Variable kann von allen Funktionen aus zugegriffen werden. Eine globale Variabe kann konstant oder veränderbar definiert werden und muss initialisiert werden. Nachfolgend ein Beispiel für eine 32-Bit Ganzzahlvariable, die mit \lstinline{123} initialisiert wird: \lstinputlisting{src/technischeGrundlagen/modulesGlobal.wat}
     \item[Start-Funktion] Jedes Modul kann eine Funktion definieren, die beim Instanzieren des Moduls aufgerufen wird. Die Funktion wird aufgerufen, sobald Tabellen und Speicher initialisiert wurden. Die aufzurufende Funktion wird über den Index angegeben. So würde man beispielsweise Funktion am Index \lstinline{12} als Startfunktion definieren: \lstinputlisting{src/technischeGrundlagen/modulesStart.wat}
     \item[Imports] Funktionen, Tabellen, Speicher und globale Variablen können von der Laufzeitumgebung zur Verfügung gestellt werden. Ein Import besteht aus drei Teilen: Aus einem Modulnamen, Objektnamen und Objektdefinition. Der Modulname ist nicht mit einem WebAssembly- oder JavaScript-Modul gleichzusetzen, Modulname und Objektname bilden gemeinsam einen zweistufigen Bezeichner, der flexibel nach Bedarf verwendet werden kann. So würde man beispielsweise die Funktion \lstinline{env.println} importieren, der Funktionstyp wäre hier am Index \lstinline{1} definiert: \lstinputlisting{src/technischeGrundlagen/modulesImport.wat}
     Über Imports kann in WebAssembly direkt nach außen kommuniziert werden. Auf diese Art können beispielsweise Konsolenausgaben umgesetzt werden.
-    \item[Exports] Funktionen, Tabellen, Speicher und globale Variablen können auch der Laufzeitumgebung zugänglich gemacht werden. Die Definition eines Exports ist etwas einfacher als die eines Imports, da hier kein Modulname notwendig ist. So würde man beispielsweise die Funktion am Index 2 als \lstinline{main} exportieren: \lstinputlisting{src/technischeGrundlagen/modulesExport.wat}
+    \item[Exports] Funktionen, Tabellen, Speicher und globale Variablen können auch der Laufzeitumgebung zugänglich gemacht werden. Die Definition eines Exports ist etwas einfacher als die eines Imports, da hier kein Modulname notwendig ist. So würde man beispielsweise die Funktion am Index 3 als \lstinline{main} exportieren: \lstinputlisting{src/technischeGrundlagen/modulesExport.wat}
     Mit Exports kann die Umgebung mit dem WebAssembly-Modul kommunizieren. Die Umgebung kann dadurch beispielsweise Funktionen im Modul aufrufen.
 \end{description}
 
 \subsection{Instruktionen}
 \label{subsec:WebAssembly-Instruktionen}
-WebAssembly unterstützt eine Reihe an elementaren Bytecode-Instruktionen. Instruktionen können zur Compilezeit festgelegte Argumente annehmen. Nachfolgend wird auf einige ausgewählte Instruktionen im Detail eingegangen. Eine vollständige Liste aller Instruktionen findet sich in der WebAssembly-Spezifikation \cite{WebAssemblySpecification}. Anmerkung: Die meisten Instruktionen existieren in Ausprägungen für jeden der vier elementaren Datentypen. Die nachfolgenden Beispiele werden nur anhand des 32-Bit Ganzzahltyp gezeigt, \lstinline{i32} könnte man somit mit einem anderen Datentyp ersetzen.
+WebAssembly unterstützt eine Reihe an elementaren Bytecode-Instruktionen. Instruktionen können zur Compilezeit festgelegte Argumente annehmen. Nachfolgend wird auf einige ausgewählte Instruktionen im Detail eingegangen. Eine vollständige Liste aller Instruktionen findet sich in der WebAssembly-Spezifikation \cite{WebAssemblySpecification}. Anmerkung: Die meisten Instruktionen existieren in Ausprägungen für jeden der vier elementaren Datentypen. Die nachfolgenden Beispiele werden nur anhand des 32-Bit-Ganzzahltyps gezeigt, \lstinline{i32} könnte man somit mit einem anderen Datentyp ersetzen.
 
 Die Instruktion \lstinline{i32.const} legt zur Laufzeit einen zur Compilezeit definierte Konstante oben auf den Kellerspeicher, zum Beispiel: \lstinline{i32.const 123}.
 
 Lokale Variablen lassen sich mit \lstinline{local.get} und \lstinline{local.set} lesen und schreiben. Die lokalen Variablen werden ab \lstinline{0} beginnend nummeriert. Besitzt eine Funktion Parameter, so zählen die Parameter ebenfalls zu den lokalen Variablen. Der erste Parameter beginnt dann bei \lstinline{0}, danach folgen die lokalen Variablen.
 
-\lstinline{local.get} liest den Wert der angeforderten lokalen Variable und legt den Wert oben auf den Kellerspeicher. \lstinline{local.set} nimmt den obersten Wert am Kellerspeicher herunter und speichert diesen in die angegebene Variable. In Listing \ref{lst:wasm-locals} wird das Lesen der ersten lokalen Variable und das Schreiben in die zweite lokale Variable dargestellt, dies entspricht einer einfachen Zuweisung. 
+\lstinline{local.get} liest den Wert der angeforderten lokalen Variable und legt den Wert oben auf den Kellerspeicher. \lstinline{local.set} nimmt den obersten Wert am Kellerspeicher herunter und speichert diesen in die angegebene Variable. In Listing \ref{lst:wasm-locals} wird das Lesen der ersten lokalen Variable und das Schreiben in die zweite lokale Variable dargestellt, dies entspricht einer einfachen Zuweisung wie \lstinline{a = b}. 
 
 \lstinputlisting[label={lst:wasm-locals}, caption={Lesen und Schreiben lokaler Variablen}]{src/technischeGrundlagen/instructionsLocal.wat}
 
-Für das Rechnen mit Variablen bietet WebAssembly eine Reihe an binären Operationen an. Diese nehmen jeweils die obersten zwei Werte vom Kellerspeicher herunter (Operanden), wenden auf diese die Operation an und legen anschließend das Ergebnis oben auf den Kellerspeicher. Nachfolgend finden sich einige Beispiele für solche Instruktionen: \lstinline{i32.add} (Addieren), \lstinline{i64.and} (Bitweises Und), \lstinline{f32.le} (Kleiner oder gleich)
+Für das Rechnen mit Variablen bietet WebAssembly eine Reihe an binären Operationen an. Diese nehmen jeweils die obersten zwei Werte vom Kellerspeicher herunter (Operanden), wenden auf diese die Operation an und legen anschließend das Ergebnis oben auf den Kellerspeicher. Nachfolgend finden sich einige Beispiele für solche Instruktionen: \lstinline{i32.add} (Addieren), \lstinline{i64.and} (Bitweises Und), \lstinline{f32.le} (Kleiner oder gleich, \emph{lower or equal}).
 
 Weiters gibt es einige Strukturen zur Steuerung des Kontrollflusses. Die einfachste ist die binäre Verzweigung und besteht aus drei Instruktionen: \lstinline{if}, \lstinline{else} und \lstinline{end}. Die \lstinline{if}-Instruktion nimmt den obersten Wert vom Kellerspeicher herunter. Ist dieser ungleich 0 (\emph{wahr}) werden die Instruktionen zwischen \lstinline{if} und \lstinline{else} ausgeführt. Ist der oberste Wert am Kellerspeicher gleich 0 (\emph{falsch}), werden die Instruktionen zwischen \lstinline{else} und \lstinline{end} ausgeführt. In Listing \ref{lst:wasm-if-else-end} wird ein Beispiel dargestellt.
 
 \lstinputlisting[label={lst:wasm-if-else-end},caption = Beispiel einer binären Verzweigung: Abhängig vom Wert in der ersten lokalen Variable wird \lstinline{1} oder \lstinline{2} in die zweite lokale Variable geschrieben.]{src/technischeGrundlagen/instructionsIfElseEnd.wat}
 
-Neben der binären Verzweigung sind auch Sprünge möglich. Es ist allerdings nicht möglich, zu jeder beliebigen Instruktion im Bytecode zu springen. Sprungziele werden mit \lstinline{block ... end} oder \lstinline{loop ... end} definiert. Dabei wird beim Betreten des Bereichs ein Sprungziel auf den Kellerspeicher gelegt. Beim Verlassen des Bereichs wird das Sprungziel wieder vom Kellerspeicher heruntergenommen. Somit sind die Sprungziele nur innerhalb des Bereich gültig. Das Sprungziel ist bei \lstinline{block} das Ende des Bereichs, bei \lstinline{loop} der Anfang des Bereichs. Einen (unbedingten) Sprung kann man mit der \lstinline{br}-Instruktion durchführen. Für einen bedingten Sprung ist die \lstinline{br_if}-Instruktion vorgesehen, dabei wird der oberste Wert zunächst vom Kellerspeicher heruntergenommen. Ist dieser wahr (ungleich 0), wird gesprungen. Beide Sprunginstruktionen erwarten als Argument eine Zahl \lstinline{n}. Die Instruktion führ dann einen Sprung zum \lstinline{n}-ten obersten Sprungziel am Kellerspeicher durch. Diese Instruktionen können für Schleifen eingesetzt werden. In Listing \ref{lst:wasm-loop} wird ein Beispiel dargestellt.
+Neben der binären Verzweigung sind auch Sprünge möglich. Es ist allerdings nicht möglich, zu jeder beliebigen Instruktion im Bytecode zu springen. Sprungziele werden mit \lstinline{block ... end} oder \lstinline{loop ... end} definiert. Dabei wird beim Betreten des Bereichs ein Sprungziel auf den Kellerspeicher gelegt. Beim Verlassen des Bereichs wird das Sprungziel wieder vom Kellerspeicher heruntergenommen. Somit sind die Sprungziele nur innerhalb des Bereich gültig. Das Sprungziel ist bei \lstinline{block} das Ende des Bereichs, bei \lstinline{loop} der Anfang des Bereichs. Einen (unbedingten) Sprung kann man mit der \lstinline{br}-Instruktion durchführen. Für einen bedingten Sprung ist die \lstinline{br_if}-Instruktion vorgesehen, dabei wird der oberste Wert zunächst vom Kellerspeicher heruntergenommen. Nur wenn dieser wahr (ungleich 0) ist, wird gesprungen. Beide Sprunginstruktionen erwarten als Argument eine Zahl \lstinline{n}. Die Instruktion führ dann einen Sprung zum \lstinline{n}-ten obersten Sprungziel am Kellerspeicher durch. Diese Instruktionen können für Schleifen eingesetzt werden. In Listing \ref{lst:wasm-loop} wird ein Beispiel dargestellt.
 
 \lstinputlisting[label={lst:wasm-loop}, caption = {Beispiel für eine einfache Schleife: Am Anfang der Schleife wird der Wert der ersten lokalen Variable ausgelesen. Ist dieser wahr, wird die Schleife verlassen. Am Ende der Schleife wird unbedingt zum Anfang der Schleife gesprungen.}]{src/technischeGrundlagen/instructionsBranches.wat}
 
@@ -103,7 +103,7 @@ Wie bereits beschrieben wurde im MVP von WebAssembly nur die allernotwendigste F
 \end{enumerate}
 
 Sämtliche aktive Entwicklungen werden in einem GitHub-Repository zusammengefasst \cite{WebAssemblyProposals}.
-Eine davon haben bereits die Implementierungsphase (4) erreicht, beispielsweise Unterstützung für Referenzdatentypen. Threads sind beispielsweise erst in Phase 2. Interessante Funktionalitäten wie Garbage Collection oder Interface Types (diese sollen dabei helfen, die Interoperabilität mit Web-APIs zu verbessern \cite{WebAssemblyInterfaceTypes}) sind erst in Phase 1.
+Einige davon haben bereits die Implementierungsphase (4) erreicht, beispielsweise Unterstützung für Referenzdatentypen. Threads sind beispielsweise erst in Phase 2. Interessante Funktionalitäten wie Garbage Collection oder Interface Types (diese sollen dabei helfen, die Interoperabilität mit Web-APIs zu verbessern \cite{WebAssemblyInterfaceTypes}) sind erst in Phase 1.
 
 \subsection{\emph{WebAssembly Binary Toolkit}}
 Das \emph{WebAssembly Binary Toolkit} (WABT) ist eine Sammlung an Werkzeugen, die EntwicklerInnen im Kontext von WebAssembly unterstützen sollen \cite{WABT}. Dazu zählen Werkzeuge zum Analysieren, Validieren und Dekompilieren von WebAssembly-Modulen. Zwei im Rahmen dieser Arbeit nützliche Werkzeuge sind \lstinline{wat2wasm} und \lstinline{wasm2wat}, mit denen zwischen der textuellen und binären Repräsentation eines Moduls konvertiert werden kann. Konkret wird \lstinline{wat2wasm} im MiniJava-Compiler eingesetzt, um das binäre WebAssembly-Modul zu generieren.
@@ -112,7 +112,7 @@ Das \emph{WebAssembly Binary Toolkit} (WABT) ist eine Sammlung an Werkzeugen, di
 \label{subsec:WebAssembly-JavaScript-API}
 JavaScript stellt eine Schnittstelle zur Verfügung, mit der WebAssembly-Module geladen, kompiliert und ausgeführt werden können \cite{MDNWebAssembly}. In diesem Abschnitt soll ein Überblick über diese Schnittstelle gegeben werden.
 
-Zunächst muss das Modul geladen werden. Dies kann im Browser beispielsweise mit \lstinline{fetch} und in Node.js mit \lstinline{fs.readFile} erfolgen. Aus diesen Rohdaten wird mit \lstinline{WebAssembly.compile} das Modul kompiliert. Im Browser können diese zwei Schritte auch gemeinsam mit \lstinline{WebAssembly.compileStreaming} zusammengefasst werden, dabei wird während dem Herunterladen das Modul gleichzeitig kompiliert. Dadurch können potenziell schnellere Ladezeiten erreicht werden. Diese Funktion ist allerdings nicht in allen Browsern verfügbar.
+Zunächst muss das Modul geladen werden. Dies kann im Browser beispielsweise mit \lstinline{fetch} und in Node.js mit \lstinline{fs.readFile} erfolgen. Mit \lstinline{WebAssembly.compile} wird aus diesen Rohdaten das Modul kompiliert. Im Browser können diese zwei Schritte auch gemeinsam mit \lstinline{WebAssembly.compileStreaming} zusammengefasst werden, dabei wird während dem Herunterladen das Modul gleichzeitig kompiliert. Dadurch können potenziell schnellere Ladezeiten erreicht werden. Diese Funktion ist allerdings nicht in allen Browsern verfügbar.
 
 Nun wird eine Instanz des Moduls mit \lstinline{WebAssembly.instantiate} erzeugt. Diese Funktion benötigt als weiteren Parameter ein JavaScript-Objekt, das die Imports definiert. In diesem Import-Objekt spiegelt sich der zweistufige Bezeichner wieder. So könnte man beispielsweise die in Abschnitt \ref{subsec:WebAssembly-Module} importierte Funktion \lstinline{env.println} bereitstellen:
 
@@ -136,7 +136,7 @@ ANTLR ist in der Lage, für jede kontextfreie Grammatik ohne indirekte oder vers
 
 ALL(*) basiert auf dem in ANTLR 3 eingesetzten LL(*). LL(*) unterschiedet sich zu LL(k) dahingehend, dass die Anzahl der Vorgriffssymbole k nicht fixiert ist \cite{ANTLRLLStar}. Beim Treffen einer Entscheidung bei Alternativen wird stattdessen ein regulärer Ausdruck verwendet. ANTLR 3 erzeugt beim Generieren des Parsers für jedes Nonterminalsymbol einen deterministischen endlichen Automat. Gelingt es nicht, einen deterministischen endlichen Automanten zu erzeugen, wird auf Backtracking zurückgegriffen.
 
-ALL(*) erweitert die Idee von LL(*): Hier wird der determinische Automat beim Parsen dynamisch erzeugt \cite{ANTLRALLStar}. Beim Erzeugen des Automaten werden die Symbole der tatsächlichen Eingabe verwendet. Beim Treffen zukünftigen Entscheidungen wird der bestehende Automat verwendet oder wenn notwendig erweitert. Der Vorteil gegenüber LL(*) ist, dass beim Aufbau des deterministischen endlichen Automats zur Laufzeit nur eine endliche Menge an Eingaben berücksichtigt werden müssen, während bei LL(*) \emph{alle} Möglichkeiten an Eingaben berücksichtigt werden müssen.
+ALL(*) erweitert die Idee von LL(*): Hier wird der determinische Automat beim Parsen dynamisch erzeugt \cite{ANTLRALLStar}. Beim Erzeugen des Automaten werden die Symbole der tatsächlichen Eingabe verwendet. Beim Treffen zukünftigen Entscheidungen wird der bestehende Automat verwendet oder wenn notwendig erweitert. Der Vorteil gegenüber LL(*) ist, dass beim Aufbau des deterministischen endlichen Automats zur Laufzeit nur eine endliche Menge an Eingaben berücksichtigt werden müssen, während bei LL(*) \emph{alle} Möglichkeiten an potenziellen Eingaben berücksichtigt werden müssen.
 
 ALL(*) kann grundsätzlich nicht mit Linksrekursionen umgehen \cite{ANTLR4Reference} \cite{ANTLRALLStar}. ANTLR ist jedoch in der Lage, direkte Linksrekursionen aufzulösen. Dadurch lassen sich mathematische Ausdrücke übersichtlicher und kompakter schreiben. Der Vorrang der Operatoren wird durch die Reihenfolge der Alternativen beschrieben: Die Priorität nimmt von oben nach unten ab. In Listing \ref{lst:antlr-left-recursion} findet sich ein Beispiel um das zu verdeutlichen.
 
@@ -160,9 +160,9 @@ Aus der Grammatikdatei werden Scanner, Parser und weitere Hilfsklassen mit dem A
 
 Aus der im vorherigen Abschnitt beschriebenen Grammatik kann mit ANTLR nun Quelltext für die Zielsprache Java erzeugt werden. Die Namen der generierten Dateien beginnen mit dem Grammatiknamen. Der erzeugte Scanner und Parser wird nun in ein eigenes Programm integriert.
 
-Da sich Java-Quelltext von Kotlin ausgehend verwenden lässt, wird nachfolgend gezeigt, wie der generierte Scanner und Parser in Kotlin aufgerufen wird:
+Da sich Java-Quelltext von Kotlin ausgehend verwenden lässt, findet sich in Listing \ref{lst:antlr-kotlin-usage} ein Beispiel, wie der generierte Scanner und Parser in Kotlin aufgerufen wird. 
 
-\lstinputlisting[]{src/technischeGrundlagen/antlrKotlin.kt}
+\lstinputlisting[label = {lst:antlr-kotlin-usage}, caption = {Verwendung der generierten ANTLR-Klassen in Kotlin}]{src/technischeGrundlagen/antlrKotlin.kt}
 
 Zu den einzelnen Zeilen ein paar Details:
 \begin{itemize}
@@ -179,10 +179,10 @@ Oft reicht es nicht, lediglich zu überprüfen, ob ein Text in der Sprache der G
 
 \begin{itemize}
     \item Die Struktur der Sprache wird in einer Grammatik beschrieben. Semantische Aktionen erfolgen davon getrennt in eigenen Komponenten (\lstinline{Listener} oder \lstinline{Visitor}), die den Syntaxbaum auswerten. Die Grammatik enthält keinen zielsprachenspezifischen Quelltext.
-    \item Die Grammatik enthält zielsprachenspezifischen Quelltext in Form von Codeeinschlüssen. Diese Einschlüsse werden in den generierten Scanner bzw. Parser eingebettet und später während dem Scannen und Parsen ausgeführt. 
+    \item Die Grammatik enthält zielsprachenspezifischen Quelltext in Form von Codeeinschlüssen. Diese Einschlüsse werden im generierten Scanner bzw. Parser eingebettet und später während dem Scannen und Parsen ausgeführt. 
 \end{itemize}
 
-Parr empfiehlt, soweit als möglich auf Codeeinschlüsse zu verzichten. Dafür sprechen folgende Argumente:
+Parr empfiehlt, soweit als möglich auf Codeeinschlüsse zu verzichten. Dafür sprechen folgende Argumente \cite{ANTLR4Reference}:
 \begin{itemize}
     \item Saubere Trennung von Grammatik und Auswertung im Sinne des \emph{Single-res\-pon\-si\-bi\-li\-ty principle} \cite{AgileSoftwareDevelopmentPPP}.
     \item Da die Grammatik sprachunabhängig bleibt, können Scanner und Parser einfacher für andere Zielsprachen aus bestehenden Grammatiken erzeugt werden.
@@ -198,18 +198,19 @@ Dennoch kann es Gründe geben, die für Codeeinschlüsse sprechen:
     \item Wiederverwendbarkeit der Grammatik steht nicht im Vordergrund.
 \end{itemize}
 
-In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. In Abbildung \ref{fig:listenerVisitor} werden die beiden Ansätze visuell gegenübergestellt. Nachfolgend werden die beiden Ansätze beschrieben.
-
-\begin{figure}[]
+\begin{figure}[b]
     \centering
     \includegraphics[width=\textwidth]{technischeGrundlagen/listenerVisitor}
     \caption{Abarbeiten des Syntaxbaums des Satzes \lstinline{sp = 100;} mit einem \lstinline{Listener} und \lstinline{Visitor} \cite{ANTLR4Reference}}
     \label{fig:listenerVisitor}
 \end{figure}
 
+In dieser Arbeit wurde der Ansatz mit sauberer Trennung von Grammatik und Auswertung umgesetzt. Wie bereits erwähnt bietet ANTLR dafür mit \lstinline{Listener} und \lstinline{Vistor} zwei Möglichkeiten, um den Syntaxbaum auszuwerten. In Abbildung \ref{fig:listenerVisitor} werden die beiden Ansätze visuell gegenübergestellt.
+
+\pagebreak
 Die einfachste Art einen Syntaxbaum abzuarbeiten ist eine Kombination aus einem \lstinline{ParseTreeWalker} und einem \lstinline{Listener}. Das Prinzip ist hier vergleichbar mit dem Verarbeiten von XML-Dokumenten auf Basis von SAX. ANTLR stellt den \lstinline{ParseTreeWalker} zur Verfügung, der \lstinline{Listener} ist auf Basis eines generierten \emph{Interfaces} selber zu implementieren. Der Syntaxbaum wird vom \lstinline{ParseTreeWalker} depth-first abgearbeitet. Beim Betreten und Verlassen der Knoten werden entsprechende Methoden des \lstinline{Listeners} aufgerufen: \lstinline{enterXYZ} und \lstinline{exitXYZ} bei Nonterminalsymbolen und \lstinline{visitTerminal} bei Terminalsymbolen.
 
-Manchmal ist jedoch etwas mehr Kontrolle notwendig: Zum Beispiel möchte man den Baum in einer anderen Reihenfolge auswerden. Es kann auch möglich sein, dass Teile des Syntaxbaums gar nicht ausgewertet werden müssen. Hier muss basierend auf einem generierten \emph{Interface} ein \lstinline{Visitor} implementiert werden. für jeden Knotentyp gibt es eine Methode nach dem Schema \lstinline{visitXYZ}. In der Implementierung der \lstinline{visit}-Methoden muss (sofern erwünscht) aktiv das Abarbeiten von Kindknoten angestoßen werden.
+Manchmal ist jedoch etwas mehr Kontrolle notwendig: Zum Beispiel möchte man den Baum in einer anderen Reihenfolge auswerten. Es kann auch möglich sein, dass Teile des Syntaxbaums gar nicht ausgewertet werden müssen. Hier muss basierend auf einem generierten \emph{Interface} ein \lstinline{Visitor} implementiert werden. Für jeden Knotentyp gibt es eine Methode nach dem Schema \lstinline{visitXYZ}. In der Implementierung der \lstinline{visit}-Methoden muss, sofern erwünscht, aktiv das Abarbeiten von Kindknoten angestoßen werden.
 
 ANTLR generiert zu jedem \lstinline{Listener}- und \lstinline{Visitor}-\emph{Interface} eine Basisimplementierung, in der beim \lstinline{Listener} alle Methoden leer sind und beim \lstinline{Visitor} alle Kinder abgearbeitet werden. So können in eigenen Implementierung nur die relevanten Methoden überschrieben werden.
 
@@ -220,7 +221,7 @@ Kotlin ist eine von JetBrains entwickelte Programmiersprache \cite{KotlinReferen
 Bei MiniJava wird Kotlin als Implementierungssprache des MiniJava-Compilers eingesetzt. Der von ANTLR generierte Parser (Java-Quelltext) lässt sich von Kotlin ausgehend problemlos verwenden. Kotlin wurde aufgrund persönlicher Präferenz gewählt, da die tatsächliche Implementierungssprache des Compilers im JVM-Umfeld keine essenzielle Rolle spielt.
 
 \subsection{Node.js}
-Node.js ist eine JavaScript-Laufzeitumgebung, die auf der V8 JavaScript Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript-API für WebAssembly (siehe Abschnitt \ref{subsec:WebAssembly-JavaScript-API}).
+Node.js ist eine JavaScript-Laufzeitumgebung, die auf der V8-JavaScript-Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript-API für WebAssembly (siehe Abschnitt \ref{subsec:WebAssembly-JavaScript-API}).
 
 Bei MiniJava wird Node.js als Laufzeitumgebung für Konsolenanwendungen eingesetzt.
 
@@ -232,14 +233,14 @@ JavaScript dient bei MiniJava als Bindeglied zu WebAssembly.
 \subsection{Gradle}
 Gradle ist ein Build-System, das sich im Java-Umfeld etabliert hat \cite{Gradle}. Der Build-Prozess wird dabei deklarativ in der Programmiersprache Groovy beschrieben.
 
-Das Kernelement sind so genannte Tasks, die eine definierte Aufgabe erfüllen, beispielsweise Java-Quelltext kompilieren, Tests ausführen oder ein Java-Archiv (JAR) erstellen. Zwischen Tasks lassen sich Abhängigkeiten definieren, dadurch werden Tasks in der richtigen Reihenfolge abgearbeitet (beispielsweise müssen Tests nach dem Kompilieren ausgeführt werden). Weiters können für Tasks Eingaben und Ausgaben (das sind Verzeichnisse oder Dateien) definiert werden. Mit diesen Informationen kann Gradle den Build-Prozess dahingehend optimieren, dass nur diejenigen Tasks ausgeführt werden, bei denen es auch sinnvoll ist: Beispielsweise würde es nichts bringen, Java-Quelltext nocheinmal zu kompilieren, wenn er seit dem letzten Kompilieren nicht verändert wurde.
+Das Kernelement sind so genannte Tasks, die eine definierte Aufgabe erfüllen, beispielsweise Java-Quelltext kompilieren, Tests ausführen oder ein Java-Archiv (JAR) erstellen. Zwischen Tasks lassen sich Abhängigkeiten definieren, dadurch werden Tasks in der richtigen Reihenfolge abgearbeitet, beispielsweise müssen Tests nach dem Kompilieren ausgeführt werden. Weiters können für Tasks Eingaben und Ausgaben (das sind Verzeichnisse oder Dateien) definiert werden. Mit diesen Informationen kann Gradle den Build-Prozess dahingehend optimieren, dass nur diejenigen Tasks ausgeführt werden, bei denen es auch sinnvoll ist: Beispielsweise würde es nichts bringen, Java-Quelltext nocheinmal zu kompilieren, wenn er seit dem letzten Kompilieren nicht verändert wurde.
 
 Gradle baut auf der Abhängigkeitsverwaltung von Maven auf. So lassen sich bestehende Bibliotheken, die zum Beispiel im Central Repository\footnote{\url{https://search.maven.org}} verfügbar sind, einfach einbinden.
 
 Bei MiniJava wird Gradle bei der gesamten Implementierung dieser Masterarbeit eingesetzt, sowohl beim Kompilieren des MiniJava-Compilers selbst, als auch beim Kompilieren MiniJava-Quelltexte mit dem MiniJava-Compiler.
 
 \subsection{\emph{webpack}}
-webpack ist ein Werkzeug, mit dem mehrere JavaScript-Module, die auf mehrere Dateien aufgeteilt sind, in eine einzige JavaScript-Datei zusammengebündelt werden können \cite{Webpack}. webpack unterstützt eine Reihe von Modulsystemen, darunter CommonJS (mit Statement \lstinline{require}) oder die \lstinline{import}-Statements im ES2015-Umfeld. Weiters kann webpack auch so konfiguriert werden, dass andere Programmiersprachen (wie zum Beispiel Type\-Script) ebenfalls in diesen Prozess eingebunden werden können. Diese werden dabei mit einem Transpiler in JavaScript-Quelltext konvertiert.
+webpack ist ein Werkzeug, mit dem mehrere JavaScript-Module, die auf mehrere Dateien aufgeteilt sind, in eine einzige JavaScript-Datei zusammengebündelt werden können \cite{Webpack}. webpack unterstützt eine Reihe von Modulsystemen, darunter CommonJS mit der Anweisung \lstinline{require} oder die \lstinline{import}-Anweisungen im ES2015-Umfeld. Weiters kann webpack auch so konfiguriert werden, dass andere Programmiersprachen (wie zum Beispiel Type\-Script) ebenfalls in diesen Prozess eingebunden werden können. Diese werden dabei mit einem Transpiler in JavaScript-Quelltext konvertiert.
 
 Bei MiniJava wird webpack eingesetzt, um beim Einsatz im Browser alle generierten JavaScript-Dateien in einer gemeinsamen JavaScript-Datei zusammenzufassen.
 
@@ -261,7 +262,7 @@ Es gibt bereits eine Reihe an Technologien, die auf WebAssembly aufbauen. In die
 
 Emscripten ist ein Compiler, mit dem sich C/C++-Quelltext nach WebAssembly übersetzen lässt \cite{Emscripten}. Die grundsätzliche Idee ist, dass sich mit möglichst wenig Aufwand bestehender C/C++-Quelltext ins Web bringen lässt. Zum Beispiel werden \lstinline{printf}-Aufrufe automatisch auf die Browser-Konsole abgebildet. Weitere typische Bibliotheken werden direkt unterstützt, darunter zum Beispiel SDL (Simple DirectMedia Layer) OpenGL (über WebGL) oder OpenAL (über Web Audio API). Emscripten bietet zusätzlich eine Reihe an eigenen Schnittstellen an, darunter zum Beispiel Anbindungen an HTML 5 und WebVR.
 
-Da WebAssembly in einem isolierten Umfeld läuft, ergeben sich natürlich auch einige Einschränkungen, die keine 1:1-Abbildungen ermöglichen, dazu zählen zum Beispiel direkter Dateisystem- und Netzwerkzugriff. Für Netzwerkanbindungen bietet Emscripten zum Beispiel eine Schnittstelle für WebSockets an. Dateisystemzugriff wird über ein virtuelles Dateisystem abgebildet. Auf dieses virtuelle Dateisystem kann wie gewohnt über Funktionen wie \lstinline{fopen} zugegriffen werden. Dateien können entweder beim Kompilieren in dieses Dateisystem kopiert oder zur Laufzeit dynamisch über XMLHttpRequests geladen werden.
+Da WebAssembly in einem isolierten Umfeld läuft, ergeben sich natürlich auch einige Einschränkungen, die keine 1:1-Abbildungen ermöglichen, dazu zählen zum Beispiel direkter Dateisystem- und Netzwerkzugriff. Für Netzwerkanbindungen bietet Emscripten zum Beispiel eine Schnittstelle für WebSockets an. Dateisystemzugriff wird über ein virtuelles Dateisystem abgebildet. Auf dieses virtuelle Dateisystem kann wie gewohnt über Funktionen wie \lstinline{fopen} zugegriffen werden. Dateien können entweder beim Kompilieren in dieses Dateisystem kopiert oder zur Laufzeit dynamisch über \lstinline{XMLHttpRequests} geladen werden.
 
 Mit Emscripten sind Aufrufe von JavaScript nach C möglich. Funktionen werden in C mit \lstinline{EMSCRIPTEN_KEEPALIVE} markiert, damit sie durch Optimierungen nicht gelöscht werden, falls sie nirgends in C-Quelltext referenziert werden. In JavaScript gibt es zwei Möglichkeiten zum Aufruf: Direkt an das generierte JavaScript-Modul mit einem Unterstrich vor dem Funktionsnamen oder über \lstinline{ccall}. In Listing \ref{lst:emscripten-js-to-c} findet sich ein auf der offziellen Dokumentation basierendes Beispiel.
 
@@ -269,14 +270,14 @@ Mit Emscripten sind Aufrufe von JavaScript nach C möglich. Funktionen werden in
 
 Es ist auch möglich, C++-Funktionen aufzurufen, dies ist aber aufgrund von \emph{Name mangling} nicht so einfach wie bei C-Funktionen möglich. Eine Lösung für dieses Problem ist das Verpacken in \lstinline|extern "C" { ... }| Konstrukte. Weitere Möglichkeiten sind in der offiziellen Dokumentation zu finden.
 
-Aufrufe von C nach JavaScript sind auch möglich. Grundsätzlich bietet Emscripten hier zwei Ansätze: Das Ausführen von beliebigen JavaScript-Quelltext-Zeichenketten (wird vom JavaScript über \lstinline{eval} ausgewertet) oder das Einbetten von JavaScript-Quelltext in C. In Listing \ref{lst:emscripten-c-to-js} findet sich ein auf der offziellen Dokumentation basierendes Beispiel.
+Aufrufe von C nach JavaScript sind auch möglich. Grundsätzlich bietet Emscripten hier zwei Ansätze: Das Ausführen von beliebigen JavaScript-Quelltext-Zeichenketten (wird in JavaScript mit \lstinline{eval} ausgewertet) oder das Einbetten von JavaScript-Quelltext in C. In Listing \ref{lst:emscripten-c-to-js} findet sich ein auf der offziellen Dokumentation basierendes Beispiel.
 
 \lstinputlisting[label={lst:emscripten-c-to-js}, caption = Aufruf von JavaScript in C]{src/technischeGrundlagen/emscriptenJSCalls.txt}
 
 \subsection{Blazor WebAssembly}
 Blazor \cite{Blazor} ist ein von Microsoft entwickeltes Framework und eine Technologie in der ASP.NET Core Familie. Mit Blazor lassen sich clientseitige Web-Anwendungen auf Basis von .NET mit C\#{} entwickeln. Blazor wird in zwei Ausprägungen angeboten: Blazor Server und Blazor WebAssembly. Weitere Ausprägungen für Progressive-Web-Apps, mobile Anwendungen auf Basis von Web-Technologien und native Anwendungen sind geplant \cite{BlazorBlog}.
 
-Blazor basiert auf Razor \cite{Razor}. Razor ermöglicht, HTML und C\#{} miteinander zu kombinieren. In Listing \ref{lst:blazor-component} findet sich ein Beispiel, das das Zusammenspiel zwischen HTML und C\#{} verdeutlichen soll.
+Blazor basiert auf Razor \cite{Razor}. Razor ermöglicht, HTML und C\#{} miteinander zu kombinieren. In Listing \ref{lst:blazor-component} findet sich ein Beispiel, welches das Zusammenspiel zwischen HTML und C\#{} verdeutlichen soll.
 
 \lstinputlisting[label={lst:blazor-component}, caption = Beispiel für eine Blazor-Komponente aus der offiziellen Dokumenation \cite{Blazor}]{src/technischeGrundlagen/blazorExample.razor}
 
@@ -298,7 +299,7 @@ Weiters bietet Blazor Schnittstellen an, um von JavaScript ausgehend .NET-Method
 
 Die Programmiersprache Rust unterstützt WebAssembly \cite{RustWasmWebsite}. Besonders hervorzuheben ist, dass zur Laufzeit kein Garbage-Collector involviert ist und die Ausführzeiten somit vorhersehbar werden und der Rust-Compiler in der Lage ist, möglichst kleine Web\-As\-sem\-bly-Module zu generieren.
 
-Der Weg vom Rust-Quelltext zur Webanwendung sieht folgendermaßen aus: Der Rust-Quelltext wird mit cargo in ein WebAssembly-Modul kompiliert. Anschließend wird mit wasm-bindgen JavaScript-Quelltext generiert. Das Werkzeug wasm-pack fasst diese Aufgaben zusammen \cite{RustWasmBook}.
+Der Weg vom Rust-Quelltext zur Webanwendung sieht folgendermaßen aus: Der Rust-Quelltext wird mit \emph{cargo} in ein WebAssembly-Modul kompiliert. Anschließend wird mit \emph{wasm-bindgen} JavaScript-Quelltext generiert. Das Werkzeug \emph{wasm-pack} fasst diese Aufgaben zusammen \cite{RustWasmBook}.
 
 Um Rust-Quelltext im WebAssembly-Umfeld verwenden zu können, sind einige Anpassungen im Quelltext notwendig. In Listing \ref{lst:rust-example} findet sich ein einfaches Beispiel (basierend auf der offiziellen Dokumentation \cite{RustWasmBook}), das die Interopabilität zwischen Rust und JavaScript demonstrieren soll.
 

@@ -4,4 +4,3 @@ float c = 123.456f;
 boolean d = true;
 boolean e = false;
 char f = 'A';
-char g = 'z';

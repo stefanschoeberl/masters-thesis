@@ -1,16 +1,17 @@
-\chapter{Anforderungen an den Compiler und die Laufzeitumgebung}
+\chapter{Anforderungen an den Compiler und das Laufzeitsystem}
 \label{cha:MiniJava}
 
-In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Der im Rahmen dieser Arbeit entstandene Compiler übersetzt MiniJava-Quelltexte in WebAssembly-Module. Weiters werden essenzielle Bestandteile der Laufzeitumgebung beschrieben, sodass MiniJava sinnvoll mit der Umgebung interagieren kann.
+In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Der im Rahmen dieser Arbeit entstandene Compiler übersetzt MiniJava-Quelltexte in WebAssembly-Module. Weiters werden essenzielle Bestandteile des Laufzeitsystems beschrieben, sodass MiniJava sinnvoll mit der Umgebung interagieren kann.
 
 \section{Programmiersprache MiniJava}
 
-MiniJava wurde als Untermenge der Programmiersprache Java entworfen und lässt sich vereinfacht beschreiben als \emph{Java mit weniger syntaktischem Zucker und reduzierter Objektorientierung}. Das bedeutet, dass nur die essentiellsten Sprachkonstrukte umgesetzt wurden und auf jene verzichtet wurde, die ausschließlich den Quelltext vereinfachen bzw. verkürzen. Die Syntax von MiniJava basiert auf der offiziellen Syntax von Java 8 \cite{Java8Specification}.
+MiniJava wurde als Teilmenge der Programmiersprache Java entworfen und lässt sich vereinfacht beschreiben als \emph{Java mit weniger syntaktischem Zucker und reduzierter Objektorientierung}. Das bedeutet, dass nur die essentiellsten Sprachkonstrukte umgesetzt wurden und auf jene verzichtet wurde, die ausschließlich den Quelltext vereinfachen bzw. verkürzen. Die Syntax von MiniJava basiert auf der Syntax von Java 8 \cite{Java8Specification}.
 
 Die Grundidee von MiniJava ist zu zeigen, wie eine höhere Programmiersprache ins Web portiert werden kann. In MiniJava-Quelltexten sollte kein WebAssembly-spezifischer Quelltext enthalten sein, so soll gezeigt werden, dass bei potenziellem Ausbau des Compilers auf den vollen Java-Sprachumfang, bestehender Java-Quelltext nahezu direkt für Web-Anwendungen übernommen werden könnte. Ausgenommen davon sind Browser-spezifische Interaktionen, wie beispielsweise für den DOM-Zugriff.
 
-In den nächsten Abschnitten wird Sprachumfang der Programmiersprache MiniJava anhand von Beispielen vorgestellt. Außerdem werden die wichtigsten Unterschiede zu Java hervorgehoben. Die Grammatik von MiniJava ist in Anhang \ref{app:MiniJava-Grammatik} zu finden.
+In den nächsten Abschnitten wird der Sprachumfang der Programmiersprache MiniJava anhand von Beispielen vorgestellt. Außerdem werden die wichtigsten Unterschiede zu Java hervorgehoben. Die Grammatik von MiniJava ist in Anhang \ref{app:MiniJava-Grammatik} zu finden.
 
+\pagebreak
 \subsection{Terminologie-Hinweis zu Konstruktoren und Initalisierern}
 
 In der Java-Sprachsyntax sind \emph{Constructors} und \emph{Instance Initializers} als Sprachkonstrukte definiert \cite{Java8Specification}. Die darin enthaltenen Quelltexten werden nach dem Erzeugen eines Objekts ausgeführt. Zusätzlich sind \emph{Static Initializers} zum Initialieren der Klassenvariablen vorgesehen. In Listing \ref{lst:java-class} werden diese drei Konstrukte in einem Beispiel gezeigt.
@@ -29,8 +30,9 @@ Im Zusammenhang mit MiniJava bedeuten \emph{Konstruktor} und \emph{Initialisiere
 
 \subsection{Elementare Datentypen}
 
-Es werden vier elementare Datentypen unterstützt: \lstinline{int} für 32-Bit Ganzzahlen, \lstinline{float} für 32-Bit Fließkommazahlen, \lstinline{boolean} für Wahrheitswerte und \lstinline{char} für einzelne Zeichen. Für alle vier Datentypen gibt es entsprechende Literale. In Listing \ref{lst:minijava-primitive-datatypes} werden einige Beispiele dazu gezeigt. Bei Variablen elemenaterer Datentypen wird der Wert direkt in der Variable gespeichert.
+Es werden vier elementare Datentypen unterstützt: \lstinline{int} für 32-Bit Ganzzahlen, \lstinline{float} für 32-Bit Fließkommazahlen, \lstinline{boolean} für Wahrheitswerte und \lstinline{char} für einzelne Zeichen. Für alle vier Datentypen gibt es entsprechende Literale. In Listing \ref{lst:minijava-primitive-datatypes} werden einige Beispiele dazu gezeigt. Bei Variablen elementarer Datentypen wird der Wert direkt in der Variable gespeichert.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-primitive-datatypes}, caption = {Elementare Datentypen in MiniJava}]{src/miniJavaLaufzeitumgebung/primitiveDatatypes.minijava}
 
 \subsection{Referenzdatentypen}
@@ -42,7 +44,7 @@ Obwohl MiniJava keine Vererbungsbeziehung im klassischem Sinne unterstützt, ist
 \subsection{Klassen}
 \label{subsec:MiniJava-Klassen}
 
-Klassen sind eine Möglichkeit, eigene Referenzdatentypen zu definieren. Gleichzeitig bilden sie auch das Grundstrukturierungselement der Sprache. Klassen werden mit dem Schlüsselwort \lstinline{class} definiert. Im Unterschied zu Java können Klassen nicht von einander ableiten.
+Klassen sind eine Möglichkeit, eigene Referenzdatentypen zu definieren. Gleichzeitig bilden sie auch das Grundstrukturierungselement der Sprache. Klassen werden mit dem Schlüsselwort \lstinline{class} definiert. Im Unterschied zu Java können Klassen nicht von einer anderen Klasse ableiten.
 
 Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisieren und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um auf sich selbst zu verweisen. So kann zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugegriffen werden.
 
@@ -50,7 +52,7 @@ In Listing \ref{lst:minijava-classes} sieht man ein Beispiel für eine Klasse f�
 
 \lstinputlisting[label = {lst:minijava-classes}, caption = {Definition der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/class.minijava}
 
-Klassen werden mit dem \lstinline{new}-Operator instanziert. Es kann wie in Java üblich mit dem Navigationsoperator \lstinline{.} auf Datenkomponenten und Methoden zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava-Klasse \lstinline{Point} gezeigt.
+Klassen werden mit dem \lstinline{new}-Operator instanziert. Wie in Java üblich, kann mit dem Navigationsoperator \lstinline{.} auf Datenkomponenten und Methoden zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava-Klasse \lstinline{Point} gezeigt.
 
 \lstinputlisting[label = {lst:minijava-class-use}, caption = {Verwendung der MiniJava-Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/instance.minijava}
 
@@ -63,7 +65,7 @@ Methoden werden in Klassen definiert. Eine Methode wird innerhalb der Klasse ein
 
 Methoden können als Objekt- oder Klassenmethode definiert werden. Objektmethoden können im Unterschied zu Klassenmethoden auf Datenkomponenten zugreifen. Klassenmethoden werden mit dem Schlüsselwort \lstinline{static} gekennzeichnet.
 
-Wie bei den Datenkomponenten und Initialisierern gibt es auch bei Methoden keine Sichtbarkeiten, jede Methode ist überall in MiniJava sichtbar. Bei Methoden gibt es allerdings eine Ergänzung: Möchte man eine MiniJava-Methode nach außen zur Verfügung stellen, sodass man sie in JavaScript aufrufen kann, muss diese mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden.
+Wie bei den Datenkomponenten und Initialisierern gibt es auch bei Methoden keine Sichtbarkeiten, jede Methode ist überall in MiniJava sichtbar. Bei Methoden gibt es allerdings eine Ergänzung: Möchte man eine MiniJava-Methode nach außen zur Verfügung stellen, sodass sie in JavaScript aufgerufen werden kann, muss diese mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden.
 
 Manchmal ist es nicht möglich oder gar unerwünscht, eine Methode in Java zu implementieren. In Java wurde mit dem \emph{Java Native Interface} (JNI) \cite{JNI8} und dem Schlüsselwort \lstinline{native} ein Mechanismus geschaffen, mit dem Java-Methoden in C implementiert werden können. Diese Idee wurde in MiniJava aufgegriffen, sodass es möglich ist, MiniJava-Methoden in JavaScript zu implementieren. Solche Methoden werden in MiniJava ebenfalls mit dem Schlüsselwort \lstinline{native} gekennzeichnet. Nativen Methoden sind ein elementarer Bestandteil zur Interaktion mit JavaScript.
 
@@ -78,14 +80,15 @@ Wie in Listing \ref{lst:minijava-advanced-methods} erkennbar, können Methoden i
 \subsection{Felder}
 \label{subsec:MiniJava-Felder}
 
-In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp geordnet hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über den Index mit dem Indizierungsoperator \lstinline{[...]}. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}-Operator erzeugt, dabei wird die Größe angegeben. Die Länge eines Feldes kann über die Datenkomponente \lstinline{length} abgerufen werden. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
+In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp geordnet hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über den Index mit dem Indizierungsoperator \lstinline{[]}. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}-Operator erzeugt, dabei wird die Größe angegeben. Die Länge eines Feldes kann über die Datenkomponente \lstinline{length} abgerufen werden. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-array}, caption = {Felder in MiniJava}]{src/miniJavaLaufzeitumgebung/array.minijava}
 
 \subsection{Zeichenketten}
 \label{subsec:MiniJava-Zeichenketten}
 
-Zeichenketten werden durch die MiniJava-Klasse \lstinline{String} abgebildet. Sie zählen somit ebenfalls zu den Referenzdatentypen. Wie in Java sind Zeichenketten unveränderlich. Zeichenketten können über Literale erzeugt werden. Weiters können Zeichenketten mit dem \lstinline{+}-Operator konkateniert werden. In Listing \ref{lst:minijava-string} finden sich einige Beispiele zum Umgang mit Zeichenketten.
+Zeichenketten werden über die MiniJava-Klasse \lstinline{String} realisiert. Sie zählen somit ebenfalls zu den Referenzdatentypen. Wie in Java sind Zeichenketten unveränderlich. Zeichenketten können über Literale erzeugt werden. Weiters können Zeichenketten mit dem \lstinline{+}-Operator konkateniert werden. In Listing \ref{lst:minijava-string} finden sich einige Beispiele zum Umgang mit Zeichenketten.
 
 \lstinputlisting[label = {lst:minijava-string}, caption = {Zeichenketten in MiniJava}]{src/miniJavaLaufzeitumgebung/string.minijava}
 
@@ -107,7 +110,7 @@ Viele aus Java bekannte Ausdrücke und Operatoren werden in MiniJava unterstütz
 
 Die drei numerischen Datentypen \lstinline{int}, \lstinline{float} und \lstinline{char} unterstützen die vier Grundrechenarten mit den Operatoren \lstinline{+}, \lstinline{-}, \lstinline{*} und \lstinline{/}. Ist einer der beiden Operanden vom Typ \lstinline{float}, wird der andere Operand, falls notwendig, in einen Wert vom Typ \lstinline{float} konvertiert (Typerweiterung). Sind beim Divisionsoperator beide Operanden ein ganzzahliger Typ, wird eine Ganzzahldivision durchgeführt.
 
-Die numerischen Datentypen unterstützen ebenfalls die Vergleichsoperatoren \lstinline{==}, \lstinline{!=}, \lstinline{<}, \lstinline{<=}, \lstinline{>} und \lstinline{>=}. Auch hier wird wie bei den Rechenoperatoren, wenn notwendig, eine Typerweiterung durchgeführt.
+Die numerischen Datentypen unterstützen ebenfalls die Vergleichsoperatoren \lstinline{==}, \lstinline{!=}, \mbox{\lstinline{<},} \lstinline{<=}, \lstinline{>} und \lstinline{>=}. Auch hier wird wie bei den Rechenoperatoren, wenn notwendig, eine Typerweiterung durchgeführt.
 
 Der Datentyp \lstinline{boolean} unterstützt die Vergleichsoperatoren \lstinline{==} und \lstinline{!=}, das logische Und \lstinline{&&} und das logische Oder \lstinline{||}. Die beiden logischen Operatoren werden nicht nach dem Kurzschluss-Prinzip ausgewertet, es werden immer beide Operaden ausgewertet.
 
@@ -117,12 +120,13 @@ Die zwei numerischen Datentypen \lstinline{int} und \lstinline{float} unterstüt
 
 Alle drei numerischen Datentypen können mit dem Cast-Operator in einen anderen numerischen Datentyp explizit umgewandelt werden.
 
-Zu den Ausdrücken zählen auch der Navigationsoperator \lstinline{.}, der Indizierungsoperator \lstinline{[...]} und die \lstinline{new}-Operatoren für Felder und Klassen. Diese wurden bereits in den vorherigen Abschnitten beschrieben.
+Zu den Ausdrücken zählen auch der Navigationsoperator \lstinline{.}, der Indizierungsoperator \lstinline{[]} und die \lstinline{new}-Operatoren für Felder und Klassen. Diese wurden bereits in den vorherigen Abschnitten beschrieben.
 
 Sämtliche Ausdrücke können beliebig tief mit runden Klammern \lstinline{(...)} verschachtelt werden.
 
 In Listing \ref{lst:minijava-expressions} finden sich einige Beispiele zu den Audrücken und Operatoren.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-expressions}, caption = {Ausdrücke in MiniJava}]{src/miniJavaLaufzeitumgebung/expressions.minijava}
 
 \section{MiniJava-Quelltext-Verwaltung}
@@ -137,9 +141,10 @@ Um nicht jede einzelen Datei angeben zu müssen, kann alternativ auch ein Pfad z
 
 So ist es möglich, eine Standardbibliothek in einem eigenen Verzeichnis verwalten zu können. Auf diese Bibliothek können dann andere MiniJava-Projekte problemlos zugreifen. Außerdem lässt sich so MiniJava-Quelltext besser strukturieren.
 
-\section{Laufzeitumgebung}
+\pagebreak
+\section{Laufzeitsystem}
 
-Wie bereits beschrieben, sind in der Sprache MiniJava keine WebAssembly-spezifischen Details enthalten. Die Laufzeitumgebung muss daher sämtliche Aspekte zur Interaktion mit WebAssembly und JavaScript abdecken.
+Wie bereits beschrieben, sind in der Sprache MiniJava keine WebAssembly-spezifischen Details enthalten. Das Laufzeitsystem muss daher sämtliche Aspekte zur Interaktion mit WebAssembly und JavaScript abdecken.
 
 \subsection{Abbildung der Datentypen}
 Eine fundamentale Grundidee ist, dass MiniJava-Objekte 1:1 auf JavaScript-Objekte abgebildet werden. In MiniJava werden die Objekte über eine Referenz angesprochen. Diese Grundidee ist primär durch die Möglichkeit eines direkten DOM-Zugriffs motiviert. Die Alternative dazu wäre, sämtliche MiniJava-Objekte isoliert in einem linearen WebAssembly-Speicher zu verwalten, dann könnte man allerdings nicht mehr direkt auf den DOM zugreifen.
@@ -151,14 +156,15 @@ MiniJava-Felder werden auf JavaScript-Felder abgebildet. In MiniJava/WebAssembly
 Die elementaren Datentypen \lstinline{int}, \lstinline{float}, \lstinline{boolean} und \lstinline{char} verbleiben grundsätzlich in MiniJava, wenn sie als Parameter, lokale Variable oder Rückgabewert eingesetzt werden. Werden sie allerdings als Datenkomponente in Klassen verwendet, müssen sie auf einen entsprechenden JavaScript-Datentyp abgebildet werden.
 
 \subsection{Objekt- und Speicherverwaltung}
-Objekte werden über eine Referenz angesprochen. Referenzen werden zur Laufzeit in JavaScript verwaltet. Beim Transferieren eines Objekts von JavaScript nach MiniJava/WebAssembly wird eine Referenz erstellt. Verlässt die Referenz MiniJava/WebAssembly, wird dereferenziert, um das dahinterliegende Objekt zu erhalten.
+Objekte werden über eine Referenz angesprochen. Referenzen werden zur Laufzeit in JavaScript verwaltet. Beim Austausch eines Objekts von JavaScript nach MiniJava/WebAssembly wird eine Referenz erstellt. Kehrt die Referenz von MiniJava/WebAssembly nach JavaScript zurück, wird dereferenziert, um das dahinterliegende Objekt zu erhalten.
 
 \subsection{Methodenaufrufe von JavaScript nach MiniJava}
 Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, um sie für JavaScript aufrufbar zu machen. Aus technischer Sicht wird dabei aus dem Klassennamen und der Methodensignature ein eindeutiger Bezeichner abgeleitet, der im WebAssembly-Modul als \emph{Export} verwendet wird. Ziel soll sein, Klassen- und Objektmethoden möglichst einfach, wie in Listing \ref{lst:minijava-js-calls} gezeigt, in JavaScript aufrufen zu können.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-js-calls}, caption = {Aufruf von MiniJava-Methoden in JavaScript}]{src/miniJavaLaufzeitumgebung/methodCalls.txt}
 
 \vspace{4em}
-In diesem Kapitel wurde die Programmiersprache MiniJava vorgestellt und auf die Anforderungen an die Laufzeitumgebung kurz eingegangen.
+In diesem Kapitel wurde die Programmiersprache MiniJava vorgestellt und auf die Anforderungen an das Laufzeitsystem kurz eingegangen.
 
 Im nächsten Kapitel wird gezeigt, wie aus MiniJava-Quelltext WebAssembly-Bytecode erzeugt wird.
