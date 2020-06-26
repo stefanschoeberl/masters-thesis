@@ -42,7 +42,7 @@ Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausg
     \item Blazor \cite{Blazor} 
 \end{itemize}
 
-Beim Einsatz von Emscripten und Rust ist im C/C++/Rust-Quelltext ersichtlich, dass JavaScript oder WebAssembly im Hintergrund verwendet wird. Bei Emscripten sind das beispielsweise Einschlüsse von JavaScript-Fragmenten oder bei Rust müssen spezielle Attribute eingefügt werden. Blazor ist ein Framework zum Entwickeln von Web-Anwendungen und bietet somit eine Komplettlösung an. Hier kann bestehender C\#{}-Code unter gewissen Voraussetzungen wiederverwendet werden.
+Beim Einsatz von Emscripten und Rust ist im C/C++/Rust-Quelltext ersichtlich, dass JavaScript oder WebAssembly im Hintergrund verwendet wird. Bei Emscripten sind das beispielsweise Einschlüsse von JavaScript-Fragmenten oder bei Rust müssen spezielle Attribute eingefügt werden. Blazor ist ein Framework zum Entwickeln von Web-Anwendungen und bietet somit eine Komplettlösung an. Hier kann bestehender C\#{}-Quelltext unter gewissen Voraussetzungen wiederverwendet werden.
 
 Mit MiniJava soll ein alternativer Ansatz versucht werden, eine (neue) Programmiersprache ins Web über WebAssembly zu bringen: MiniJava-Quelltext soll im Unterschied zu Emscripten und Rust keine Hinweise darauf enthalten, dass der kompilierte Quelltext schlussendlich mit JavaScript und WebAssembly interagiert. Es soll mit MiniJava auch kein Framework aufgebaut werden wie bei Blazor. Weiters sollen Objekte in MiniJava 1:1 auf JavaScript-Objekte abgebildet werden, dadurch soll beispielsweise direkter Zugriff auf den DOM ermöglicht werden. Dieser Ansatz findet sich so in keiner der drei Technologien. Schnittstellen zur Laufzeitumgebung werden in MiniJava über native Methoden umgesetzt. Dieses Sprachkonstrukt ist aus Java bekannt.
 
@@ -83,4 +83,4 @@ Um zu Beginn einen Überblick zu geben, wird in Abbildung \ref{fig:architecture}
 \end{figure}
 
 \section{Verweis auf Quelltext}
-Der Quellcode des gesamten Compilers und der Demo-Beispiele steht auf GitHub zum Download zur Verfügung: \url{https://github.com/stefanschoeberl/MiniJava-Compiler}
+Der Quelltext des gesamten Compilers und der Demo-Beispiele steht auf GitHub zum Download zur Verfügung: \url{https://github.com/stefanschoeberl/MiniJava-Compiler}
