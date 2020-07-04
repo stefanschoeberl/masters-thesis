@@ -2,7 +2,7 @@
 
 \section{Motivation}
 
-WebAssembly \cite{WebAssemblyWebsite} ist eine neue Technologie mit dem Ziel, eine sprachunabhängige Plattform für das Web zu schaffen. Da nur JavaScript von Browsern unterstützt wird, ist man auf diese Sprache beschränkt. Früher konnte man auch Java-Applets mit Java entwickeln, die direkt im Browser ausgeführt werden konnten. Aktuelle Browserversionen unterstützen diese Technologie mittlerweile nicht mehr und Oracle stellt ebenfalls die Unterstützung ein \cite{OracleJavaSESupportRoadmap}.
+WebAssembly \cite{WebAssemblyWebsite} ist eine neue Technologie mit dem Ziel, eine sprachunabhängige Plattform für das Web zu schaffen. Da nur JavaScript von aktuellen Browsern unterstützt wird, ist man auf diese Sprache beschränkt. Früher konnte man auch Java-Applets mit Java entwickeln, die direkt im Browser ausgeführt werden konnten. Aktuelle Browserversionen unterstützen diese Technologie mittlerweile nicht mehr und Oracle stellt ebenfalls die Unterstützung ein \cite{OracleJavaSESupportRoadmap}.
 
 Anders sieht es bei Sprachen wie beispielsweise TypeScript aus: Um diese im Browser ausführen zu können, muss der Quelltext zunächst mit einem Transpiler nach JavaScript übersetzt werden. Anschließend muss der resultierende JavaScript"=Quelltext vom Browser zur Laufzeit interpretiert werden \cite{TypeScript}.
 
@@ -70,7 +70,7 @@ Um zu Beginn einen Überblick zu geben, wird in Abbildung \ref{fig:architecture}
     \item Die Eingaben des Compilers sind MiniJava- und JavaScript"=Quelltexte. Die JavaScript"=Quelltexte enthalten die Implementierung nativer Methoden.
     \item Die MiniJava"=Quelltexte werden vom Scanner und Parser analysiert und in Syntaxbäume umgewandelt. Diese Syntaxbäume werden mit \emph{Visitors} und Codegeneratoren zu einem WebAssembly"=Modul (als Datenstruktur im Arbeitsspeicher) verarbeitet. Dabei werden ebenfalls Metainformationen über den MiniJava"=Quelltext gesammelt.
     \item Der Paketgenerator erzeugt aus dem Modul, den Meta"=Informationen und den JavaScript"=Quelltexten ein Paket. Ein Paket ist ein Verzeichnis mit einer definierten Struktur. Darin ist unter anderem das WebAssembly"=Modul als Datei enthalten.
-    \item Das Laufzeitsystem lädt in der Laufzeitumgebung das Paket, dabei wird die WebAssembly"=API eingesetzt. Daraus entsteht ein lauffähiges Modul.
+    \item Das Laufzeitsystem lädt mit Hilfe der WebAssembly"=API das Paket in der Laufzeitumgebung Dabei entsteht ein lauffähiges Modul.
     \item Nun kann das Modul gestartet werden und Ausgaben auf der Konsole oder visuell im DOM erzeugen.
 \end{enumerate}
 

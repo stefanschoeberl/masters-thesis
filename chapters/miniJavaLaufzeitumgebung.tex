@@ -6,7 +6,7 @@ In diesem Kapitel wird die Programmiersprache MiniJava vorgestellt. Der im Rahme
 \section{Programmiersprache MiniJava}
 \label{sec:Programmiersprache-MiniJava}
 
-MiniJava wurde als Teilmenge der Programmiersprache Java entworfen und lässt sich vereinfacht beschreiben als \emph{Java mit weniger syntaktischem Zucker und reduzierter Objektorientierung}. Das bedeutet, dass nur die essenziellsten Sprachkonstrukte umgesetzt wurden und auf jene verzichtet wurde, die ausschließlich den Quelltext vereinfachen bzw. verkürzen. Die Syntax von MiniJava basiert auf der Syntax von Java 8 \cite{Java8Specification}. Mit ein paar Anpassungen könnte man MiniJava"=Quelltext auch mit dem Java"=Compiler \lstinline{javac} übersetzen.
+MiniJava wurde im Rahmen dieser Arbeit als Teilmenge der Programmiersprache Java entworfen und lässt sich vereinfacht beschreiben als \emph{Java mit weniger syntaktischem Zucker und reduzierter Objektorientierung}. Das bedeutet, dass nur die essenziellsten Sprachkonstrukte umgesetzt wurden und auf jene verzichtet wurde, die ausschließlich den Quelltext vereinfachen bzw. verkürzen. Die Syntax von MiniJava basiert auf der Syntax von Java 8 \cite{Java8Specification}. Mit ein paar Anpassungen könnte man MiniJava"=Quelltext auch mit dem Java"=Compiler \lstinline{javac} übersetzen.
 
 Die Grundidee von MiniJava ist zu zeigen, wie eine höhere Programmiersprache in das Web gebracht werden kann. In MiniJava"=Quelltexten sollte kein WebAssembly"=spezifischer Code enthalten sein, damit soll gezeigt werden, dass bei potenziellem Ausbau des Compilers auf den vollen Java"=Sprachumfang, bestehender Java"=Quelltext nahezu direkt für Web"=Anwendungen übernommen werden könnte. Ausgenommen davon sind Browser"=spezifische Interaktionen, wie beispielsweise für den DOM"=Zugriff.
 
@@ -29,11 +29,14 @@ Im Zusammenhang mit MiniJava bedeuten \emph{Konstruktor} und \emph{Initialisiere
 
 \emph{Konstruktoren} sind somit ein Implementierungsdetail und nicht Teil des MiniJava"=Sprachumfangs. Details dazu finden sich in Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten}.
 
+\subsection{Namenskonventionen für Bezeichner}
+In MiniJava werden in vielen Sprachelementen, wie beispielsweise bei Klassennamen, Methodennamen oder Variablennamen, Bezeichner verwendet. Ein Bezeichner muss mit einem Unterstrich, einem Klein- oder Großbuchstaben beginnen. Danach darf beliebig oft ein Unterstrich, eine Ziffer, ein Klein- oder Großbuchstabe folgen. Schlüsselwörter sind als Bezeichner nicht erlaubt.
+
+\pagebreak
 \subsection{Elementare Datentypen}
 
 Es werden vier elementare Datentypen unterstützt: \lstinline{int} für 32"=Bit"=Ganzzahlen, \lstinline{float} für 32"=Bit"=Fließkommazahlen, \lstinline{boolean} für Wahrheitswerte und \lstinline{char} für einzelne Zeichen (16- oder 32"=Bit). Für alle vier Datentypen gibt es entsprechende Literale. In Listing \ref{lst:minijava-primitive-datatypes} werden einige Beispiele dazu gezeigt. Bei Variablen von Wertdatentypen wird der Wert direkt in der Variable gespeichert.
 
-\pagebreak
 \lstinputlisting[label = {lst:minijava-primitive-datatypes}, caption = {Elementare Datentypen in MiniJava}]{src/miniJavaLaufzeitumgebung/primitiveDatatypes.minijava}
 
 \subsection{Referenzdatentypen}
@@ -61,7 +64,7 @@ Zeichenketten werden über die MiniJava"=Klasse \lstinline{String} realisiert. S
 
 Mit Klassen können eigene Referenzdatentypen definiert werden. Gleichzeitig bilden sie auch das Grundstrukturierungselement der Sprache. Klassen werden mit dem Schlüsselwort \lstinline{class} definiert. Im Unterschied zu Java können Klassen nicht von einer anderen Klasse ableiten. Sie leiten implizit von der Klasse \lstinline{Object} ab.
 
-Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisierern und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um auf das Empfängerobjekt der Methode zu verweisen. So kann zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugegriffen werden.
+Innerhalb von Klassen können Datenkomponenten, Initialisierer und Methoden definiert werden. Im Unterschied zu Java lässt sich keine Sichtbarkeit für Datenkomponenten und Initialisierer definieren, sie sind überall in MiniJava sichtbar. Das Verhalten entspricht der Standardsichtbarkeit in Java, so als ob sich alle MiniJava"=Klassen im selben \lstinline{package} befinden würden. Auf Methoden wird in Abschnitt \ref{subsec:MiniJava-Methoden} genauer eingegangen. In Initialisierern und Objektmethoden kann das Schlüsselwort \lstinline{this} verwendet werden, um auf das Empfängerobjekt der Methode zu verweisen. So kann zum Beispiel bei gleichnamigen Parametern oder lokalen Variablen auf Datenkomponenten zugegriffen werden.
 
 In Listing \ref{lst:minijava-classes} sieht man ein Beispiel für eine Klasse für zweidimensionale Punkte.
 
@@ -69,9 +72,9 @@ In Listing \ref{lst:minijava-classes} sieht man ein Beispiel für eine Klasse f�
 
 Klassen werden mit dem \lstinline{new}-Operator instanziert. Wie in Java üblich, kann mit dem Selektionsoperator \lstinline{.} auf Datenkomponenten und Methoden zugegriffen werden. In Listing \ref{lst:minijava-class-use} wird die Verwendung der MiniJava"=Klasse \lstinline{Point} gezeigt.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-class-use}, caption = {Verwendung der MiniJava"=Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/instance.minijava}
 
-\pagebreak
 \subsection{Methoden}
 \label{subsec:MiniJava-Methoden}
 
@@ -81,7 +84,7 @@ Methoden werden in Klassen definiert. Eine Methode wird innerhalb der Klasse ein
 
 Methoden können als Objekt- oder Klassenmethode definiert werden. Objektmethoden können im Unterschied zu Klassenmethoden auf Datenkomponenten zugreifen. Klassenmethoden werden mit dem Schlüsselwort \lstinline{static} gekennzeichnet.
 
-Wie bei den Datenkomponenten und Initialisierern gibt es auch bei Methoden keine innerhalb von MiniJava relevante Sichtbarkeiten, jede Methode ist überall in dem MiniJava"=Programm sichtbar. Bei Methoden gibt es allerdings eine Ergänzung: Möchte man eine MiniJava"=Methode nach außen zur Verfügung stellen, sodass sie in JavaScript aufgerufen werden kann, muss diese mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden.
+Wie bei den Datenkomponenten und Initialisierern gibt es auch bei Methoden keine innerhalb von MiniJava relevante Sichtbarkeiten, jede Methode ist überall in dem MiniJava"=Programm sichtbar, so als ob sie bei Java im selben \lstinline{package} liegen würde. Bei Methoden gibt es allerdings eine Ergänzung: Möchte man eine MiniJava"=Methode nach außen zur Verfügung stellen, sodass sie in JavaScript aufgerufen werden kann, muss diese mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden.
 
 Manchmal ist es nicht möglich oder gar unerwünscht, eine Methode in Java zu implementieren. In Java wurde mit dem \emph{Java Native Interface} (JNI) \cite{JNI8} und dem Schlüsselwort \lstinline{native} ein Mechanismus geschaffen, mit dem Java"=Methoden in C implementiert werden können. Diese Idee wurde in MiniJava aufgegriffen, sodass es möglich ist, MiniJava"=Methoden in JavaScript zu implementieren. Solche Methoden werden in MiniJava ebenfalls mit dem Schlüsselwort \lstinline{native} gekennzeichnet. Native Methoden sind ein elementarer Bestandteil zur Interaktion mit JavaScript.
 

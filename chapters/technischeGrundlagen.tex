@@ -7,9 +7,9 @@ In diesem Kapitel werden die technischen Grundlagen beschrieben, auf denen der M
 WebAssembly ist ein Bytecode mit dem Ziel, eine sprachunabhängige Plattform für das Web zu ermöglichen \cite{WebAssemblyWebsite} \cite{WebAssemblySpecification}. So können andere Programmiersprachen (wie zum Beispiel C, C++ oder Rust) und hochperformante Anwendungen in das Web gebracht werden.
 
 \subsection{Hintergrund und Motivation}
-Aktuelle Browser unterstützen ausschließlich JavaScript, daher musste bisher der Quelltext anderer Programmiersprachen mit einen Transpiler in JavaScript konvertiert werden. Bei beispielsweise TypeScript übernimmt diese Aufgabe der TypeScript"=Compiler \emph{tsc} \cite{TypeScript}.
+Aktuelle Browser unterstützen ausschließlich JavaScript, daher musste bisher der Quelltext anderer Programmiersprachen mit einen Transpiler in JavaScript"=Quelltext konvertiert werden. Bei beispielsweise TypeScript übernimmt diese Aufgabe der TypeScript"=Compiler \emph{tsc} \cite{TypeScript}.
 
-JavaScript muss im Browser zur Laufzeit interpretiert werden, gegebenenfalls wird auch ein Just"=In"=Time"=Compiler verwendet \cite{MDNJavaScript}. Dies ist natürlich mit einem gewissen Mehraufwand verbunden. Hier verspricht WebAssembly Performanceverbesserungen, da der Bytecode einfacher geladen (verglichen mit dem Parsen einer Skriptsprache) und effizienter ausgeführt werden kann \cite{WebAssemblySpecification}.
+JavaScript muss im Browser zur Laufzeit interpretiert werden, gegebenenfalls wird auch ein Just"=In"=Time"=Compiler verwendet \cite{MDNJavaScript}. Dies ist natürlich mit einem gewissen Mehraufwand verbunden. Hier verspricht WebAssembly Performanceverbesserungen, da der Bytecode, im Vergleich zum Parsen einer Skriptsprache, einfacher geladen und effizienter ausgeführt werden kann \cite{WebAssemblySpecification}.
 
 Man könnte auf den ersten Blick vermuten, dass WebAssembly aufgrund des ähnlichen Namen etwas mit \emph{Assembler} gemeinsam hat und man sich daher Gedanken zur Sicherheit machen müsste. Aber deren ist nicht so und WebAssembly gibt ein klares Sicherheitsmodell vor: Vereinfacht beschrieben läuft sämtlicher WebAssembly"=Bytecode im Browser in einer isolierten Umgebung und besitzt nicht mehr Rechte beim Ausführen als JavaScript"=Quelltext \cite{WebAssemblyWebsite} \cite{WebAssemblyW3CPressStandard}.
 
@@ -22,12 +22,12 @@ WebAssembly trifft in der Spezifikation keine Annahmen über die Laufzeitumgebun
 WebAssembly"=Bytecode stellt eine elementare Programmiersprache dar. In der Spezifikation werden für diese einige Konzepte \cite{WebAssemblySpecification} definiert. Nachfolgend werden diese vorgestellt und erklärt.
 
 \begin{description}
-    \item[Datentypen] WebAssembly definiert vier Datentypen, zwei für Ganzzahlen und zwei für Fließkommazahlen, jeweils in einer 32"=Bit- und 64"=Bit"=Variante. Der 32"=Bit"=Ganzzahltyp wird auch für Wahrheitswerte und für Speicheradressen verwendet. Die Ganzzahltypen können sowohl für vorzeichenbehaftete als auch für vorzeichenlose Zahlen verwendet werden, abhängig von den konkreten Operation darauf werden sie entsprechend interpretiert. Die zwei Ganzzahltypen werden mit \lstinline{i32} und \lstinline{i64} abgekürzt, die zwei Fließkommatypen mit \lstinline{f32} und \lstinline{f64}.
+    \item[Datentypen] WebAssembly definiert nur vier Datentypen, zwei für Ganzzahlen und zwei für Fließkommazahlen, jeweils in einer 32"=Bit- und 64"=Bit"=Variante. Der 32"=Bit"=Ganzzahltyp wird auch für Wahrheitswerte und für Speicheradressen verwendet. Die Ganzzahltypen können sowohl für vorzeichenbehaftete als auch für vorzeichenlose Zahlen verwendet werden, abhängig von den konkreten Operation darauf werden sie entsprechend interpretiert. Die zwei Ganzzahltypen werden mit \lstinline{i32} und \lstinline{i64} abgekürzt, die zwei Fließkommatypen mit \lstinline{f32} und \lstinline{f64}.
     \item[Instruktionen] Das Laufzeitmodell von WebAssembly basiert auf einer Kellermaschine. Das bedeutet, dass Instruktionen meist Operanden zunächst vom Kellerspeicher herunternehmen, dann die Operation ausführen und am Schluss das Ergebnis wieder auf den Kellerspeicher legen. Standardmäßig werden Instruktionen nacheinander ausgeführt. Es gibt aber auch Instruktionen, die den Kontrollfluss steuern. Einige Instruktionen werden in Abschnitt \ref{subsec:WebAssembly-Instruktionen} detailliert behandelt.
     \item[\emph{Traps}] Instruktionen können (absichtlich oder unbeabsichtigt) Laufzeitfehler in Form von \emph{Traps} erzeugen, die zu einem sofortigen Abbruch der Ausführung führen. Die Behandlung dieser \emph{Traps} erfolgt in der Laufzeitumgebung und nicht direkt in WebAssembly.
     \item[Funktionen] Instruktionen werden in Funktionen gekapselt. Funktionen können beliebig viele Eingangsparameter, maximal ein Funktionsergebnis und beliebig viele lokale Variablen definieren. Funktionen können andere Funktionen oder sich selbst rekursiv aufrufen.
     \item[Tabellen] In Tabellen können derzeit Funktionen abgelegt werden, auf die über einen Index zugegriffen werden kann. Auf diese Art und Weise können beispielsweise Funktionszeiger nachgebildet werden. 
-    \item[Linearer Speicher] Linearer Speicher ist ein zusammenhängendes Byte"=Feld, auf das lesend und schreibend zugegriffen werden kann. Der Zugriff erfolgt mit eigenen Instruktionen über einen Index. Beim Erstellen des Speichers wird eine initiale Größe definiert, der Speicher kann zur Laufzeit automatisch wachsen.
+    \item[Linearer Speicher] Linearer Speicher ist ein zusammenhängendes Byte"=Feld, auf das lesend und schreibend zugegriffen werden kann. Der Zugriff erfolgt mit eigenen Instruktionen über einen Index. Beim Erstellen des Speichers wird eine initiale Größe definiert, der Speicher wächst je nach Bedarf zur Laufzeit automatisch.
     \item[Module] In einem Modul werden sämtliche Bestandteile von WebAssembly, darunter Funktionen, Tabellen, Imports und Exports, definiert. Weitere Details zu Modulen finden sich in Abschnitt \ref{subsec:WebAssembly-Module}.
 \end{description}
 
@@ -50,7 +50,7 @@ In einem Modul können verschiedene Komponenten definiert werden. Nachfolgend wi
 \begin{description}
     \item[Funktionstypen] Ein Funktionstyp definiert die Schnittstelle einer Funktion. Dabei werden die Datentypen der Eingangsparameter und des Funktionsergebnisses. Auf diese Funktionstypen kann beim Definieren von Funktionen über einen Index zugegriffen werden. Beispielsweise würde der Typ einer Funktion, die zwei 32"=Bit"=Ganzzahlen annimmt und eine 32"=Bit"=Fließkommazahl liefert, folgendermaßen definiert werden: \lstinputlisting{src/technischeGrundlagen/modulesType.wat}
     \item[Funktionen] Eine Funktion besteht aus der Signatur und einer Folge von Bytecode"=Instruktionen. Die Signatur kann in der textuellen Darstellung direkt bei der Funktion definiert werden. Alternativ kann ein bestehender Funktionstyp referenziert werden. In einer Funktion können beliebig viele lokale Variablen definiert werden. Angenommen der vorher definierte Funktionstyp wäre über den Index \lstinline{3} erreichbar, könnte man auf folgende zwei Arten eine Funktion mit einer lokalen Variable (64"=Bit Ganzzahl) definieren: \lstinputlisting{src/technischeGrundlagen/modulesFunc.wat}
-    Eine Funktion ist über einen Index adressierbar. Dieser Index wird über die Definitionsreihenfolge der Funktionen festgelegt, also erhält die 1. Funktion den Index 0, die 2. Funktion den Index 1 usw.
+    Eine Funktion ist über einen Index adressierbar. Dieser Index wird implizit über die Definitionsreihenfolge der Funktionen festgelegt, also erhält die 1. Funktion den Index 0, die 2. Funktion den Index 1 und so weiter.
     \item[Tabellen und Einträge] Diese Funktionsindizes können selbst wieder in Tabellen hinterlegt werden. Damit könnten beispielsweise indirekte Funktionsaufrufe (vergleichbar mit Funktionszeigern) umgesetzt werden. Da für diese Arbeit dieses Konzept nicht relevant ist, wird darauf nicht weiter  eingegangen.
     \item[Linearer Speicher und dessen Initialisierung] Linearer Speicher kann direkt im Modul definiert werden, dabei wird eine Initialgröße (in Anzahl der \emph{Pages}, eine \emph{Page} ist 64KiB groß) angegeben. Der initiale Inhalt des Speichers wird über das \lstinline{data}"=Konstrukt definiert. Das folgende Codestück zeigt, wie man beispielsweise einen Speicher definiert (mit Mindestgröße einer Page) und die Zeichenkette \lstinline{"Hello"} an Index 0 ablegt: \lstinputlisting{src/technischeGrundlagen/modulesMemory.wat}
     \item[Globale Variablen] Auf eine globale Variable kann von allen Funktionen aus zugegriffen werden. Eine globale Variabe kann konstant oder veränderbar definiert werden und muss initialisiert werden. Nachfolgend ein Beispiel für zwei 32"=Bit"=Ganzzahlvariablen, einmal konstant und einmal veränderbar. Beide Variablen werden mit \lstinline{123} initialisiert: \lstinputlisting{src/technischeGrundlagen/modulesGlobal.wat}
@@ -102,7 +102,7 @@ Wie bereits beschrieben wurde im MVP von WebAssembly nur die allernotwendigste F
     \item \emph{The Feature is Standardized}: Die Funktionalität ist fertiggestellt und wurde in die Spezifikation aufgenommen.
 \end{enumerate}
 
-Sämtliche aktive Entwicklungen werden in einem GitHub"=\emph{Repository} zusammengefasst \cite{WebAssemblyProposals}.
+Sämtliche offene Entwicklungen werden in einem GitHub"=\emph{Repository} zusammengefasst \cite{WebAssemblyProposals}.
 Einige davon haben bereits die Implementierungsphase (4) erreicht, beispielsweise Unterstützung für Referenzdatentypen. \emph{Threads} befinden sich beispielsweise erst in Phase 2. Interessante Funktionalitäten wie \emph{Garbage Collection} oder \emph{Interface Types} (diese helfen, die Interoperabilität mit Web"=APIs zu verbessern \cite{WebAssemblyInterfaceTypes}) sind erst in Phase 1.
 
 \subsection{\emph{WebAssembly Binary Toolkit}}
@@ -112,7 +112,7 @@ Das \emph{WebAssembly Binary Toolkit} (WABT) ist eine Sammlung an Werkzeugen, di
 \label{subsec:WebAssembly-JavaScript-API}
 JavaScript stellt eine Schnittstelle zur Verfügung, mit der WebAssembly"=Module geladen, kompiliert und ausgeführt werden können \cite{MDNWebAssembly}. In diesem Abschnitt soll ein Überblick über diese Schnittstelle gegeben werden.
 
-Zunächst muss das Modul geladen werden. Dies kann im Browser beispielsweise mit \lstinline{fetch} und in Node.js mit \lstinline{fs.readFile} erfolgen. Mit \lstinline{WebAssembly.compile} wird aus diesen Rohdaten das Modul kompiliert. Im Browser können diese zwei Schritte auch gemeinsam mit \lstinline{WebAssembly.compileStreaming} zusammengefasst werden, dabei wird während des Herunterladens das Modul gleichzeitig kompiliert. Dadurch können schnellere Ladezeiten erreicht werden. Diese Funktion ist allerdings nicht in allen Browsern verfügbar.
+Zunächst muss das Modul geladen werden. Dies kann im Browser beispielsweise mit \lstinline{fetch} und in Node.js mit \lstinline{fs.readFile} erfolgen. Mit \lstinline{WebAssembly.compile} wird aus diesen Rohdaten das Modul kompiliert. Im Browser können diese zwei Schritte auch gemeinsam mit \lstinline{WebAssembly.compileStreaming} zusammengefasst werden, dabei wird während des Herunterladens das Modul gleichzeitig kompiliert. Dadurch können schnellere Ladezeiten erreicht werden. Diese Funktion ist allerdings nicht in allen Browsern verfügbar. Zur Laufzeit kann die Verfügbarkeit dieser Funktionen abgefragt werden.
 
 Nun wird mit \lstinline{WebAssembly.instantiate} eine Instanz des Moduls erzeugt. Diese Funktion benötigt als weiteren Parameter ein JavaScript"=Objekt, das die Imports definiert. In diesem Import"=Objekt spiegelt sich der zweistufige Bezeichner wider. So könnte man beispielsweise die in Abschnitt \ref{subsec:WebAssembly-Module} importierte Funktion \lstinline{env.println} bereitstellen:
 
@@ -168,7 +168,7 @@ Aus der Grammatikdatei werden Scanner, Parser und weitere Hilfsklassen mit dem A
 
 Aus der im vorherigen Abschnitt beschriebenen Grammatik kann mit ANTLR nun Quelltext für die Zielsprache Java erzeugt werden. Die Namen der generierten Dateien beginnen mit dem Grammatiknamen. Der erzeugte Scanner und der Parser werden nun in ein eigenes Programm integriert.
 
-Da sich Java von Kotlin aus verwenden lässt, findet sich in Listing \ref{lst:antlr-kotlin-usage} ein Beispiel, wie der generierte Scanner und Parser in Kotlin aufgerufen werden. 
+Da sich Java von Kotlin (siehe Abschnitt \ref{subsec:Kotlin}) aus verwenden lässt, findet sich in Listing \ref{lst:antlr-kotlin-usage} ein Beispiel, wie der generierte Scanner und Parser in Kotlin aufgerufen werden. 
 
 \lstinputlisting[label = {lst:antlr-kotlin-usage}, caption = {Verwendung der generierten ANTLR"=Klassen in Kotlin}]{src/technischeGrundlagen/antlrKotlin.kt}
 
@@ -226,7 +226,10 @@ ANTLR generiert zu jedem \lstinline{Listener}- und \lstinline{Visitor}"=\emph{In
 \section{Weitere Technologien}
 
 Neben WebAssembly und ANTLR als Kerntechnologien werden für die Implementierung einige Hilfstechnologien benötigt. Auf diese wird in diesem Abschnitt eingegangen.
+
 \subsection{Kotlin}
+\label{subsec:Kotlin}
+
 Kotlin ist eine von JetBrains entwickelte Programmiersprache \cite{KotlinReference}. Kotlin zeichnet sich besonders durch die kompakte Syntax und starke Integration in das bestehende Java"=Umfeld aus. Zusätzlich bietet Kotlin Absicherungen gegen \lstinline{NullPointerExceptions} zur Übersetzungszeit. Wie bei Java wird aus Kotlin beim Kompilieren Bytecode für die \emph{Java Virtual Machine} (JVM) erzeugt. Durch diese enge Interoperabilität kann beim Programmieren mit Kotlin auf die bereits große Menge an Java"=Bibliotheken zurückgegriffen werden.
 
 Die kompakte Syntax von Kotlin gegenüber Java wird anhand eines kleinen Beispiels mit \emph{Data Classes} gezeigt. Mit \emph{Data Classes} können Klassen, die primär nur Daten kapseln, sehr einfach definiert werden, da oft benötigte Methoden wie \emph{Getter}, \emph{Setter}, \lstinline{hashCode}, \lstinline{equals} und \lstinline{toString} automatisch vom Kotlin"=Compiler erzeugt werden. Außerdem wird ein Konstruktor generiert, mit dem alle Datenkomponenten initialisiert werden können. In Java müsste man all diese Methoden händisch schreiben oder von der IDE generieren lassen. In Listings \ref{lst:point-kotlin} und \ref{lst:point-java} wird der Quelltext für die Klasse \lstinline{Point} gezeigt. Die Unterschiede sind deutlich sichtbar.
@@ -243,7 +246,7 @@ Bei MiniJava wird Kotlin als Implementierungssprache des MiniJava"=Compilers ein
 
 \pagebreak
 \subsection{Node.js}
-Node.js ist eine JavaScript"=Laufzeitumgebung, die auf der V8"=JavaScript"=Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst viele Verbindungen gleichzeitig abarbeiten können sollen. Node.js unterstützt die JavaScript"=API für WebAssembly (siehe Abschnitt \ref{subsec:WebAssembly-JavaScript-API}).
+Node.js ist eine JavaScript"=Laufzeitumgebung, die auf der V8"=JavaScript"=Engine aufbaut \cite{NodeJSDocumentation}. Node.js wird unter anderem bei skalierbaren Serveranwendungen eingesetzt, die möglichst vielen gleichzeitig Verbindungen umgehen können sollen. Node.js unterstützt die JavaScript"=API für WebAssembly (siehe Abschnitt \ref{subsec:WebAssembly-JavaScript-API}).
 
 Bei MiniJava wird Node.js als Laufzeitumgebung für Konsolenanwendungen eingesetzt.
 
@@ -262,9 +265,9 @@ Gradle baut auf der Abhängigkeitsverwaltung von Maven auf. So lassen sich beste
 Bei MiniJava wird Gradle bei der gesamten Implementierung dieser Masterarbeit eingesetzt, sowohl beim Kompilieren des MiniJava"=Compilers selbst, als auch beim Kompilieren von MiniJava"=Quelltexten mit dem MiniJava"=Compiler.
 
 \subsection{\emph{webpack}}
-\emph{webpack} ist ein Werkzeug, mit dem mehrere JavaScript"=Module, die auf mehrere Dateien aufgeteilt sind, in eine einzige JavaScript"=Datei zusammengebündelt werden können \cite{Webpack}. webpack unterstützt eine Reihe von Modulsystemen, darunter \emph{CommonJS} mit der Anweisung \lstinline{require} oder die \lstinline{import}"=Anweisungen im ES2015"=Umfeld. Weiters kann webpack auch so konfiguriert werden, dass andere Programmiersprachen (wie zum Beispiel TypeScript) ebenfalls in diesen Prozess eingebunden werden können. Diese werden dabei mit einem Transpiler in JavaScript"=Quelltext konvertiert.
+\emph{webpack} ist ein Werkzeug, mit dem mehrere JavaScript"=Module, die auf mehrere Dateien aufgeteilt sind, in eine einzige JavaScript"=Datei zusammengebündelt werden können \cite{Webpack}. \emph{webpack} unterstützt eine Reihe von Modulsystemen, darunter \emph{CommonJS} mit der Anweisung \lstinline{require} oder die \lstinline{import}"=Anweisungen im ES2015"=Umfeld. Weiters kann \emph{webpack} auch so konfiguriert werden, dass andere Programmiersprachen (wie zum Beispiel TypeScript) ebenfalls in diesen Prozess eingebunden werden können. Diese werden dabei mit einem Transpiler in JavaScript"=Quelltext konvertiert.
 
-Bei MiniJava wird webpack eingesetzt, um beim Einsatz im Browser alle generierten JavaScript"=Dateien in einer gemeinsamen JavaScript"=Datei zusammenzufassen.
+Bei MiniJava wird \emph{webpack} eingesetzt, um beim Einsatz im Browser alle generierten JavaScript"=Dateien in einer gemeinsamen JavaScript"=Datei zusammenzufassen.
 
 \subsection{\emph{JUnit} und \emph{AssertJ}}
 \emph{JUnit} ist ein Unit"=Test"=Framework für Java \cite{JUnit}. Testfälle können sehr einfach definiert werden. Es genügt dabei, eine Methode mit der \lstinline{@Test}"=Annotation zu markieren, dann kann sie von JUnit gefunden werden. Weiters lässt sich JUnit direkt in Gradle als Teil des Build"=Prozesses integrieren \cite{Gradle}.
@@ -273,7 +276,9 @@ Bei MiniJava wird webpack eingesetzt, um beim Einsatz im Browser alle generierte
 
 \lstinputlisting{src/technischeGrundlagen/assertions.java}
 
-Auch wenn der Quelltext etwas länger ist, ist er aussagekräftiger. Außerdem würde man sofort erkennen, wenn man den erwarteten und den tatsächlichen Wert vertauschen würde.
+Auch wenn der Quelltext etwas länger ist, ist er aussagekräftiger. Außerdem würde man sofort erkennen, wenn man den erwarteten und den tatsächlichen Wert vertauschen würde. So erhält man beim Testen des Programms sprechende Fehlermeldungen, die beim Beheben des Problems helfen. Die nachfolgende Fehlermeldung würde entstehen, wenn \lstinline{someNumber} den Wert \lstinline{456} hätte:
+
+\lstinputlisting{src/technischeGrundlagen/assertJError.txt}
 
 JUnit wird gemeinsam mit AssertJ bei MiniJava zum Testen des Compilers eingesetzt.
 

@@ -5,5 +5,5 @@ constructor() {
     this.types = new Map();
     this.objects.set(null, 0);
     this.references.set(0, null);
-    this.instance = null;
+    this.wasmModuleInstance = null;
 }

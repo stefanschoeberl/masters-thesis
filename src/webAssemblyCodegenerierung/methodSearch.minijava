@@ -9,11 +9,12 @@ class Main {
     public static void main() {
         String text = "Hello World!";
         Point point = new Point(1f, 2f);
+        int number = 123;
 
-        compute(text, 123);
-        compute(point, 123);
+        compute(text, number);
+        compute(point, number);
         
-        compute(text, text, 123);
-        compute(text, point, 123);
+        compute(text, text, number);
+        compute(text, point, number);
     }
 }

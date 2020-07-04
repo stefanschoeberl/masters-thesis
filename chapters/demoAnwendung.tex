@@ -4,13 +4,13 @@
 Um die praktische Anwendung von MiniJava für typische Browser"=Anwendungen zu demonstrieren, wurde eine einfache Web"=Anwendung implementiert, die Fibonacci"=Zahlen berechnen kann.
 
 \section{Anforderungen an den Fibonacci-Rechner}
-Die Benutzeroberfläche soll zwei Eingabefelder (für die Werte $a$ und $b$) und einen Start"=Knopf darstellen. Beim Drücken des Start"=Knopfs soll die Anwendung die Fibonacci"=Zahlen von $fib(a)$ bis $fib(b)$ berechnen und in einer Tabelle ausgeben.
+Die Benutzeroberfläche (siehe Abbildung \ref{fig:fibCalculatorBrowser} auf Seite \pageref{fig:fibCalculatorBrowser}) soll zwei Eingabefelder (für die Werte $a$ und $b$) und einen Start"=Knopf darstellen. Beim Drücken des Start"=Knopfs soll die Anwendung die Fibonacci"=Zahlen von $fib(a)$ bis $fib(b)$ berechnen und in einer Tabelle ausgeben.
 
 Der Fokus des Fibonacci"=Rechners liegt darauf, MiniJava in einem abgeschlossenen Projekt zu präsentieren und zu zeigen, wie MiniJava mit dem Browser interagieren kann. Dabei wurde der Aspekt einer effizienten Implementierung bewusst vernachlässigt. Dadurch wirken zwar einige Quelltext"=Abschnitte erzwungen (beispielsweise das rekursive Berechnen jeder einzelnen Fibonacci-Zahl ohne Speichern von Zwischenergebnissen oder das Kapseln von Methodenparametern in Objekte), gleichzeitig wird dadurch aber ermöglicht, im Rahmen eines überschaubaren Anwendungsfalls möglichst viele Funktionalitäten von MiniJava einzusetzen.
 
 Zum Vergleich wurden dieselben Anforderungen zur Gänze auch in JavaScript implementiert. Ziel ist dabei lediglich ein Vergleich zwischen den Programmiersprachen und nicht eine idente oder gar deckungsgleiche Implementierung.
 
-In diesem Kapitel werden nur relevante Quelltext"=Ausschnitte gezeigt. Die vollständige Implementierung findet sich im Git"=Repository.
+In diesem Kapitel werden nur relevante Quelltext"=Ausschnitte gezeigt.
 
 \pagebreak
 \section{Implementierung in MiniJava}
@@ -36,7 +36,7 @@ Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly"=Modul 
 
 \section{Auszug aus der Standardbibliothek für den Browser}
 
-Um in MiniJava sinnvoll mit dem Browser interagieren zu können, wurde eine kleine Standardbibliothek entwickelt. Zwei Funktionen daraus werden nun im Detail betrachtet: Das Abfragen eines HTML"=Knotens aus dem DOM über die ID des Elements und das Hinzufügen eines Event"=Listeners für das Mausklick"=Ereignis zu einem HTML"=Knoten.
+Um in MiniJava sinnvoll mit dem Browser interagieren zu können, wurde eine kleine Standardbibliothek entwickelt. Zwei Funktionen daraus werden nun im Detail betrachtet: Das Abfragen eines HTML"=Knotens aus dem DOM über die ID des Elements und das Hinzufügen eines Event"=Listeners für das Mausklick"=Ereignis zu einem HTML"=Knoten. In der Standardbibliothek sind noch weitere Methoden zur Modifikation des DOMs vorhanden, unter anderem das Erstellen und Einfügen von Knoten.
 
 \lstinputlisting{src/demoAnwendung/Browser.minijava}
 \lstinputlisting{src/demoAnwendung/Browser.js}
