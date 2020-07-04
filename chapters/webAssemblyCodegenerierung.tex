@@ -5,7 +5,7 @@ Dieses Kapitel befasst sich mit der Generierung von WebAssembly"=Bytecode. Dabei
 
 Beim Generieren von Bytecode wird in diesem Kapitel davon ausgegangen, dass sämtlicher zu kompilierender MiniJava"=Quelltext syntaktisch und semantisch korrekt ist. Das bedeutet, dass ausschließlich der Schönwetterfall betrachtet wird, in dem zum Beispiel Variablen vor der Verwendung deklariert werden, Variablen nicht doppelt deklariert werden, aufzurufenden Methoden existieren oder verwendete Datentypen in Ausdrücken zu einander kompatibel sind. Auf die Fehlerbehandlung wird nicht eingangen, da dies aufgrund des großen Umfangs an Fehlerfällen den Rahmen sprengen würde und der Fokus dieses Kapitels auf der Codegenerierung liegt, die syntaktisch und semantisch korrekten MiniJava-Quelltext voraussetzt.
 
-Der für ein Sprachkonstrukt generierte Bytecode wird in diesem Kapitel schablonenartig als \emph{Vorlage} gezeigt. Der Bytecode in diesen Vorlagen ist in der textuellen Repräsentation von WebAssembly dargestellt. Darin gibt sich Platzhalter (gekenntzeichnet durch spitze Klammern \lstinline{<...>}), die beispielsweise auf generierten Bytecode anderer Sprachkonstrukte, andere Instruktionen oder Übersetzungszeit-Konstanten verweisen. Weiters kann es vorkommen, dass Teile der Vorlage nur in bestimmten Fällen generiert werden. Diese Teile werden durch eckige Klammern \lstinline{[...]} gekennzeichnet.
+Der für ein Sprachkonstrukt generierte Bytecode wird in diesem Kapitel schablonenartig als Vorlage gezeigt. Der Bytecode in diesen Vorlagen ist in der textuellen Repräsentation von WebAssembly dargestellt. Darin gibt sich Platzhalter (gekennzeichnet durch spitze Klammern \lstinline{<...>}), die beispielsweise auf generierten Bytecode anderer Sprachkonstrukte, andere Instruktionen oder Übersetzungszeit-Konstanten verweisen. Weiters kann es vorkommen, dass Teile der Vorlage nur in bestimmten Fällen generiert werden. Diese Teile werden durch eckige Klammern \lstinline{[...]} gekennzeichnet.
 
 \pagebreak
 \section{Gradle-Projektaufbau}
@@ -14,7 +14,7 @@ Das Gradle"=Projekt besteht aus fünf Gradle"=Modulen\footnote{Ein Gradle"=Modul
 \begin{itemize}
     \item Das Modul \emph{grammar} enthält die Grammatik von MiniJava in ANTLR"=Syntax. In der dazugehörigen \emph{build.gradle}"=Datei wird die Scanner-, Parser- und Visitorgenerierung mit dem ANTLR"=Gradle"=Plugin konfiguriert.
     \item Das Modul \emph{compiler} enthält den Quelltext, der für das Abarbeiten des Syntaxbaums verantwortlich und daraus ein WebAssembly"=Modul erzeugt. Außerdem ist in diesem Modul die \emph{Main}"=Funktion des Compilers enthalten.
-    \item Das Modul \emph{wasm} enthält Datenstrukturen zum Aufbau eines WebAssembly"=Moduls im Arbeitsspeicher. Der Aufbau und die Namen dieser Datenstrukturen entsprechen der WebAssembly"=Spezifikation \cite{WebAssemblySpecification}. Weiters werden Methoden zur Verfügung gestellt, um aus dem WebAssembly-Modul die textuelle Repräsentation und in weiterer Folge auch die binäre Repräsentation des Modules zu erzeugen.
+    \item Das Modul \emph{wasm} enthält Datenstrukturen zum Aufbau eines WebAssembly"=Moduls im Arbeitsspeicher. Der Aufbau und die Namen dieser Datenstrukturen entsprechen der WebAssembly"=Spezifikation \cite{WebAssemblySpecification}. Weiters werden Methoden zur Verfügung gestellt, um aus dem WebAssembly-Modul die textuelle Repräsentation und in weiterer Folge auch die binäre Repräsentation des Moduls zu erzeugen.
     \item Das Modul \emph{demo-nodejs} enthält ein Beispiel, wie MiniJava in einer Node.js"=Konsolenanwendung eingesetzt werden kann. Darauf wird in Abschnitt \ref{sec:NodeJSExample} eingegangen.
     \item Das Modul \emph{demo-browser} enthält eine Web"=Anwendung, in der MiniJava eingesetzt wird. Darauf wird in Kapitel \ref{cha:DemoAnwendung} eingegangen.
 \end{itemize}
@@ -37,8 +37,8 @@ Insgesamt werden dazu sechs Arten von Symboltabellen eingesetzt, die teilweise h
         \item Die \lstinline{FieldSymbolTable} verwaltet Datenkomponenten einer Klasse. Eine Datenkomponente ist über den Namen eindeutig identifizierbar. Für jede Datenkomponente werden der Datentyp und die WebAssembly"=Funktionsindizes des \emph{Getters} und des \emph{Setters} gespeichert.
         \item Die \lstinline{InitializerSymbolTable} verwaltet die Initialisierer einer Klasse. Ein Initialisierer ist über die Datentypen der Parameter eindeutig identifizierbar. Für jeden Initialisierer wird der dazugehörige WebAssembly"=Funktionsindex gespeichert.
     \end{itemize}
-    \item In der \lstinline{StringLiteralSymbolTable} werden alle im MiniJava"=Quelltext vorhandenen Zeichnketten"=Literale gespeichert, um daraus auf die Referenz der Zeichenkette schließen zu können.
-    \item Die \lstinline{LocalVariableSymbolTable} verwaltet lokale Variablen und Parameter innerhalb eines Methoden- oder Initialisiererrumpfs. Lokale Variablen und Parameter sind über den Namen eindeutig identifizierbar, dabei werden verschachtelte Gültigkeitsbereiche mitberücksichtigt. Für jede lokale Variable bzw. jeden Parameter werden der Datentyp und der WebAssembly"=Index gespeichert.
+    \item In der \lstinline{StringLiteralSymbolTable} werden alle im MiniJava"=Quelltext vorhandenen Zeichenketten"=Literale gespeichert, um daraus auf die Referenz der Zeichenkette schließen zu können.
+    \item Die \lstinline{LocalVariableSymbolTable} verwaltet lokale Variablen und Parameter innerhalb eines Methoden- oder Initialisiererrumpfs. Lokale Variablen und Parameter sind über den Namen eindeutig identifizierbar, dabei werden verschachtelte Gültigkeitsbereiche mitberücksichtigt. Für jede lokale Variable bzw. jeden Parameter wird der Datentyp und der WebAssembly"=Index gespeichert.
 \end{itemize}
 
 Bei einem Compiler"=Aufruf werden mehrere MiniJava"=Quelltexte gemeinsam kompiliert. Bei diesem Vorgangs wird genau eine \lstinline{ClassSymbolTable}"=Instanz für alle MiniJava"=Klassen verwendet. Es wird ebenfalls nur eine \lstinline{StringLiteralSymbolTable}"=Instanz für alle Zeichenketten"=Literale eingesetzt. Beim Codegenerieren für eine Methode bzw. einen Initialisierer wird eine eigene \lstinline{LocalVariableSymbolTable}"=Instanz verwendet, die danach nicht mehr benötigt wird.
@@ -49,12 +49,12 @@ Da MiniJava wie Java Vorwärtsreferenzen (zum Beispiel beim Aufruf einer Methode
 
 \begin{enumerate}
     \item Deklarationsphase: In dieser Phase werden alle Klassennamen, Datenkomponenten, Initialisierer und Methoden gesammelt. Daraus wird die \lstinline{ClassSymbolTable} mit den dazugehörigen Kindsymboltabellen aufgebaut. Genauer betrachtet wird innerhalb dieser Phase der Syntaxbaum auch schon zwei Mal abgearbeitet: Beim ersten Durchlauf werden die Klassennamen gesammelt, im zweiten Durchlauf die Datenkomponenten, Initialisierer und Methoden. Das hat den Grund, dass Datenkomponenten, Initialisierer und Methoden Vorwärtsreferenzen auf Klassen enthalten könnten, zum Beispiel als Datentyp eines Parameters. Mit Hilfe eines \lstinline{Visitors} können nur die relevanten Teile des Syntaxbaums ausgewertet werden, so wird verhindert, dass zu diesem Zeitpunkt irrelevante Teile, wie beispielsweise einzelne Anweisungen, unnötig abgearbeitet werden.
-    \item Codegenerierungsphase: Mit Hilfe der in der ersten Phase gewonnenen Metainformationen kann nun der WebAssembly"=Bytecode generiert. In dieser Phase wird der Syntaxbaum noch einmal abgearbeitet. Das Ergebnis dieser Phase ist ein WebAssembly"=Modul als Objektgraph im Arbeitsspeicher.
+    \item Codegenerierungsphase: Mit Hilfe der in der ersten Phase gewonnenen Metainformationen kann nun der WebAssembly"=Bytecode generiert werden. In dieser Phase wird der Syntaxbaum noch einmal abgearbeitet. Das Ergebnis dieser Phase ist ein WebAssembly"=Modul als Objektgraph im Arbeitsspeicher.
 \end{enumerate}
 
 \section{Indexräume für Funktionen}
 
-Funktionen sind in einem WebAssembly"=Modul über einen Index adressierbar. Einige MiniJava"=Sprachkonstrukte, wie beispielsweise Methoden, werden auf WebAssembly"=Funktionen abgebildet. Ein Teil dieser Funktionen wird direkt in WebAssembly definiert und für diese werden WebAssembly"=Instruktionen generiert. Der andere Teil wird importiert, da die Implementierung der Funktion in JavaScript vorliegt.
+Funktionen sind in einem WebAssembly"=Modul über einen Index adressierbar. Einige MiniJava"=Sprachkonstrukte, wie beispielsweise Methoden, werden auf WebAssembly"=Funktionen abgebildet. Ein Teil dieser Funktionen wird direkt in WebAssembly definiert und für diese Funktionen werden WebAssembly"=Instruktionen generiert. Der andere Teil wird importiert, da die Implementierung der Funktion in JavaScript vorliegt.
 
 Die WebAssembly"=Spezifikation sieht folgende Einschränkung zur Reihenfolge der Funktionen vor: Zunächst müssen Funktionen importiert werden, erst danach dürfen Funktionen (inkl. Instruktionen) definiert werden \cite{WebAssemblySpecification}. Allgemein betrachtet erhalten importierte Funktionen somit den Indexbereich von $0$ bis $n$ und in WebAssembly definierte Funktionen den Indexbereich von $n+1$ bis $m$ 
 
@@ -90,15 +90,15 @@ Unter Berücksichtigung dieser Einschränkung werden die Funktionsindizes in der
     \label{tab:functionIndices}
 \end{table}
 
-Die sprachinterenen Funktionalitäten wurden an den Anfang gesetzt, damit die darin enthaltenen Funktionen immer über denselben Index erreichbar sind, dies erleichtert die Implementierung.
+Die sprachinternen Funktionalitäten wurden an den Anfang gesetzt, damit die darin enthaltenen Funktionen immer über denselben Index erreichbar sind, dies erleichtert die Implementierung.
 
 \section{Codegenerierung für nicht-native Methoden}
 
-Objektmethoden und Klassenmethoden werden auf in WebAssembly definierte Funktionen abgebildet. Dabei wird ein Funktionstyp \lstinline{(type ...)} im WebAssembly"=Modul definiert, der die Schnittstelle der Funktion beschreibt. Haben mehrere Funktionen diesselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly"=Funktion referenziert den entsprechenden Typ.
+Objektmethoden und Klassenmethoden werden auf in WebAssembly definierte Funktionen abgebildet. Dabei wird ein Funktionstyp \lstinline{(type ...)} im WebAssembly"=Modul definiert, der die Schnittstelle der Funktion beschreibt. Haben mehrere Funktionen dieselbe Schnittstelle, werden Typen wiederverwendet. Jede WebAssembly"=Funktion referenziert den entsprechenden Typ.
 
 \subsection{\lstinline{this}-Parameter}
 \label{subsec:this-Parameter}
-Objektmethoden benötigen eine Referenz auf das Empfängerobjet der Methode. Diese Referenz ist im Methodenrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden ein zusätzlichen Parameter definiert, auch \lstinline{this}"=Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}"=Parameter ist bei Objektmethoden immer der erste Parameter.
+Objektmethoden benötigen eine Referenz auf das Empfängerobjet der Methode. Diese Referenz ist im Methodenrumpf über das Schlüsselwort \lstinline{this} abrufbar. Daher wird für Objektmethoden ein zusätzlicher Parameter definiert, auch \lstinline{this}"=Parameter genannt, über den sie die Referenz auf das Objekt zur Laufzeit erhalten können. Der \lstinline{this}"=Parameter ist bei Objektmethoden immer der erste Parameter.
 
 \subsection{Rückgabetyp}
 Falls in MiniJava ein Rückgabetyp (ungleich \lstinline{void}) für die Methode definiert wurde, muss dieser in der Funktionsdefinition mit \lstinline{(result ...)} angegeben werden. Zusätzlich wird als letzte Instruktion im Funktionsrumpf \lstinline{unreachable} eingefügt, Details dazu folgen im nächsten Abschnitt.
@@ -114,7 +114,7 @@ WebAssembly"=Module werden validiert, zum Beispiel beim Einsatz von \lstinline{w
 
 Ein Beispiel für so eine Funktion findet sich in Listing \ref{lst:unreachable-problem}. Die \lstinline{if}"=\lstinline{else}"=\lstinline{end}"=Instruktion liefert immer einen Rückgabewert, egal welcher Zweig ausgeführt wird. Aus WebAssembly"=Sicht ist die \lstinline{if}"=\lstinline{else}"=\lstinline{end}"=Instruktion allerdings ein Ausdruck, der selbst einen Wert liefern könnte. Die Instruktion ist vergleichbar zum ternären Operator \lstinline{?:} in Java. Da in diesem Fall die \lstinline{if}"=\lstinline{else}"=\lstinline{end}"=Instruktion aber keinen Wert liefert, nimmt der WebAssembly"=Validator an, dass nach dem Ausführen der \lstinline{if}"=\lstinline{else}"=\lstinline{end}"=Instruktion der Kellerspeicher leer ist und die Funktion deshalb keinen Rückgabewert liefern kann.
 
-\lstinputlisting[label = {lst:unreachable-problem}, caption = {Beispiel für eine Funktion, zwar korrekt ausgeführt werden könnte, aber nicht korrekt validierbar ist}]{src/webAssemblyCodegenerierung/unreachableExample.wasm}
+\lstinputlisting[label = {lst:unreachable-problem}, caption = {Beispiel für eine Funktion, die zwar korrekt ausgeführt werden könnte, aber nicht korrekt validierbar ist}]{src/webAssemblyCodegenerierung/unreachableExample.wasm}
 
 In einem GitHub"=Issue \cite{WebAssemblyUnreachableWorkaround} wurde dieses Problem bereits diskutiert. Als einfache Lösung für dieses Problem wird vorgeschlagen, die \lstinline{unreachable}"=Instruktion am Ende der Funktion hinzuzufügen. Dadurch kommt es aus Sicht des Validators \emph{immer} zu einem Laufzeitfehler, da die Ausführung \emph{immer abgebrochen wird}.
 
@@ -130,14 +130,14 @@ Initialisierer werden wie Methoden auf in WebAssembly definierte Funktionen abge
 \section{Codegenerierung für Ausdrücke}
 \label{sec:Codegenerierung-für-Ausdrücke}
 
-Der Syntaxbaum von Ausdrücken wird von einem \lstinline{Visitor} abgearbeitet. Der \lstinline{Visitor} delegiert je nach Ausdruckstyp im Syntaxbaums das Abarbeiten des Ausdrucks an einen eigenen Codegenerator. Jeder Codegenerator ist für die Codegenerierung einer Teilmenge der Ausdrucksmenge verantwortlich. Diese Aufteilung verbessert die Lesbarkeit und Strukurierung des Compilers.
+Der Syntaxbaum von Ausdrücken wird von einem \lstinline{Visitor} abgearbeitet. Der \lstinline{Visitor} delegiert je nach Ausdruckstyp im Syntaxbaum das Abarbeiten des Ausdrucks an einen eigenen Codegenerator. Jeder Codegenerator ist für die Codegenerierung einer Teilmenge der Ausdrucksmenge verantwortlich. Diese Aufteilung verbessert die Lesbarkeit und Strukturierung des Compilers.
 
-Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaums wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}"=Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}"=Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}"=Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können. Der Ablauf zum Codegenerieren wird in Abbildung \ref{fig:codegenerators} anhand eines einfachen Beispiels dargestellt.
+Die Codegenerierung für jeden Ausdruck erfolgt allgemein nach folgendem Prinzip: Jeder Ausdruck im Syntaxbaum wird isoliert in einer eigenen Methode betrachtet. Müssen Kindausdrücke eines Ausdrucks ausgewertet werden, erfolgt dies über die \lstinline{visit}"=Methode. Die Kontrolle wird dann \emph{nach unten} an den jeweils verantwortlichen Codegenerator weitergegeben. Durch das Ausführen der \lstinline{visit}"=Methode wird Bytecode für das Auswerten des Kindausdrucks erzeugt. Gleichzeitig liefert die \lstinline{visit}"=Methode als Rückgabewert den statischen Datentyp des Kindausdrucks, dieser Datentyp wird meist für die weitere Auswertung des eigenen Ausdrucks verwendet. Zum Schluss muss als Rückgabewert der statische Datentyp des eigenen Ausdrucks geliefert werden, damit \emph{höhere} Codegeneratoren damit weiterarbeiten können. Der Ablauf zum Codegenerieren wird in Abbildung \ref{fig:codegenerators} anhand eines einfachen Beispiels dargestellt.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{webAssemblyCodegenerierung/codegenerators}
-    \caption{Beispiel für die Codegenerierung des Ausdrucks \lstinline{1+2}. Der Visitor entscheidet anhand der Art des Ausdrucks, welcher Codegenerator verwendet wird. In diesem Fall wird der \lstinline{BinaryExpressionCodegenerator} gewählt. Zunächst wird Bytecode für das Auswerten des linken Teilausdruck erzeugt, dann Code für den rechten Teilausdruck. Zum Auswerten der Teilausdrücke wird die Kontrolle zurück an den Visitor gegeben. Zum Schluss wird die Instruktion für die Addition direkt generiert.}
+    \caption{Beispiel für die Codegenerierung des Ausdrucks \lstinline{1+2}. Der Visitor entscheidet anhand der Art des Ausdrucks, welcher Codegenerator verwendet wird. In diesem Fall wird der \lstinline{BinaryExpressionCodegenerator} gewählt. Zunächst wird Bytecode für das Auswerten des linken Teilausdrucks erzeugt, dann Code für das Auswerten des rechten Teilausdrucks. Zum Auswerten der Teilausdrücke wird die Kontrolle zurück an den Visitor gegeben. Zum Schluss wird die Instruktion für die Addition direkt generiert.}
     \label{fig:codegenerators}
 \end{figure}
 
@@ -145,7 +145,7 @@ In den nachfolgenden Abschnitten wird beschrieben, auf welche Bytecode"=Instrukt
 
 Die Codegenerierung einiger Ausdrücke ist etwas aufwendiger, daher wird in den nachfolgenden Abschnitten nur auf die einfachsten Ausdrücke eingegangen. Den komplexeren Ausdrücken wurden eigene Abschnitte etwas später in diesem Kapitel gewidmet. Zu den komplexeren Ausdrücken zählen: 
 \begin{itemize}
-    \item Erzeugen von Objekten über den \lstinline{new}"=Operator(siehe Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten})
+    \item Erzeugen von Objekten über den \lstinline{new}"=Operator (siehe Abschnitt \ref{sec:Codegenerierung-für-das-Erzeugen-und-Initialisieren-von-Objekten})
     \item Lesen von Datenkomponenten, sowohl direkt als auch über den Selektionsoperator (siehe Abschnitt \ref{sec:Codegenerierung-für-den-Zugriff-auf-Datenkomponenten})
     \item Erzeugen von Feldern über den \lstinline{new}"=Operator (siehe Abschnitt \ref{subsec:Erzeugen-von-Feldern})
     \item Lesezugriff auf Felder über den \lstinline{[]}"=Operator (siehe Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index})
@@ -190,7 +190,7 @@ Für alle vier elementare Datentypen können Werte mittels Literalen erzeugt wer
 \subsection{Zeichenketten-Literale}
 \label{subsec:Zeichenketten-Literale}
 
-Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTable} alle im MiniJava"=Quelltext vorkommenden Zeichenketten"=Literale. Jedem Literal wird eine eindeutige Referenz zugewiesen. Kommt das gleiche Zeichenketten"=Literal mehrfach im Quelltext vor, wird dieselbe Referenz verwendet. Mit der \lstinline{i32.const}"=Instruktion wird diese Referenz als Konstante auf den Kellerspeicher gelegt. Der erzeugte Bytecode entspricht der Vorlage in Listing.
+Während der Codegenerierungsphase sammelt die \lstinline{StringLiteralSymbolTable} alle im MiniJava"=Quelltext vorkommenden Zeichenketten"=Literale. Jedem Literal wird eine eindeutige Referenz zugewiesen. Kommt das gleiche Zeichenketten"=Literal mehrfach im Quelltext vor, wird dieselbe Referenz verwendet. Mit der \lstinline{i32.const}"=Instruktion wird diese Referenz als Konstante auf den Kellerspeicher gelegt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:string-literal-bytecode}.
 
 \lstinputlisting[label = {lst:string-literal-bytecode}, caption = {Vorlage für Zeichenketten"=Literale}]{src/webAssemblyCodegenerierung/string-literal.wasm}
 
@@ -242,7 +242,7 @@ MiniJava bietet eine Vielzahl an binären Operatoren an. Die Operatoren lassen s
 
 Für die ersten drei Kategorien wird ähnlicher Bytecode erzeugt. Dabei wird Bytecode für das Auswerten der beiden Operanden erzeugt. Hat bei numerischen Operanden mindestens einer der Operanden den Datentyp \lstinline{float}, wird für den anderen Operanden zusätzlich Bytecode für eine implizite Typumwandlung (Typerweiterung) erzeugt. Diese Umwandlung in Werte des Datentyps \lstinline{float} ist nur für Werte des Typs \lstinline{int} oder \lstinline{char} mit der Instruktion \lstinline{f32.convert_i32_s} möglich.
 
-Anhand der Datentypen der Operanden (nach den impliziten Typumwandlungen) wird die Instruktion ermittelt, die die Operation schlussendlich durchführt. Die Operatoren werden mit den dazugehörigen Instruktionen in Tabelle \ref{tab:binaryOperators} dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
+Anhand der Datentypen der Operanden (nach den impliziten Typumwandlungen) wird die Instruktion ermittelt, welche die Operation schlussendlich durchführt. Die Operatoren werden mit den dazugehörigen Instruktionen in Tabelle \ref{tab:binaryOperators} dargestellt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
 
 \begin{table}[]
     \centering
@@ -273,9 +273,9 @@ Anhand der Datentypen der Operanden (nach den impliziten Typumwandlungen) wird d
 
 Die vierte Kategorie (Zeichenketten"=Konkatenation) stellt einen Sonderfall dar, da der Operator auf einen Funktionsaufruf abgebildet wird. Zeichenketten werden in JavaScript verwaltet, daher müssen Operationen darauf ebenfalls in JavaScript erfolgen. Es ist auch möglich, Zeichenketten mit Werten anderer Datentypen zu konkatenieren. Für jede Kombination der Datentypen auf der linken und rechten Seite des Operators wird eine eigene Funktion im WebAssembly"=Modul importiert, deren Implementierung in JavaScript hinterlegt ist. Auf die Implementierung dieser Funktionen wird in Abschnitt \ref{subsec:JavaScript-Zeichenketten-Konkatenation} näher eingegangen.
 
-Wie bei den anderen binären Operationen, müssen zunächst die Operanden ausgewertet werden, anschließend wird je nach Datentyp der Operanden die entsprechende Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:binaryOperator-bytecode}.
+Wie bei den anderen binären Operationen, müssen zunächst die Operanden ausgewertet werden, anschließend wird je nach Datentyp der Operanden die entsprechende Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:stringConcat-bytecode}.
 
-\lstinputlisting[label = {lst:stringConcat-bytecode}, caption = {Vorlage für binäre Operatoren}]{src/webAssemblyCodegenerierung/stringConcat.wasm}
+\lstinputlisting[label = {lst:stringConcat-bytecode}, caption = {Vorlage für den \lstinline{+}-Operator für das Konkatenieren von Zeichenketten}]{src/webAssemblyCodegenerierung/stringConcat.wasm}
 
 \section{Codegenerierung für Anweisungen}
 
@@ -320,7 +320,7 @@ Beim Speichern in eine lokale Variable wird über die \lstinline{LocalVariableSy
 Der Zugriff auf Felder und Datenkomponenten erfolgt über importierte JavaScript"=Funktionen. Details zu den Schreiboperationen finden sich in Abschnitt \ref{subsec:Lese-und-Schreibzugriff-mit-Index} für Felder und in Abschnitt \ref{subsec:Zugriff-auf-Datenkomponenten-Setter} für Datenkomponenten.
 
 \subsection{Methodenaufruf als Anweisung}
-Methodenaufrufe gehören zu den Ausdrücken. Als einzige Form der Ausdrücke dürfen sie auch direkt als Anweisung verwendet werden. Hier wird zunächst Bytecode für den Methodenaufruf selbst erzeugt, Details dazu finden sich in Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe}. Liefert die aufgerufene Methode einen Rückgabewert, liegt dieser nach dem Aufruf oben am Kellerspeicher. Da der Rückgabewert jedoch nicht verwertet wird, muss er nach dem Methodenaufruf mit der \lstinline{drop}"=Instruktion vom Kellerspeichert entfernt werden. Im Fall einer Methode ohne Rückgabewert (\lstinline{void}) ist die \lstinline{drop}"=Instruktion nicht notwendig, da nach dem Methodenaufruf kein Rückgabewert oben am Kellerspeicher liegt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:methodCall-statement-bytecode}.
+Methodenaufrufe gehören zu den Ausdrücken. Als einzige Form der Ausdrücke dürfen sie auch direkt als Anweisung verwendet werden. Hier wird zunächst Bytecode für den Methodenaufruf selbst erzeugt, Details dazu finden sich in Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe}. Liefert die aufgerufene Methode einen Rückgabewert, liegt dieser nach dem Aufruf oben am Kellerspeicher. Da der Rückgabewert jedoch nicht verwertet wird, muss er nach dem Methodenaufruf mit der \lstinline{drop}"=Instruktion vom Kellerspeicher entfernt werden. Im Fall einer Methode ohne Rückgabewert (\lstinline{void}) ist die \lstinline{drop}"=Instruktion nicht notwendig, da nach dem Methodenaufruf kein Rückgabewert oben am Kellerspeicher liegt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:methodCall-statement-bytecode}.
 
 \lstinputlisting[label = {lst:methodCall-statement-bytecode}, caption = {Vorlage für Methodenaufrufe als Anweisung}]{src/webAssemblyCodegenerierung/methodCallStatement.wasm}
 
@@ -343,11 +343,11 @@ Wurde in MiniJava ein \lstinline{else}"=Zweig implementiert, müssen vor der \ls
 
 \subsection{\lstinline{while}-Schleife}
 
-Die \lstinline{while}"=Schleife wird folgendermaßen auswertet: Zu Beginn jedes Schleifendurchlaufs wird die Bedingung geprüft. Ist diese wahr, wird der Schleifenrumpf ausgeführt. Ist die Bedingung falsch, wird die Schleife abgebrochen und aus der Schleife herausgesprungen. Nach der Ausführung des Schleifenrumpfs wird zum Anfang der Schleife gesprungen und die Prüfung erfolgt erneut.
+Die \lstinline{while}"=Schleife wird folgendermaßen ausgewertet: Zu Beginn jedes Schleifendurchlaufs wird die Bedingung geprüft. Ist diese wahr, wird der Schleifenrumpf ausgeführt. Ist die Bedingung falsch, wird die Schleife abgebrochen und aus der Schleife herausgesprungen. Nach der Ausführung des Schleifenrumpfs wird zum Anfang der Schleife gesprungen und die Prüfung erfolgt erneut.
 
 Im Bytecode werden daher zwei Sprungziele benötigt: Einmal hinter dem Ende, um aus der Schleife herauszuspringen und einmal am Anfang der Schleife, um einen neuen Durchlauf zu starten. Dafür werden die \lstinline{block}- und \lstinline{loop}"=Instruktionen eingesetzt.
 
-Nach den \lstinline{block}- und \lstinline{loop}"=Instruktionen wird zunächst der Bytecode für das Auswerten der Bedingung generiert, das erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Danach wird das Ergebnis der Bedingung mit der \lstinline{i32.eqz}-Instruktion\footnote{\emph{EQuals Zero} für 32"=Bit"=Ganzzahlen: Ein Wert wird vom Kellerspeicher genommen. Ist dieser 0, wird 1 auf den Kellerspeicher gelegt, andernfalls wird 0 auf den Kellerspeicher gelegt.} negiert. Ein bedingter Sprung wird anschließend mit der \lstinline{br_if}"=Instruktiondurchgeführt. Das Negieren der Bedingung ist notwendig, weil die \lstinline{br_if}"=Instruktion nur dann den Sprung durchführt, wenn der oberste Wert am Kellerspeicher wahr (ungleich 0) ist. Das Sprungziel der \lstinline{br_if}"=Instruktion ist das Ende der Schleife, also wird das Sprungziel der \lstinline{block}"=Instruktion angegeben (zweitäußerstes Ziel, Index = 1).
+Nach den \lstinline{block}- und \lstinline{loop}"=Instruktionen wird zunächst der Bytecode für das Auswerten der Bedingung generiert, das erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Danach wird das Ergebnis der Bedingung mit der \lstinline{i32.eqz}-Instruktion\footnote{\emph{EQuals Zero} für 32"=Bit"=Ganzzahlen: Ein Wert wird vom Kellerspeicher genommen. Ist dieser 0, wird 1 auf den Kellerspeicher gelegt, andernfalls wird 0 auf den Kellerspeicher gelegt.} negiert. Ein bedingter Sprung wird anschließend mit der \lstinline{br_if}"=Instruktion durchgeführt. Das Negieren der Bedingung ist notwendig, weil die \lstinline{br_if}"=Instruktion nur dann den Sprung durchführt, wenn der oberste Wert am Kellerspeicher wahr (ungleich 0) ist. Das Sprungziel der \lstinline{br_if}"=Instruktion ist das Ende der Schleife, also wird das Sprungziel der \lstinline{block}"=Instruktion angegeben (zweitäußerstes Ziel, Index = 1).
 
 Nun folgen die Instruktionen des Schleifenrumpfs. Am Ende wird zum Anfang der Schleife gesprungen. Dies erfolgt unbedingt mit \lstinline{br}"=Instruktion. Als Sprungziel wird das der \lstinline{loop}"=Instruktion angegeben (erstäußerstes Ziel, Index = 0).
 
@@ -358,7 +358,7 @@ Zum Schluss werden die \lstinline{block}- und \lstinline{loop}"=Instruktionen mi
 \section{Codegenerierung für Methodenaufrufe}
 \label{sec:Codegenerierung-für-Methodenaufrufe}
 
-Ausdrücke mit Methodenaufrufen können verschiedenen Formen annehmen, dabei lassen sich folgende drei Fälle unterscheiden:
+Ausdrücke mit Methodenaufrufen können verschiedene Formen annehmen, dabei lassen sich folgende drei Fälle unterscheiden:
 \begin{enumerate}
     \item Aufruf von Methoden derselben Klasse über den Namen der Methode, zum Beispiel \lstinline{methodName(param1, ...)}. Klassenmethoden können immer so aufgerufen werden, Objektmethoden auf das Empfängerobjekt nur von anderen Objektmethoden derselben Klasse ausgehend. Hier besteht der Ausdruck aus zwei Teilen: dem Methodennamen und einer Aktualparameterliste.
     \item Aufruf von Klassenmethoden anderer Klassen, zum Beispiel \lstinline{Math.add(x, y)}. Hier besteht der Ausdruck aus drei Teilen: dem Klassennamen, dem Methodennamen und einer Aktualparameterliste.
@@ -379,9 +379,9 @@ Nun wird Bytecode für die Auswertung der Aktualparameter generiert, indem für 
 Bei Objektmethoden wird ein zusätzlicher Parameter, der \lstinline{this}"=Parameter benötigt. Daher muss vor dem Aufruf der Methode sichergestellt werden, dass dieser vor allen anderen Parametern am Kellerspeicher vorhanden ist. Im Gegensatz dazu wird bei Klassenmethoden kein \lstinline{this}"=Parameter übergeben. Je nachdem, in welchem der obigen Fälle man sich befindet, muss der \lstinline{this}"=Parameter hinzugefügt oder entfernt werden:
 
 \begin{enumerate}
-    \item Beim Aufruf einer Klassenmethoden muss nichts mehr verändert werden. Wird eine Objektmethode aufgerufen, wird die Instruktion \lstinline{local.get 0} vor den Instruktionen zum Auswerten der Aktualparameter eingefügt.
+    \item Beim Aufruf einer Klassenmethode muss nichts mehr verändert werden. Wird eine Objektmethode aufgerufen, wird die Instruktion \lstinline{local.get 0} vor den Instruktionen zum Auswerten der Aktualparameter eingefügt.
     \item In diesem Fall ist nichts mehr zu tun.
-    \item Wird eine Objektmethode aufgerufen, ist nichts weiter zu tun, da der \lstinline{this}"=Parameter bereits durch das Auswerten des Objekt"=Ausdrucks am Kellerspeicher liegt. Wird jedoch eine Klassenmethode aufgerufen, muss der \lstinline{this}"=Parameter vom Kellerspeicher entfernt werden. Dazu wird die \lstinline{drop}"=Instruktion vor den Instruktion zum Auswerten der Aktualparameter eingefügt. Es können nicht einfach die Instruktionen zum Auswerten des Objekt"=Ausdrucks entfernt werden, da diese Nebenwirkungen haben könnten.
+    \item Wird eine Objektmethode aufgerufen, ist nichts weiter zu tun, da der \lstinline{this}"=Parameter bereits durch das Auswerten des Objekt"=Ausdrucks am Kellerspeicher liegt. Wird jedoch eine Klassenmethode aufgerufen, muss der \lstinline{this}"=Parameter vom Kellerspeicher entfernt werden. Dazu wird die \lstinline{drop}"=Instruktion vor den Instruktionen zum Auswerten der Aktualparameter eingefügt. Es können nicht einfach die Instruktionen zum Auswerten des Objekt"=Ausdrucks entfernt werden, da diese Nebenwirkungen haben könnten.
 \end{enumerate}
 
 Zum Schluss wird die Methode mit der \lstinline{call}"=Instruktion aufgerufen.
@@ -404,9 +404,9 @@ Objekte einer Klasse werden mit dem \lstinline{new}-Operator in MiniJava erzeugt
 
 Da alle Objekte in JavaScript verwaltet werden, müssen sie auch in JavaScript erzeugt werden. Dafür wird ein Konstruktor als JavaScript"=Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}). Diese Funktion wird im WebAssembly"=Modul importiert.
 
-Zunächst muss der Funktionsindex der importieren Konstruktorfunktion aus dem Klassennamen abgeleitet werden. Dies erfolgt über die Symboltabellen, da der Index des Konstruktors bereits in der Deklarationsphase festgelegt wurde. Diese Konstruktorfunktion wird mit der \lstinline{call}"=Instruktion aufgerufen. Danach liegt die Referenz des erzeugten Objekts oben am Kellerspeicher.
+Zunächst muss der Funktionsindex der importierten Konstruktorfunktion aus dem Klassennamen abgeleitet werden. Dies erfolgt über die Symboltabellen, da der Index des Konstruktors bereits in der Deklarationsphase festgelegt wurde. Diese Konstruktorfunktion wird mit der \lstinline{call}"=Instruktion aufgerufen. Danach liegt die Referenz des erzeugten Objekts oben am Kellerspeicher.
 
-Anschließend werden die Aktualparameter ausgewertet. Aus ihren Datentypen wird mit Hilfe der Symboltabellen der Index der in WebAssembly definierten Funktion des Initialisierers bestimmt. Diese Funktion wird mit der \lstinline{call}"=Instruktion aufgerufen. Der Initialisier liefert als Rückgabewert wieder die Referenz des Objekts. Sind keine Aktualparameter vorhanden und in der Klasse wurde auch kein Standardinitialisierer definiert, wird dieser Schritt übersprungen.
+Anschließend werden die Aktualparameter ausgewertet. Aus ihren Datentypen wird mit Hilfe der Symboltabellen der Index der in WebAssembly definierten Funktion des Initialisierers bestimmt. Diese Funktion wird mit der \lstinline{call}"=Instruktion aufgerufen. Der Initialisierer liefert als Rückgabewert wieder die Referenz des Objekts. Sind keine Aktualparameter vorhanden und wurde in der Klasse auch kein Standardinitialisierer definiert, wird dieser Schritt übersprungen.
 
 Der gesamte Ausdruck liefert immer die Referenz des erzeugten Objekts. Der erzeugte Bytecode entspricht der Vorlage aus Listing \ref{lst:newObject-bytecode}. Für den Fall, dass der Schritt mit dem Initialisierer übersprungen wird, besteht der erzeugte Bytecode ausschließlich aus der Instruktion in Zeile 1.
 
@@ -422,8 +422,8 @@ Beim schreibenden Zugriff auf eine Datenkomponente wird ein \emph{Setter} aufger
 
 Es gibt zwei Möglichkeiten, auf eine Datenkomponente zuzugreifen:
 \begin{itemize}
-    \item Innerhalb von Objektmethoden und Initialisieren über den Namen der Datenkomponente, zum Beispiel \lstinline{x}. In diesem Fall wird das dazugehörige Objekt über den \lstinline{this}"=Parameter identifiziert.
-    \item Über den Selektionssoperator, zum Beispiel \lstinline{point.x} oder \lstinline{getPoint().x}. Dies schließt den Fall innerhalb von Objektmethoden und Initialisieren mit dem Schlüsselwort \lstinline{this} ein, zum Beispiel \lstinline{this.x}.
+    \item Innerhalb von Objektmethoden und Initialisierern über den Namen der Datenkomponente, zum Beispiel \lstinline{x}. In diesem Fall wird das dazugehörige Objekt über den \lstinline{this}"=Parameter identifiziert.
+    \item Über den Selektionssoperator, zum Beispiel \lstinline{point.x} oder \lstinline{getPoint().x}. Dies schließt den Fall innerhalb von Objektmethoden und Initialisierern mit dem Schlüsselwort \lstinline{this} ein, zum Beispiel \lstinline{this.x}.
 \end{itemize}
 
 Der Umweg über \emph{Getter} und \emph{Setter} ist notwendig, weil alle Objekte in JavaScript verwaltet werden. Daher werden für alle Datenkomponenten \emph{Getter} und \emph{Setter} als JavaScript"=Funktion generiert (siehe Abschnitt \ref{sec:JavaScript-Codegenerierung}), die anschließend im WebAssembly"=Modul importiert werden.
@@ -456,7 +456,7 @@ Felder werden mit dem \lstinline{new}"=Operator in MiniJava erzeugt. Der \lstinl
 
 Je nach Art des Elementdatentyps (numerisch, \lstinline{boolean}, \lstinline{char} oder Klasse) wird eine andere JavaScript"=Funktion (siehe Abschnitt \ref{subsec:Feld-Funktionen}) zum Erzeugen des Felds aufgerufen, die in das WebAssembly"=Modul importiert wird.
 
-Zunächst muss der Ausdrück für die Größe des Felds auswertet werden, dies erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend wird je nach Datentyp die entsprechende importierte Funktion aufgerufen. Die Funktion liefert als Rückgabewert eine Referenz auf das Feld. Die Indizes dieser Funktionen sind im Compiler definiert (siehe Bereich $0$ bis $a$ in Tabelle \ref{tab:functionIndices} auf Seite \pageref{tab:functionIndices}). Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:newArray-bytecode}.
+Zunächst muss der Ausdruck für die Größe des Felds ausgewertet werden, dies erfolgt wie in Abschnitt \ref{sec:Codegenerierung-für-Ausdrücke} beschrieben. Anschließend wird je nach Datentyp die entsprechende importierte Funktion aufgerufen. Die Funktion liefert als Rückgabewert eine Referenz auf das Feld. Die Indizes dieser Funktionen sind im Compiler definiert (siehe Bereich $0$ bis $a$ in Tabelle \ref{tab:functionIndices} auf Seite \pageref{tab:functionIndices}). Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:newArray-bytecode}.
 
 \lstinputlisting[label = {lst:newArray-bytecode}, caption = {Vorlage für das Erstellen eines Felds}]{src/webAssemblyCodegenerierung/newArray.wasm}
 
@@ -480,7 +480,7 @@ Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld 
 
 MiniJava unterstützt keine Vererbung. Da es jedoch in manchen Fällen sehr nützlich sein kann, wenn Methoden mit einem Parameter eines beliebigen Referenzdatentyps aufgerufen werden können, wird dafür die Klasse \lstinline{Object} verwendet. Ein einfaches Beispiel für solche Methoden ist \lstinline{Console.println(Object a)}, die jedes beliebige Objekt auf der Konsole ausgeben soll. So muss nicht für jede Klasse eine Ausgabemethode für die Konsole implementiert werden. Auch bei Methoden für das Registrieren von Ereignisbehandlern, beispielsweise \lstinline{register(Object handler)}, ist \lstinline{Object} sehr nützlich, da als Behandler ein Objekt einer beliebigen Klasse verwendet werden kann. Die Klasse \lstinline{Object} bildet somit eine implizite Basisklasse aller MiniJava"=Klassen.
 
-In Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe} wurde beschrieben, wie Bytecode für Methodenaufrufe erzeugt wird. Dort wird über den Klassennamen, Methodennamen und die Datentypen der Aktualparameter der WebAssembly"=Funktionsindex der aufzurufenden Methode mit Hilfe der Symboltabellen bestimmt. Dieser Vorgang wird folgendermaßen ergänzt, um Methoden mit Parametern vom Typ \lstinline{Object} zu berücksichtigen:
+In Abschnitt \ref{sec:Codegenerierung-für-Methodenaufrufe} wurde beschrieben, wie Bytecode für Methodenaufrufe erzeugt wird. Dort wird über den Klassennamen, Methodennamen und die Datentypen der Aktualparameter der WebAssembly"=Funktionsindex der aufzurufende Methode mit Hilfe der Symboltabellen bestimmt. Dieser Vorgang wird folgendermaßen ergänzt, um Methoden mit Parametern vom Typ \lstinline{Object} zu berücksichtigen:
 
 \begin{enumerate}
     \item Wurde eine Methode in den Symboltabellen gefunden, bei der die Datentypen der Formalparameter und die Datentypen der Aktualparamater 1:1 übereinstimmen, wird diese Methode verwendet.
@@ -512,13 +512,13 @@ Das Verhalten ist dann nicht definiert, wenn es für mehr als eine Kombinationsm
 \section{Exportieren von Methoden}
 \label{sec:Exportieren-von-Methoden}
 
-Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, um aus JavaScript aufgerufen zu können. Dafür muss die für eine Methode generierte Funktion im WebAssembly"=Modul exportiert werden. Jeder exportierten Funktion muss ein Name gegeben werden, der innerhalb eines WebAssembly"=Moduls eindeutig ist. Da in MiniJava Methoden mit demselben Namen in mehreren Klassen definiert werden können, reicht der Methodenname dafür alleine nicht aus. Weiters kann eine Methode innerhalb einer Klasse überladen werden. Daher wird gemeinsam aus dem Klassennamen, dem Methodennamen und den Datentypen der Formalparameterliste der Methode nach dem Schema in Listing \ref{lst:externalName} ein eindeutiger externer Bezeichner abgeleitet. Dies ist mit \emph{Name mangling} in C++ vergleichbar.
+Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, um aus JavaScript aufgerufen werden zu können. Dafür muss die für eine Methode generierte Funktion im WebAssembly"=Modul exportiert werden. Jeder exportierten Funktion muss ein Name gegeben werden, der innerhalb eines WebAssembly"=Moduls eindeutig ist. Da in MiniJava Methoden mit demselben Namen in mehreren Klassen definiert werden können, reicht der Methodenname dafür alleine nicht aus. Weiters kann eine Methode innerhalb einer Klasse überladen werden. Daher wird gemeinsam aus dem Klassennamen, dem Methodennamen und den Datentypen der Formalparameterliste der Methode nach dem Schema in Listing \ref{lst:externalName} ein eindeutiger externer Bezeichner abgeleitet. Dies ist mit \emph{Name mangling} in C++ vergleichbar.
 
 \lstinputlisting[label = {lst:externalName}, caption = {Schema für externe Bezeichner}]{src/webAssemblyCodegenerierung/externalName.txt}
 
 Da als Bezeichner für Klassennamen und Methodennamen die Zeichen \lstinline{'.'} und \lstinline{'#'} nicht erlaubt sind, können sie problemlos als Trennzeichen verwendet werden. Weiters muss nicht darauf Rücksicht genommen werden, ob es sich um eine Klassen- oder Objektmethode handelt, da innerhalb einer Klasse nicht zwei Methoden mit demselben Namen und denselben Parametertypen einmal mit und einmal ohne dem Schlüsselwort \lstinline{static} definiert werden dürfen. In Listing \ref{lst:externalNameExamples} finden sich einige Beispiele, die das Schema veranschaulichen sollen.
 
-\lstinputlisting[label = {lst:externalNameExamples}, caption = {Beispiele für abgeleitete Namen zum exportieren von Methoden}]{src/webAssemblyCodegenerierung/externalNameExamples.minijava}
+\lstinputlisting[label = {lst:externalNameExamples}, caption = {Beispiele für abgeleitete Namen zum Exportieren von Methoden}]{src/webAssemblyCodegenerierung/externalNameExamples.minijava}
 
 Für jede zu exportierende Methode wird ein Export mit dem externen Bezeichner im WebAssembly"=Modul angelegt, der Index der entsprechenden Funktion wird über die Symboltabellen ermittelt. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:export-bytecode}.
 

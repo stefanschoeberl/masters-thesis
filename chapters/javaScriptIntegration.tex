@@ -2,7 +2,7 @@
 \label{cha:JavaScript-Integration}
 
 Im vorherigen Kapitel wurde gezeigt, wie das WebAssembly"=Modul erzeugt wird.
-Damit dieses funktioniert, ist ein JavaScript"=Gerüst rundherum notwendig. Dieses wird benötigt, da zur Laufzeit Interaktion mit JavaScript vorausgesetzt wird (zum Beispiel für Objektverwaltung, Konsolenausgaben und native Methoden). Über JavaScript werden alle Komponenten miteinander verbunden. Daher wird vom MiniJava"=Compiler nicht nur ein einfache \lstinline{wasm}"=Datei erzeugt, sondern ein Verzeichnis (im Quelltext \lstinline{Bundle} genannt, nachfolgend auch als \emph{Paket} bezeichnet) mit einigen JavaScript"=Dateien und der \lstinline{wasm}"=Datei.
+Damit dieses funktioniert, ist ein JavaScript"=Gerüst rundherum notwendig. Dieses wird benötigt, da zur Laufzeit Interaktion mit JavaScript vorausgesetzt wird (zum Beispiel für Objektverwaltung, Konsolenausgaben und native Methoden). Über JavaScript werden alle Komponenten miteinander verbunden. Daher wird vom MiniJava"=Compiler nicht nur eine einfache \lstinline{wasm}"=Datei erzeugt, sondern ein Verzeichnis (im Quelltext \lstinline{Bundle} genannt, nachfolgend auch als \emph{Paket} bezeichnet) mit einigen JavaScript"=Dateien und der \lstinline{wasm}"=Datei.
 
 \section{Aufbau des erzeugten Pakets}
 
@@ -14,7 +14,7 @@ Das Paket wird entsprechend der Struktur in Listing \ref{lst:bundle-structure} a
 
 Das Skript \emph{imports.js} ist für das Erstellen des Import"=Objekts verantwortlich, das beim Instanzieren des WebAssembly"=Moduls benötigt wird. Hier werden sowohl die JavaScript"=Implementierungen von sprachinternen Funktionalitäten als auch die JavaScript"=Pendants nativer Methoden in ein Objekt zusammengefasst.
 
-Das Skript \emph{internal.js} enthält die JavaScript"=Implementierungen von sprachinternen Funktionalitäten für Felder und Zeichnketten"=Konkatenationen.
+Das Skript \emph{internal.js} enthält die JavaScript"=Implementierungen von sprachinternen Funktionalitäten für Felder und Zeichenketten"=Konkatenationen.
 
 Das Skript \emph{runtime.js} definiert in der JavaScript"=Klasse \lstinline{Runtime} das Laufzeitsystem für das Zusammenspiel zwischen JavaScript und WebAssembly/MiniJava. In dieser Klasse befinden sich die Objektverwaltung und diverse Hilfsmethoden, um Daten zwischen JavaScript und WebAssembly/MiniJava auszutauschen und um von JavaScript ausgehend MiniJava"=Methoden aufrufen zu können.
 
@@ -24,7 +24,7 @@ Alle JavaScript"=Pendants für native Methoden werden in das Verzeichnis \emph{n
 
 Der generierte Bytecode wird in der Datei \emph{module.wasm} abgelegt. Als Zwischenprodukt entsteht beim Kompilieren die Datei \emph{module.wat}, die lediglich die textuelle Repräsentation des WebAssembly"=Moduls darstellt\footnote{Der Grund dafür ist, dass das Erstellen der textuellen Repräsentation wesentlich einfacher ist. Außerdem können beim Entwickeln des Compilers potenzielle Fehler leichter in einer Textdatei als in einer binären Datei gefunden werden.}. Aus dieser Datei entsteht mit dem Werkzeug \lstinline{wat2wasm} \cite{WABT} dann die binäre Form des Moduls. Die textuelle Repräsentation wird zur Laufzeit nicht benötigt.
 
-Alle im MiniJava"=Quelltext vorhandenen Zeichenketten"=Literale werden in der Datei \emph{module.js} registriert. Außerdem werden zur Übersetzungszeit sämtliche Konstrukturen, \emph{Getter} und \emph{Setter} für MiniJava"=Klassen generiert und in dieser Datei gespeichert. Weiters referenziert diese Datei alle JavaScript"=Dateien im Verzeichnis \emph{native}.
+Alle im MiniJava"=Quelltext vorhandenen Zeichenketten"=Literale werden in der Datei \emph{module.js} registriert. Außerdem werden zur Übersetzungszeit sämtliche Konstruktoren, \emph{Getter} und \emph{Setter} für MiniJava"=Klassen generiert und in dieser Datei gespeichert. Weiters referenziert diese Datei alle JavaScript"=Dateien im Verzeichnis \emph{native}.
 
 \subsection{Zusammenhang zwischen den Dateien}
 
@@ -46,12 +46,12 @@ Wie im vorherigen Abschnitt beschrieben, wird beim Kompilieren JavaScript"=Quell
 
 Beim Erzeugen des Bytecodes wurden bereits für die Zeichenketten"=Literale Referenzen (ab 1 beginnend) festgelegt. Daher müssen später zur Laufzeit die Zeichenketten"=Literale in der Reihenfolge der zuvor zugewiesenen Referenzen (siehe Abschnitt \ref{subsec:Zeichenketten-Literale}) registriert werden. Dies muss erfolgen, bevor das WebAssembly"=Modul gestartet wird, da zu diesem Zeitpunkt noch keine Objekte erstellt wurden. So wird garantiert, dass sich die Referenzen nicht verschieben.
 
-Außerdem muss für jede Klasse ein Konstruktur generiert werden. Dieser hat die Aufgabe, ein JavaScript"=Objekt zu erzeugen, in dem alle Datenkomponenten mit einem (je nach Datentyp) sinnvollen Platzhalterwert initialisiert werden. Außerdem wird der entsprechende MiniJava"=Datentyp mit dem Objekt verknüpft. Die Konstrukturen liefern als Rückgabewert eine Referenz des erzeugten Objekts.
+Außerdem muss für jede Klasse ein Konstruktor generiert werden. Dieser hat die Aufgabe, ein JavaScript"=Objekt zu erzeugen, in dem alle Datenkomponenten mit einem (je nach Datentyp) sinnvollen Platzhalterwert initialisiert werden. Außerdem wird der entsprechende MiniJava"=Datentyp mit dem Objekt verknüpft. Die Konstruktoren liefern als Rückgabewert eine Referenz des erzeugten Objekts.
 
 Datenkomponenten von MiniJava"=Klassen werden direkt auf Datenkomponenten von JavaScript"=Objekten abgebildet. Da WebAssembly nicht direkt auf JavaScript"=Objekte zugreifen kann, müssen für diese \emph{Getter} und \emph{Setter} erzeugt werden, die diese Aufgabe übernehmen. Die \emph{Getter} bekommen als Parameter nur die Referenz des Objekts und müssen den Wert der Datenkomponente (oder eine Referenz darauf wenn die Datenkomponente ein Objekt referenziert) zurückgeben. Ähnlich funktionieren die \emph{Setter}: Diese bekommen zwei Parameter, die Referenz des Objekts und den Wert des neuen Werts für die Datenkomponente (oder eine Referenz, wenn es sich um Objekte handelt). \emph{Setter} haben keinen Rückgabewert.
 
 \pagebreak
-Die Codegenerierung wird anhand eines überschaubaren Beispiel nun detailliert gezeigt. Nachfolgend ist der MiniJava"=Quelltext für dieses Beispiel dargestellt:
+Die Codegenerierung wird anhand eines überschaubaren Beispiels nun detailliert gezeigt. Nachfolgend ist der MiniJava"=Quelltext für dieses Beispiel dargestellt:
 
 \lstinputlisting{src/javaScriptIntegration/Example.minijava}
 
@@ -65,7 +65,7 @@ Nachfolgend einige Details zur generierten Datei:
     \item In den Zeilen 2 und 3 werden die Zeichenketten"=Literale registriert. 
     \item In den Zeilen 7 bis 9 befindet sich der Konstruktor der Klasse \lstinline{MyClass}, der die Datenkomponenten mit \lstinline{0} bzw. \lstinline{null} initialisiert.
     \item In den Zeilen 3 bis 15 werden \emph{Getter} und \emph{Setter} für die \lstinline{int}"=Datenkomponente \lstinline{value} definiert. Da es sich um einen elementaren Datentyp handelt, kann der Wert direkt aus dem übergebenen Parameter gelesen werden (\emph{Setter}) bzw. als Rückgabewert geliefert werden (\emph{Getter}).
-    \item In den Zeilen 16 bis 21 werden \emph{Getter} und \emph{Setter} für die \lstinline{String}"=Datenkomponente \lstinline{text} definiert. Hier muss der Parameter beim \emph{Setter} zunächst derefenziert werden bzw. muss beim \emph{Getter} zunächst eine Referenz auf das Objekt erzeugt werden.
+    \item In den Zeilen 16 bis 21 werden \emph{Getter} und \emph{Setter} für die \lstinline{String}"=Datenkomponente \lstinline{text} definiert. Hier muss der Parameter beim \emph{Setter} zunächst dereferenziert werden bzw. muss beim \emph{Getter} zunächst eine Referenz auf das Objekt erzeugt werden.
 \end{itemize}
 
 \section{Objektverwaltung für MiniJava in JavaScript}
@@ -95,7 +95,7 @@ Die Klasse \lstinline{Runtime} bietet noch einige nützliche Hilfsmethoden an, d
 
 \lstinputlisting{src/javaScriptIntegration/runtimeHelpers.js}
 
-Mit \lstinline{wasmBoolean} kann ein Wert des MiniJava"=Datentyps \lstinline{boolean} (entspricht einer Ganzahl in WebAssembly) in den Wert des JavaScript"=Datentyps \lstinline{boolean} konvertiert werden. In die andere Richtung ist keine explizite Konvertierung erforderlich.
+Mit \lstinline{wasmBoolean} kann ein Wert des MiniJava"=Datentyps \lstinline{boolean} (entspricht einer Ganzzahl in WebAssembly) in den Wert des JavaScript"=Datentyps \lstinline{boolean} konvertiert werden. In die andere Richtung ist keine explizite Konvertierung erforderlich.
 
 Mit \lstinline{charToWasm} und \lstinline{wasmToChar} kann zwischen einem Wert des MiniJava-Datentyps \lstinline{char} (entspricht ebenfalls einer Ganzzahl in WebAssembly) und einem Wert des JavaScript"=Datentyps \lstinline{string} mit genau einem Zeichen konvertiert werden.
 Es muss der JavaScript"=Datentyp \lstinline{string} verwendet werden, da JavaScript keinen eigenen Datentyp für einzelne Zeichen besitzt.
@@ -111,9 +111,9 @@ MiniJava bietet einige Sprachfunktionalitäten an, die nicht zur Gänze in WebAs
 Die Implementierung der Feld"=Funktionen sind vom konkreten Element"=Datentyp des Felds abhängig. Allgemein lassen sich daher vier Fälle unterscheiden:
 
 \begin{enumerate}
-    \item Werte numerische Datentypen wie \lstinline{int} und \lstinline{float} werden auf denselben JavaScript"=Datentyp abgebildet, da JavaScript nur den Datentyp \lstinline{number} für numerische Werte zur Verfügung stellt.
-    \item Werte des \lstinline{boolean}"=Datentyps müssen zwischen JavaScripts \lstinline{true} und \lstinline{false} auf 1 und 0 und umgekehrt abgebildet werden, da WebAssembly keinen eigenen Datentyp für Wahrheitswerte besitzt
-    \item Werte des \lstinline{char}"=Datentyps müssen zwischen einer Ganzzahl und einem Zeichenkette mit einem Zeichen abgebildet werden.
+    \item Werte numerischer Datentypen wie \lstinline{int} und \lstinline{float} werden auf denselben JavaScript"=Datentyp abgebildet, da JavaScript nur den Datentyp \lstinline{number} für numerische Werte zur Verfügung stellt.
+    \item Werte des \lstinline{boolean}"=Datentyps müssen zwischen JavaScripts \lstinline{true} und \lstinline{false} auf 1 und 0 und umgekehrt abgebildet werden, da WebAssembly keinen eigenen Datentyp für Wahrheitswerte besitzt.
+    \item Werte des \lstinline{char}"=Datentyps müssen zwischen einer Ganzzahl und einer Zeichenkette mit einem Zeichen abgebildet werden.
     \item Objekte  müssen auf Referenzen und umgekehrt abgebildet werden. 
 \end{enumerate}
 
@@ -124,7 +124,7 @@ Am interessantesten sind die Funktionen für Felder von Objekten, daher werden d
 Beim Erstellen eines Felds wird ein JavaScript"=Feld in der angeforderten Größe erstellt und mit Standardwerten (hier \lstinline{null}) vorbefüllt:
 \lstinputlisting{src/javaScriptIntegration/arrayNew.js}
 
-Das Abrufen eines Objekts über den Index funktioniert so, dass zunächst das Feld selbst derefenziert werden muss. Anschließend wird für das über den Index erhaltene Objekt mit \lstinline{runtime.wasmRef} eine Referenz erstellt:
+Das Abrufen eines Objekts über den Index funktioniert so, dass zunächst das Feld selbst dereferenziert werden muss. Anschließend wird für das über den Index erhaltene Objekt mit \lstinline{runtime.wasmRef} eine Referenz erstellt:
 \lstinputlisting{src/javaScriptIntegration/arrayGet.js}
 
 Analog dazu funktioniert das Setzen eines Objekts mit einem Index:
@@ -144,7 +144,7 @@ Die erste Variante ist das Konkatenieren von zwei Zeichenketten. Hier werden zun
 
 Die zweite Variante ist Konkatenieren von einer Zeichenkette mit dem Wert eines anderen Datentyps \emph{T}. Der Datentyp \emph{T} kann entweder auf der rechten oder linken Seite des Operators stehen, das ergibt zwei Möglichkeiten pro Datentyp. Ähnlich wie bei den Feldern gibt es dieselben vier Fälle für den Datentyp \emph{T}. Jede Kombination wird in einer eigenen Funktion implementiert, insgesamt ergibt das somit acht Funktionen. Der Wert des Datentyp \emph{T} wird dabei automatisch in eine Zeichenkette umgewandelt.
 
-Da das Konkatenieren für die einzelnen Datentypen ähnlich funktioniert, werden stellvertretend nun beispielhaft die zwei Funktionen gezeigt, um einen Zeichenkette mit einem numerischen Wert zu verketten:
+Da das Konkatenieren für die einzelnen Datentypen ähnlich funktioniert, werden stellvertretend nun beispielhaft die zwei Funktionen gezeigt, um eine Zeichenkette mit einem numerischen Wert zu verketten:
 \lstinputlisting{src/javaScriptIntegration/stringNumeric.js}
 
 \section{Methodenaufrufe von JavaScript nach MiniJava}
@@ -160,7 +160,7 @@ Auf dieser Funktion aufbauend können nun Aufrufe auf Klassenmethoden und Objekt
 
 \subsection{Aufruf von Klassenmethoden}
 
-Bei Aufrufen von Klassenmethoden kann \lstinline{findMethod} direkt verwendet werden. Um die Schnittstelle der \lstinline{Runtime}"=Klasse zu vereinheintlichen, wird der Aufruf von \lstinline{findMethod} in der Methode \lstinline{staticMethod} gekapselt, dies spiegelt die Kennzeichnung im MiniJava"=Quelltext durch das Schlüsselwort \lstinline{static}.
+Bei Aufrufen von Klassenmethoden kann \lstinline{findMethod} direkt verwendet werden. Um die Schnittstelle der \lstinline{Runtime}"=Klasse zu vereinheitlichen, wird der Aufruf von \lstinline{findMethod} in der Methode \lstinline{staticMethod} gekapselt, dies spiegelt die Kennzeichnung im MiniJava"=Quelltext durch das Schlüsselwort \lstinline{static} wider.
 
 \lstinputlisting{src/javaScriptIntegration/runtimeStaticMethod.js}
 
@@ -205,7 +205,7 @@ Zeichenketten sind ein notwendiger Basisdatentyp in jeder Programmiersprache. Zu
 Diese drei Funktionalitäten werden als Objektmethoden in der MiniJava"=Klasse \lstinline{String} definiert:
 \lstinputlisting{src/javaScriptIntegration/String.minijava}
 
-In JavaScript werden diese Methoden mit Hilfe von bereits bestehenden Funktionalität implementiert:
+In JavaScript werden diese Methoden mit Hilfe von bereits bestehenden Funktionalitäten implementiert:
 \lstinputlisting{src/javaScriptIntegration/String.js}
 
 \subsection{Konvertieren zwischen Ganzzahlen und Zeichenketten}

@@ -27,13 +27,13 @@ Die Problemstellung für diese Masterarbeit lässt sich in folgende Fragen aufte
 
 \section{Ziele}
 
-Die Fragen der Problemstellung sollen auf auf Basis einer praktischen Implementierung beantwortet werden.
+Die Fragen der Problemstellung sollen auf Basis einer praktischen Implementierung beantwortet werden.
 
 Ziel ist es, einen Compiler zu entwickeln, der MiniJava (eine Teilmenge von Java) nach WebAssembly übersetzt. Die Eingabe ist MiniJava"=Quelltext, die Ausgabe ein WebAssembly"=Modul samt Laufzeitsystem für JavaScript. Der gesamte Compiler wird in Kotlin entwickelt. Das Compiler"=Frontend (Scanner und Parser) wird mit ANTLR 4 generiert.
 
 Schlussendlich soll es möglich sein, in MiniJava kleine, typische Web"=Anwendungen zu entwickeln.
 
-Weiters wird eine minimale Standardbibliothek entworfen, diese stellt essenzielle Schnittstellen für die Konsole und den DOM"=Zugriff zur Verfügung.
+Weiters wird eine minimale Standardbibliothek entworfen, die essenzielle Schnittstellen für die Konsole und den DOM"=Zugriff zur Verfügung stellt.
 
 Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausgewählte wird in dieser Arbeit kurz eingangen:
 \begin{itemize}
@@ -44,7 +44,7 @@ Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausg
 
 Beim Einsatz von Emscripten und Rust ist im C/C++/Rust"=Quelltext ersichtlich, dass JavaScript oder WebAssembly im Hintergrund verwendet wird. Bei Emscripten sind das beispielsweise Einschlüsse von JavaScript"=Fragmenten oder bei Rust müssen spezielle Attribute eingefügt werden. Blazor ist ein Framework zum Entwickeln von Web"=Anwendungen und bietet somit eine Komplettlösung an. Hier kann bestehender C\#{}"=Quelltext unter gewissen Voraussetzungen wiederverwendet werden.
 
-Mit MiniJava soll ein alternativer Ansatz versucht werden, eine (neue) Programmiersprache über WebAssembly in das Web zu bringen: MiniJava"=Quelltext soll im Unterschied zu Emscripten und Rust keine Hinweise darauf enthalten, dass der kompilierte Quelltext schlussendlich mit JavaScript und WebAssembly interagiert. Es soll mit MiniJava auch kein Framework aufgebaut werden wie bei Blazor. Weiters sollen Objekte in MiniJava 1:1 auf JavaScript"=Objekte abgebildet werden, dadurch soll beispielsweise direkter DOM"=Zugriff ermöglicht werden. Dieser Ansatz findet sich so in keiner der oben genannten drei Technologien. Schnittstellen zur Laufzeitumgebung werden in MiniJava über native Methoden umgesetzt. Dieses Sprachkonstrukt ist aus Java mit dem \emph{Java Native Interface} (JNI) bekannt.
+Mit MiniJava soll ein alternativer Ansatz versucht werden, eine (neue) Programmiersprache über WebAssembly in das Web zu bringen: MiniJava"=Quelltext soll im Unterschied zu Emscripten und Rust keine Hinweise darauf enthalten, dass der kompilierte Quelltext schlussendlich mit JavaScript und WebAssembly interagiert. Es soll mit MiniJava auch kein Framework aufgebaut werden wie bei Blazor. Weiters sollen Objekte in MiniJava 1:1 auf JavaScript"=Objekte abgebildet werden, dadurch soll beispielsweise ein direkter DOM"=Zugriff ermöglicht werden. Dieser Ansatz findet sich so in keiner der oben genannten drei Technologien. Schnittstellen zur Laufzeitumgebung werden in MiniJava über native Methoden umgesetzt. Dieses Sprachkonstrukt ist aus Java mit dem \emph{Java Native Interface} (JNI) bekannt.
 
 \section{Aufbau der Arbeit}
 

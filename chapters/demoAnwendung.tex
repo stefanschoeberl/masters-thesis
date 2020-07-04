@@ -4,11 +4,11 @@
 Um die praktische Anwendung von MiniJava für typische Browser"=Anwendungen zu demonstrieren, wurde eine einfache Web"=Anwendung implementiert, die Fibonacci"=Zahlen berechnen kann.
 
 \section{Anforderungen an den Fibonacci-Rechner}
-Die Benutzeroberfläche soll zwei Eingabefelder (für Werte $a$ und $b$) und einen Start"=Knopf darstellen. Beim Drücken des Start"=Knopfs soll die Anwendung die Fibonacci"=Zahlen von $fib(a)$ bis $fib(b)$ berechnen und in einer Tabelle ausgeben.
+Die Benutzeroberfläche soll zwei Eingabefelder (für die Werte $a$ und $b$) und einen Start"=Knopf darstellen. Beim Drücken des Start"=Knopfs soll die Anwendung die Fibonacci"=Zahlen von $fib(a)$ bis $fib(b)$ berechnen und in einer Tabelle ausgeben.
 
 Der Fokus des Fibonacci"=Rechners liegt darauf, MiniJava in einem abgeschlossenen Projekt zu präsentieren und zu zeigen, wie MiniJava mit dem Browser interagieren kann. Dabei wurde der Aspekt einer effizienten Implementierung bewusst vernachlässigt. Dadurch wirken zwar einige Quelltext"=Abschnitte erzwungen (beispielsweise das rekursive Berechnen jeder einzelnen Fibonacci-Zahl ohne Speichern von Zwischenergebnissen oder das Kapseln von Methodenparametern in Objekte), gleichzeitig wird dadurch aber ermöglicht, im Rahmen eines überschaubaren Anwendungsfalls möglichst viele Funktionalitäten von MiniJava einzusetzen.
 
-Zum Vergleich wurden diesselben Anforderungen zur Gänze auch in JavaScript implementiert. Ziel ist dabei lediglich ein Vergleich zwischen den Programmiersprachen und nicht eine idente oder gar deckungsgleiche Implementierung.
+Zum Vergleich wurden dieselben Anforderungen zur Gänze auch in JavaScript implementiert. Ziel ist dabei lediglich ein Vergleich zwischen den Programmiersprachen und nicht eine idente oder gar deckungsgleiche Implementierung.
 
 In diesem Kapitel werden nur relevante Quelltext"=Ausschnitte gezeigt. Die vollständige Implementierung findet sich im Git"=Repository.
 
@@ -30,13 +30,13 @@ Nachfolgend findet sich die Implementierung des Fibonacci"=Rechners in JavaScrip
 
 Ähnlich wie bei der Konsolenanwendung im vorherigen Kapitel wird hier ebenfalls Gradle eingesetzt, um den MiniJava"=Quelltext zu kompilieren. Zusätzlich dazu wird webpack \cite{Webpack} eingesetzt, um alle JavaScript"=Dateien in eine einzige JavaScript"=Datei zusammenzufassen. Sämtliche \lstinline{require}"=Referenzierungen werden dabei aufgelöst.
 
-Zusätzlich zur Basis"=Standardbibliothek wird eine eigene für den Browser mitkompiliert. Diese enthält Funktionalitäten, die auf Browser"=Schnittstellen abgebildet werden (Implementierungdetails sind im nächsten Abschnitt zu finden).
+Zusätzlich zur Basis"=Standardbibliothek wird eine eigene für den Browser mitkompiliert. Diese enthält Funktionalitäten, die auf Browser"=Schnittstellen abgebildet werden (Implementierungsdetails sind im nächsten Abschnitt zu finden).
 
 Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly"=Modul vom Web"=Server mit dem MIME"=Type \lstinline{application/wasm} bereitgestellt wird, sonst kann es zu Laufzeitfehlern kommen \cite{MDNWebAssembly}. Zu Entwicklungs- und Testzwecken reicht dafür das NPM"=Modul \lstinline{lite-server}\footnote{\url{https://www.npmjs.com/package/lite-server}} vollkommen aus. Für den produktiven Einsatz sollte man diesen Aspekt bei der Konfiguration des Web"=Servers beachten. Im Git"=Repository findet sich eine lauffähige Konfiguration für den Apache HTTP Server in Form eines \emph{Dockerfiles}.
 
 \section{Auszug aus der Standardbibliothek für den Browser}
 
-Um in MiniJava sinnvoll mit dem Browser interagieren zu können, wurde eine kleine Standardbibliothek entwickelt. Zwei Funktion daraus werden nun im Detail betrachtet: Das Abfragen eines HTML"=Knotens aus dem DOM über die ID des Elements und das Hinzufügen eines Event"=Listeners für das Mausklick"=Ereignis zu einem HTML"=Knoten.
+Um in MiniJava sinnvoll mit dem Browser interagieren zu können, wurde eine kleine Standardbibliothek entwickelt. Zwei Funktionen daraus werden nun im Detail betrachtet: Das Abfragen eines HTML"=Knotens aus dem DOM über die ID des Elements und das Hinzufügen eines Event"=Listeners für das Mausklick"=Ereignis zu einem HTML"=Knoten.
 
 \lstinputlisting{src/demoAnwendung/Browser.minijava}
 \lstinputlisting{src/demoAnwendung/Browser.js}
@@ -45,7 +45,7 @@ Nachfolgend einige Details zum JavaScript"=Teil der beiden Methoden:
 
 Mit der Funktion \lstinline{runtime.wasmRef} können DOM"=Knoten, welche die JavaScript"=Funktion \lstinline{document.getElementById} zurückgibt, MiniJava zugänglich gemacht werden.
 
-Als Event"=Listeners für das Mausklick"=Eregnis wird eine JavaScript"=Funktion (Lambda"=Ausdruck) registriert. Diese Funktion delegiert das Ereignis an das beim Registieren übergebene \lstinline{handler}"=Objekt. Dabei wird angenommen, dass in der Klasse dieses Objekts eine Methode namens \lstinline{handleEvent} existiert, die einen Parameter vom Typ \lstinline{MouseEvent} annimmt. Sollte so eine Methode nicht existieren, kommt es zu einem Laufzeitfehler.
+Als Event"=Listeners für das Mausklick"=Eregnis wird eine JavaScript"=Funktion (Lambda"=Ausdruck) registriert. Diese Funktion delegiert das Ereignis an das beim Registrieren übergebene \lstinline{handler}"=Objekt. Dabei wird angenommen, dass in der Klasse dieses Objekts eine Methode namens \lstinline{handleEvent} existiert, die einen Parameter vom Typ \lstinline{MouseEvent} annimmt. Sollte so eine Methode nicht existieren, kommt es zu einem Laufzeitfehler.
 
 \section{Ergebnis}
 
@@ -75,7 +75,7 @@ Der Fibonacci"=Rechner wurde auf der folgenden Sofware- und Hardware"=Konfigurat
 
 \section{Vergleich JavaScript und MiniJava}
 
-Insgesamt sieht, man dass die Implementierungen aus Quelltextsicht sehr ähnlich sind. Sämtliche Anforderungen wurden von beiden Varianten erfüllt.
+Insgesamt sieht man, dass die Implementierungen aus Quelltextsicht sehr ähnlich sind. Sämtliche Anforderungen wurden von beiden Varianten erfüllt.
 
 Die Quelltextmenge ist bei JavaScript deutlich geringer, da keine Datentypen deklariert werden müssen, sondern diese direkt verwendet werden können. Außerdem bietet JavaScript im Vergleich zu MiniJava mehr syntaktische Konstrukte wie beispielsweise die \lstinline{for}"=Schleife oder Lambda"=Ausdrücke. 
 
