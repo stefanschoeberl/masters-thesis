@@ -42,6 +42,20 @@ Neben elementaren Datentypen gibt es Referenzdatentypen. Im Unterschied zu eleme
 
 Obwohl MiniJava keine Vererbungsbeziehung im klassischen Sinne unterstützt, ist dennoch die MiniJava"=Klasse \lstinline{Object} definiert. Diese ist ähnlich wie in Java eine Art implizite Basisklasse für alle MiniJava"=Klassen. Sie wird jedoch nur für einen einzigen Zweck eingesetzt: Methoden mit einem Formalparameter vom Typ \lstinline{Object} können mit einem Aktualparameter vom Typ einer beliebigen MiniJava"=Klasse oder eines Felds aufgerufen werden.
 
+\subsection{Felder}
+\label{subsec:MiniJava-Felder}
+
+In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp sortiert hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über einen Index mit dem Indizierungsoperator \lstinline{[]}. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}"=Operator erzeugt, dabei wird die Größe angegeben. Die Länge eines Felds kann über die Datenkomponente \lstinline{length} abgerufen werden. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
+
+\lstinputlisting[label = {lst:minijava-array}, caption = {Felder in MiniJava}]{src/miniJavaLaufzeitumgebung/array.minijava}
+
+\subsection{Zeichenketten}
+\label{subsec:MiniJava-Zeichenketten}
+
+Zeichenketten werden über die MiniJava"=Klasse \lstinline{String} realisiert. Sie zählen somit ebenfalls zu den Referenzdatentypen. Wie in Java sind Zeichenketten unveränderlich. Zeichenketten können über Literale erzeugt werden. Weiters können Zeichenketten mit dem \lstinline{+}"=Operator konkateniert werden. In Listing \ref{lst:minijava-string} finden sich einige Beispiele zum Umgang mit Zeichenketten.
+
+\lstinputlisting[label = {lst:minijava-string}, caption = {Zeichenketten in MiniJava}]{src/miniJavaLaufzeitumgebung/string.minijava}
+
 \subsection{Klassen}
 \label{subsec:MiniJava-Klassen}
 
@@ -57,6 +71,7 @@ Klassen werden mit dem \lstinline{new}-Operator instanziert. Wie in Java üblich
 
 \lstinputlisting[label = {lst:minijava-class-use}, caption = {Verwendung der MiniJava"=Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/instance.minijava}
 
+\pagebreak
 \subsection{Methoden}
 \label{subsec:MiniJava-Methoden}
 
@@ -72,37 +87,12 @@ Manchmal ist es nicht möglich oder gar unerwünscht, eine Methode in Java zu im
 
 In Listing \ref{lst:minijava-advanced-methods} wird der Einsatz der drei Schlüsselwörte \lstinline{static}, \lstinline{public} und \lstinline{native} gezeigt, sowie bei der nativen Methode die Implementierung in JavaScript skizziert.
 
+\pagebreak
 \lstinputlisting[label = {lst:minijava-advanced-methods}, caption = {Weitere Beispiele für Methoden in MiniJava}]{src/miniJavaLaufzeitumgebung/advancedMethods.txt}
 
 Wie in Listing \ref{lst:minijava-advanced-methods} erkennbar, können Methoden innerhalb der selben Klasse direkt aufgerufen werden. Will man Klassenmethoden in anderen Klassen aufrufen, muss beim Aufruf zusätzlich der Klassenname angegeben werden (wie in Java). Objektmethoden werden immer auf ein Objekt angewendet, außer ein Objekt ruft eine eigene Objektmethode für sich selbst auf. Beispiele dazu finden sich in Listing \ref{lst:minijava-call-methods}.
 
 \lstinputlisting[label = {lst:minijava-call-methods}, caption = {Aufruf von MiniJava"=Methoden}]{src/miniJavaLaufzeitumgebung/callMethods.minijava}
-
-\subsection{Felder}
-\label{subsec:MiniJava-Felder}
-
-In einem Feld können mehrere Werte bzw. Referenzen vom selben Datentyp sortiert hintereinander abgespeichert werden. Der Zugriff auf einzelne Elemente erfolgt über einen Index mit dem Indizierungsoperator \lstinline{[]}. Im Unterschied zu Java werden nur eindimensionale Felder unterstützt. Felder werden mit dem \lstinline{new}"=Operator erzeugt, dabei wird die Größe angegeben. Die Länge eines Felds kann über die Datenkomponente \lstinline{length} abgerufen werden. In Listing \ref{lst:minijava-array} wird der Umgang mit Feldern gezeigt.
-
-\lstinputlisting[label = {lst:minijava-array}, caption = {Felder in MiniJava}]{src/miniJavaLaufzeitumgebung/array.minijava}
-
-\subsection{Zeichenketten}
-\label{subsec:MiniJava-Zeichenketten}
-
-Zeichenketten werden über die MiniJava"=Klasse \lstinline{String} realisiert. Sie zählen somit ebenfalls zu den Referenzdatentypen. Wie in Java sind Zeichenketten unveränderlich. Zeichenketten können über Literale erzeugt werden. Weiters können Zeichenketten mit dem \lstinline{+}"=Operator konkateniert werden. In Listing \ref{lst:minijava-string} finden sich einige Beispiele zum Umgang mit Zeichenketten.
-
-\lstinputlisting[label = {lst:minijava-string}, caption = {Zeichenketten in MiniJava}]{src/miniJavaLaufzeitumgebung/string.minijava}
-
-\subsection{Kontrollstrukturen}
-
-MiniJava bietet zwei Möglichkeiten an, um den Kontrollfluss zu steuern: Die binäre Verzweigung und die \lstinline{while}"=Schleife.
-
-Die binäre Verzweigung wird durch die \lstinline{if}"=\lstinline{else}"=Anweisung realisiert. Wie in Java wird zunächst eine Bedinung ausgewertet. Ist diese wahr, wird der erste Zweig ausgeführt, ist diese falsch, wird der zweite Zweig nach dem \lstinline{else} ausgeführt. Der \lstinline{else}"=Zweig ist optional. Eine \lstinline{if}"=\lstinline{else}"=Kaskade ist ebenfalls möglich. In Listing \ref{lst:minijava-if-else} finden sich Beispiele für die binäre Verzweigung.
-
-\lstinputlisting[label = {lst:minijava-if-else}, caption = {\lstinline{if}"=\lstinline{else}"=Verzweigung in MiniJava}]{src/miniJavaLaufzeitumgebung/ifElse.minijava}
-
-Als einzige Schleifenform steht die \lstinline{while}-Schleife zur Verfügung. Die anderen zwei aus Java bekannten Schleifenformen (\lstinline{for} und \lstinline{do}-\lstinline{while}) werden nicht unterstützt, lassen sich aber durch die \lstinline{while}"=Schleife nachbilden. Bei der \lstinline{while}"=Schleife wird vor jeder Ausführung des Schleifenrumpfs die Bedingung geprüft. Ist diese falsch, wird die Schleife abgebrochen. In Listing \ref{lst:minijava-while} findet sich ein Beispiel für eine \lstinline{while}"=Schleife.
-
-\lstinputlisting[label = {lst:minijava-while}, caption = {\lstinline{while}"=Schleife in MiniJava}]{src/miniJavaLaufzeitumgebung/while.minijava}
 
 \subsection{Ausdrücke und Operatoren}
 
@@ -127,6 +117,19 @@ Sämtliche Ausdrücke können beliebig tief mit runden Klammern \lstinline{(...)
 Listing \ref{lst:minijava-expressions} zeigt sich einige Beispiele zu den Audrücken und Operatoren.
 
 \lstinputlisting[label = {lst:minijava-expressions}, caption = {Ausdrücke in MiniJava}]{src/miniJavaLaufzeitumgebung/expressions.minijava}
+
+\subsection{Kontrollstrukturen}
+
+MiniJava bietet zwei Möglichkeiten an, um den Kontrollfluss zu steuern: Die binäre Verzweigung und die \lstinline{while}"=Schleife.
+
+Die binäre Verzweigung wird durch die \lstinline{if}"=\lstinline{else}"=Anweisung realisiert. Wie in Java wird zunächst eine Bedinung ausgewertet. Ist diese wahr, wird der erste Zweig ausgeführt, ist diese falsch, wird der zweite Zweig nach dem \lstinline{else} ausgeführt. Der \lstinline{else}"=Zweig ist optional. Eine \lstinline{if}"=\lstinline{else}"=Kaskade ist ebenfalls möglich. In Listing \ref{lst:minijava-if-else} finden sich Beispiele für die binäre Verzweigung.
+
+\pagebreak
+\lstinputlisting[label = {lst:minijava-if-else}, caption = {\lstinline{if}"=\lstinline{else}"=Verzweigung in MiniJava}]{src/miniJavaLaufzeitumgebung/ifElse.minijava}
+
+Als einzige Schleifenform steht die \lstinline{while}-Schleife zur Verfügung. Die anderen zwei aus Java bekannten Schleifenformen (\lstinline{for} und \lstinline{do}-\lstinline{while}) werden nicht unterstützt, lassen sich aber durch die \lstinline{while}"=Schleife nachbilden. Bei der \lstinline{while}"=Schleife wird vor jeder Ausführung des Schleifenrumpfs die Bedingung geprüft. Ist diese falsch, wird die Schleife abgebrochen. In Listing \ref{lst:minijava-while} findet sich ein Beispiel für eine \lstinline{while}"=Schleife.
+
+\lstinputlisting[label = {lst:minijava-while}, caption = {\lstinline{while}"=Schleife in MiniJava}]{src/miniJavaLaufzeitumgebung/while.minijava}
 
 \section{MiniJava-Quelltext-Verwaltung}
 
@@ -156,10 +159,10 @@ Die Werte von elementaren Datentypen \lstinline{int}, \lstinline{float}, \lstinl
 \subsection{Objekt- und Speicherverwaltung}
 Objekte werden über eine Referenz angesprochen. Referenzen werden zur Laufzeit in JavaScript verwaltet. Beim Austausch eines Objekts von JavaScript nach MiniJava/WebAssembly wird eine Referenz erstellt. Kehrt die Referenz von MiniJava/WebAssembly nach JavaScript zurück, wird dereferenziert, um das dahinterliegende Objekt zu erhalten.
 
+\pagebreak
 \subsection{Methodenaufrufe von JavaScript nach MiniJava}
 Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, um sie für JavaScript aufrufbar zu machen. Aus technischer Sicht wird dabei aus dem Klassennamen und der Methodensignature ein eindeutiger Bezeichner abgeleitet, der im WebAssembly"=Modul als \emph{Export} verwendet wird. Ziel ist es, Klassen- und Objektmethoden möglichst einfach, wie in Listing \ref{lst:minijava-js-calls} gezeigt, in JavaScript aufrufen zu können.
 
-\pagebreak
 \lstinputlisting[label = {lst:minijava-js-calls}, caption = {Aufruf von MiniJava-Methoden in JavaScript}]{src/miniJavaLaufzeitumgebung/methodCalls.txt}
 
 \vspace{4em}
