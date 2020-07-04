@@ -1,4 +1,5 @@
 class MyClass {
+
     int x;
     { x = 10; } // Instance Initializer
 

@@ -1,12 +1,13 @@
 class Utils {
+
     void doSomething() { ... }
     static void doSomethingDifferent() { ... }
 
     void callMethods() {
         Point point = new Point(0f, 0f);
         point.moveBy(4, 5);               // object method of other class
-        doSomething();                    // object method of same class
-        int result = Main.add(2, 4);      // class method of other class
-        doSomethingDifferent();           // class method of same class
+        doSomething();                    // object method of same  class
+        int result = Main.add(2, 4);      // class  method of other class
+        doSomethingDifferent();           // class  method of same  class
     }
 }
