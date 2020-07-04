@@ -1,5 +1,5 @@
 module.exports = [function (runtime) {
-    runtime.wasmRefType("Hello", 'String');
+    runtime.wasmRefType("Hello ", 'String');
     runtime.wasmRefType("World", 'String');
     return {};
 }, require('./native/0.js'), ... /* require natives */ , function (runtime) {
