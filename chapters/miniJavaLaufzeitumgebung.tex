@@ -75,7 +75,7 @@ Klassen werden mit dem \lstinline{new}-Operator instanziert. Wie in Java üblich
 \subsection{Methoden}
 \label{subsec:MiniJava-Methoden}
 
-Methoden werden in Klassen definiert. Eine Methode wird innerhalb der Klasse eindeutig durch den Namen und die Typen der Formalparameter bestimmt. Somit können Methoden überladen werden. Eine Methode kann einen Rückgabewert liefern, falls keiner notwendig ist, wird dies mit \lstinline{void} gekennzeichnet. Das Beenden einer Methode mit einem Rückgabewert erfolgt mit der \lstinline{return}-Anweisung. In Listing \ref{lst:minijava-simple-methods} wird die MiniJava"=Klasse \lstinline{Point} um zwei Methoden ergänzt.
+Methoden werden in Klassen definiert. Eine Methode wird innerhalb der Klasse eindeutig durch den Namen und die Typen der Formalparameter bestimmt. Somit können Methoden überladen werden. Eine Methode kann einen Rückgabewert liefern, falls keiner notwendig ist, wird dies mit \lstinline{void} gekennzeichnet. Das Beenden einer Methode mit einem Rückgabewert erfolgt mit der \lstinline{return}"=Anweisung. In Listing \ref{lst:minijava-simple-methods} wird die MiniJava"=Klasse \lstinline{Point} um zwei Methoden ergänzt.
 
 \lstinputlisting[label = {lst:minijava-simple-methods}, caption = {Methoden der MiniJava"=Klasse \lstinline{Point}}]{src/miniJavaLaufzeitumgebung/simpleMethods.minijava}
 
@@ -163,7 +163,7 @@ Objekte werden über eine Referenz angesprochen. Referenzen werden zur Laufzeit 
 \subsection{Methodenaufrufe von JavaScript nach MiniJava}
 Methoden können mit dem Schlüsselwort \lstinline{public} gekennzeichnet werden, um sie für JavaScript aufrufbar zu machen. Aus technischer Sicht wird dabei aus dem Klassennamen und der Methodensignature ein eindeutiger Bezeichner abgeleitet, der im WebAssembly"=Modul als \emph{Export} verwendet wird. Ziel ist es, Klassen- und Objektmethoden möglichst einfach, wie in Listing \ref{lst:minijava-js-calls} gezeigt, in JavaScript aufrufen zu können.
 
-\lstinputlisting[label = {lst:minijava-js-calls}, caption = {Aufruf von MiniJava-Methoden in JavaScript}]{src/miniJavaLaufzeitumgebung/methodCalls.txt}
+\lstinputlisting[label = {lst:minijava-js-calls}, caption = {Aufruf von MiniJava"=Methoden in JavaScript}]{src/miniJavaLaufzeitumgebung/methodCalls.txt}
 
 \vspace{4em}
 In diesem Kapitel wurde die Programmiersprache MiniJava vorgestellt und auf die Anforderungen an das Laufzeitsystem kurz eingegangen.
