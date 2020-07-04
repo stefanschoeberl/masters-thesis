@@ -399,6 +399,8 @@ This work is published under the conditions of the
 		solche gekennzeichnet habe. Die Arbeit wurde bisher in gleicher oder \"ahnlicher Form keiner anderen 
 		Pr\"ufungsbeh\"orde vorgelegt.
 		\par
+		Die vorliegende, gedruckte Masterarbeit ist identisch zu dem elektronisch \"ubermittelten Textdokument.
+		\par
 		\vspace{10mm}
 		\noindent
 		%\@placeofstudy, am \formatdate{\value{@dayofsubmission}}{\value{@monthofsubmission}}{\value{@yearofsubmission}}
