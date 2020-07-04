@@ -5,7 +5,7 @@
 
 Über die gesamte Entwicklungsphase des Compilers muss sichergestellt werden, dass beim Hinzufügen neuer Funktionalitäten, diese wie erwartet funktionieren. Gleichzeitig musste auch gewährleistet werden, dass die bereits bestehende Funktionalität des Compilers nicht (versehentlich) verändert wird.
 
-Grundsätzlich stehen zwei Ansätze zum Testen zur Verfügung:
+Grundsätzlich stehen zwei Ansätze Testen zur Verfügung:
 \begin{enumerate}
     \item Jede Komponente isoliert testen, dies entspricht klassischen \emph{Unit}-Tests. Hier könnte man testen, ob zum Beispiel die erwünschten Instruktionen für eine Schleife generiert werden. 
     \item Testen, ob ein gegebener MiniJava"=Quelltext nach dem Kompilieren eine erwartete Konsolenausgabe beim Ausführen produziert. Das entspricht eher einem Integrationstest. Dabei werden in jedem Testfall alle Teilprozesse (Kompilieren, Codegenerieren und Ausführen) ausgeführt.

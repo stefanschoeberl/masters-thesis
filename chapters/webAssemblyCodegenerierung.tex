@@ -471,7 +471,7 @@ Beim lesenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld ausg
 
 \lstinputlisting[label = {lst:arrayGet-bytecode}, caption = {Vorlage für den lesenden Zugriff auf ein Feld}]{src/webAssemblyCodegenerierung/arrayGet.wasm}
 
-Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld selbst ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Nun wird der Ausdruck für den neuen Wert ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arraySet-bytecode}.
+Beim schreibenden Zugriff auf ein Feld wird zunächst die Referenz auf das Feld ausgewertet. Anschließend wird der Ausdruck für den Index ausgewertet. Nun wird der Ausdruck für den neuen Wert ausgewertet. Zum Schluss wird je nach Elementdatentyp die entsprechende importierte Funktion aufgerufen. Der erzeugte Bytecode entspricht der Vorlage in Listing \ref{lst:arraySet-bytecode}.
 
 \pagebreak
 \lstinputlisting[label = {lst:arraySet-bytecode}, caption = {Vorlage für den schreibenden Zugriff auf ein Feld, falls notwendig wird eine Typkonvertierung durchgeführt}]{src/webAssemblyCodegenerierung/arraySet.wasm}

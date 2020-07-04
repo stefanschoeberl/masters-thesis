@@ -73,7 +73,7 @@ Lokale Variablen lassen sich mit \lstinline{local.get} und \lstinline{local.set}
 
 \lstinputlisting[label={lst:wasm-locals}, caption={Lesen und Schreiben lokaler Variablen}]{src/technischeGrundlagen/instructionsLocal.wat}
 
-Für das Rechnen mit Variablen bietet WebAssembly eine Reihe an binären Operationen an. Diese nehmen jeweils die obersten zwei Werte vom Kellerspeicher herunter (Operanden), wenden auf diese die Operation an und legen anschließend das Ergebnis oben auf den Kellerspeicher. Hier drei Beispiele für solche Instruktionen: \lstinline{i32.add} (Addieren), \lstinline{i64.and} (Bitweises Und), \lstinline{f32.le} (Kleiner oder gleich, \emph{lower or equal}).
+Für das Rechnen bietet WebAssembly eine Reihe an binären Operationen an. Diese nehmen jeweils die obersten zwei Werte vom Kellerspeicher (Operanden), wenden auf diese die Operation an und legen anschließend das Ergebnis oben auf den Kellerspeicher. Hier drei Beispiele für solche Instruktionen: \lstinline{i32.add} (Addieren), \lstinline{i64.and} (Bitweises Und), \lstinline{f32.le} (Kleiner oder gleich, \emph{lower or equal}).
 
 Weiters gibt es einige strukturierte Instruktionen zur Steuerung des Kontrollflusses. Die einfachste ist die binäre Verzweigung, sie besteht aus drei Instruktionen: \lstinline{if}, \lstinline{else} und \lstinline{end}. Die \lstinline{if}"=Instruktion nimmt einen Wert vom Kellerspeicher. Ist dieser ungleich 0, also \emph{wahr}, werden die Instruktionen zwischen \lstinline{if} und \lstinline{else} ausgeführt. Ist der Wert am Kellerspeicher gleich 0, \emph{falsch}, werden die Instruktionen zwischen \lstinline{else} und \lstinline{end} ausgeführt. In Listing \ref{lst:wasm-if-else-end} ist ein Beispiel dargestellt.
 
@@ -184,7 +184,7 @@ Zu den einzelnen Zeilen ein paar Details:
 \pagebreak
 \subsection{Semantische Aktionen}
 
-Oft reicht es nicht, lediglich zu überprüfen, ob ein Text in der Sprache der Grammatik enthalten ist. Besonders beim Parsen von Programmiersprachen müssen anhand des konkreten Quelltextes Entscheidungen oder semantische Aktionen getroffen werden. ANTLR bietet hier zwei Ansätze an:
+Oft reicht es nicht, lediglich zu überprüfen, ob ein Text in der Sprache der Grammatik enthalten ist. Besonders beim Parsen von Programmiersprachen müssen anhand des konkreten Quelltexts Entscheidungen oder semantische Aktionen getroffen werden. ANTLR bietet hier zwei Ansätze an:
 
 \begin{itemize}
     \item Die Struktur der Sprache wird in einer Grammatik beschrieben. Semantische Aktionen stehen davon getrennt in eigenen Komponenten (\lstinline{Listener} oder \lstinline{Visitor}), die den Syntaxbaum auswerten. Die Grammatik enthält keinen zielsprachenspezifischen Quelltext.
@@ -283,7 +283,7 @@ Es gibt bereits eine Reihe von Technologien, die auf WebAssembly aufbauen. In di
 
 \subsection{Emscripten}
 
-Emscripten ist ein Compiler, mit dem sich C/C++"=Quelltext nach WebAssembly übersetzen lässt \cite{Emscripten}. Die grundsätzliche Idee ist, dass sich mit möglichst wenig Aufwand bestehender C/C++"=Quelltext ins Web bringen lässt. Zum Beispiel werden \lstinline{printf}"=Aufrufe automatisch auf die Browser"=Konsole abgebildet. Weitere typische Bibliotheken werden direkt unterstützt, darunter zum Beispiel \emph{Simple DirectMedia Layer} (SDL), OpenGL (über WebGL) und OpenAL (über Web Audio API). Emscripten bietet zusätzlich eine Reihe von eigenen Schnittstellen an, darunter zum Beispiel Anbindungen an HTML 5 und WebVR.
+Emscripten ist ein Compiler, mit dem sich C/C++"=Quelltext nach WebAssembly übersetzen lässt \cite{Emscripten}. Die grundsätzliche Idee ist, dass sich mit möglichst wenig Aufwand bestehender C/C++"=Quelltext in das Web bringen lässt. Zum Beispiel werden \lstinline{printf}"=Aufrufe automatisch auf die Browser"=Konsole abgebildet. Weitere typische Bibliotheken werden direkt unterstützt, darunter zum Beispiel \emph{Simple DirectMedia Layer} (SDL), OpenGL (über WebGL) und OpenAL (über Web Audio API). Emscripten bietet zusätzlich eine Reihe von eigenen Schnittstellen an, darunter zum Beispiel Anbindungen an HTML 5 und WebVR.
 
 Da WebAssembly in einem isolierten Umfeld läuft, ergeben sich natürlich auch einige Einschränkungen, die keine 1:1"=Abbildungen ermöglichen, dazu zählen zum Beispiel direkter Dateisystem- und Netzwerkzugriff. Für Netzwerkanbindungen bietet Emscripten zum Beispiel eine Schnittstelle für WebSockets an. Dateisystemzugriff wird über ein virtuelles Dateisystem abgebildet. Auf dieses virtuelle Dateisystem kann wie gewohnt über Funktionen wie \lstinline{fopen} zugegriffen werden. Dateien können entweder beim Kompilieren in dieses Dateisystem kopiert oder zur Laufzeit dynamisch über \lstinline{XMLHttpRequests} geladen werden.
 
@@ -307,7 +307,7 @@ Blazor basiert auf Razor \cite{Razor}. Razor ermöglicht es, HTML und C\#{} mite
 
 Man sieht, dass sich Werte aus Variablen ausgeben lassen können (\lstinline{@Title}) und Mausklick"=Ereignisse auf Methodenaufrufe abgebildet werden können (\lstinline{@onclick="OnYes"}). Weiters lassen sich andere Komponenten einbinden (\lstinline{@ChildContent}).
 
-\emph{Blazor Server} wird, wie der Name bereits erahnen lässt, serverseitig betrieben. Dabei läuft die Logik der Web-Anwendung auf dem Server. Die Kommunikation zwischen Server und Browser erfolgt über SignalR. Das bedeutet, dass jedes Ereignis und jedes Update der Benutzeroberfläche über das Netzwerk erfolgt. Blazor Server wurde hier nur zur Vollständigkeit erwähnt und wird nicht weiter behandelt.
+\emph{Blazor Server} wird, wie der Name bereits erahnen lässt, serverseitig betrieben. Dabei läuft die Logik der Web"=Anwendung auf dem Server. Die Kommunikation zwischen Server und Browser erfolgt über SignalR. Das bedeutet, dass jedes Ereignis und jedes Update der Benutzeroberfläche über das Netzwerk erfolgt. Blazor Server wurde hier nur zur Vollständigkeit erwähnt und wird nicht weiter behandelt.
 
 Bei der zweiten Variante, \emph{Blazor WebAssembly}, wird keine Logik am Server ausgeführt. Der Weg vom Quelltext zur lauffähigen Anwendung sieht folgendermaßen aus: Der Quelltext wird zu .NET"=Assemblies kompiliert. Der Browser lädt diese Assemblies und die .NET"=Laufzeitumgebung von einem Web"=Server herunter. Die .NET"=Laufzeitumgebung läuft in der virtuellen WebAssembly"=Maschine und lädt die Assemblies. In diesem Prozess gibt es eine Reihe an möglichen Optimierungen, zum Beispiel wird die .NET"=Laufzeitumgebung im Cache des Browsers ablegt, um unnötige Downloads zu verhindern.
 
