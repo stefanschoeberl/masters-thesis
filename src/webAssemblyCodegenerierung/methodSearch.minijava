@@ -1,4 +1,5 @@
 class Main {
+
     static void compute(String a, int x) { ... }
     static void compute(Object a, int x) { ... }
 
@@ -11,7 +12,7 @@ class Main {
 
         compute(text, 123);
         compute(point, 123);
-
+        
         compute(text, text, 123);
         compute(text, point, 123);
     }
