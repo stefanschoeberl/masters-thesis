@@ -1,4 +1,5 @@
 class ClickEventListener {
+
     Elements elements;
 
     ClickEventListener(Elements elements) {

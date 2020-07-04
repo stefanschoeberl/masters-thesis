@@ -13,7 +13,6 @@ function fibNumbers(from, to) {
     }
     return numbers;
 }
-
 module.exports = () => {
     const txtFrom = document.getElementById('txtFrom');
     const txtTo = document.getElementById('txtTo');
