@@ -35,8 +35,6 @@ incompleteIfStatement: 'if' '(' condition=expr ')'
                        elsebranch=incompleteIfStatement     # IncompleteIfElseStmt
                      ;
 
-
-
 completeStatement: 'if' '(' condition=expr ')' 
                    thenbranch=completeStatement 'else' 
                    elsebranch=completeStatement                 # CompleteIfElseStmt
@@ -92,7 +90,6 @@ ADD: '+';
 SUB: '-';
 MUL: '*';
 DIV: '/';
-
 
 TRUE: 'true';
 FALSE: 'false';

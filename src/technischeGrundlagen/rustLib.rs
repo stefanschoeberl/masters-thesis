@@ -13,8 +13,6 @@ pub struct Point {
     y: u32,
 }
 
-
-
 #[wasm_bindgen]
 impl Point {
     pub fn new(x: u32, y: u32) -> Point {

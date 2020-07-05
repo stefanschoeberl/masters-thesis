@@ -237,7 +237,10 @@ Die kompakte Syntax von Kotlin gegenüber Java wird anhand eines kleinen Beispie
 
 \lstinputlisting[label = {lst:point-kotlin}, caption = {Die Klasse \lstinline{Point} in Kotlin}]{src/technischeGrundlagen/Point.kt}
 
-\lstinputlisting[label = {lst:point-java}, caption = {Die Klasse \lstinline{Point} in Java. Konstruktor, \emph{Getter}, \emph{Setter}, \lstinline{hashCode}, \lstinline{equals} und \lstinline{toString} wurden von IntelliJ generiert.}]{src/technischeGrundlagen/Point.java}
+\lstinputlisting[label = {lst:point-java}, caption = {Die Klasse \lstinline{Point} in Java. Konstruktor, \emph{Getter}, \emph{Setter}, \lstinline{hashCode}, \lstinline{equals} und \lstinline{toString} wurden von IntelliJ generiert.}, lastline=19]{src/technischeGrundlagen/Point.java}
+
+\pagebreak
+\lstinputlisting[firstline=22, firstnumber=20]{src/technischeGrundlagen/Point.java}
 
 Kotlin bietet wie bereits erwähnt Absicherungen gegen \lstinline{NullPointerExceptions} zur Übersetzungszeit. Ein einfaches Beispiel dafür findet sich in Listing \ref{lst:npe-kotlin}.
 
@@ -334,7 +337,10 @@ Der Weg vom Rust"=Quelltext zur Web"=anwendung sieht folgendermaßen aus: Der Ru
 
 Um Rust"=Quelltext im WebAssembly"=Umfeld verwenden zu können, sind einige Anpassungen im Quelltext notwendig. In Listing \ref{lst:rust-example} findet sich ein einfaches Beispiel (basierend auf der offiziellen Dokumentation \cite{RustWasmBook}), das die Interoperbilität zwischen Rust und JavaScript demonstrieren soll.
 
-\lstinputlisting[label={lst:rust-example}, caption = {Rust"=Quelltext für WebAssembly angepasst}]{src/technischeGrundlagen/rustLib.rs}
+\lstinputlisting[label={lst:rust-example}, caption = {Rust"=Quelltext für WebAssembly angepasst}, lastline=14]{src/technischeGrundlagen/rustLib.rs}
+
+\pagebreak
+\lstinputlisting[firstline=16, firstnumber=15]{src/technischeGrundlagen/rustLib.rs}
 
 Zunächst muss die Speicherverwaltung konfiguriert werden. Dafür wird \lstinline{wee_alloc} (The Wasm"=Enabled, Elfin Allocator) eingesetzt. Dieser erzeugt besonders wenig WebAssembly"=Bytecode, laut offizieller Dokumentation unter einem Kilobyte und ist für WebAssembly ausgelegt \cite{WeeAlloc}.
 

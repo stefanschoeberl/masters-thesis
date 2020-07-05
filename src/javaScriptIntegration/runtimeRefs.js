@@ -9,9 +9,6 @@ wasmRef(obj) {
     }
 }
 
-
-
-
 wasmRefType(obj, type) {
     if (obj !== null) {
         this.types.set(obj, type);
