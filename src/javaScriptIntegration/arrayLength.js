@@ -1,3 +1,3 @@
 'array_length': arrayRef => {
-    return runtime.wasmDeref(arrayRef).length
+    return runtime.wasmDeref(arrayRef).length;
 }

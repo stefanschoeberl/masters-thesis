@@ -1,5 +1,5 @@
 wasmBoolean(value) {
-    return value !== 0
+    return value !== 0;
 }
 
 wasmToChar(value) {

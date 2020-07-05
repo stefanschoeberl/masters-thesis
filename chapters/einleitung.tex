@@ -29,13 +29,13 @@ Die Problemstellung für diese Masterarbeit lässt sich in folgende Fragen aufte
 
 Die Fragen der Problemstellung sollen auf Basis einer praktischen Implementierung beantwortet werden.
 
-Ziel ist es, einen Compiler zu entwickeln, der MiniJava (eine Teilmenge von Java) nach WebAssembly übersetzt. Die Eingabe ist MiniJava"=Quelltext, die Ausgabe ein WebAssembly"=Modul samt Laufzeitsystem für JavaScript. Der gesamte Compiler wird in Kotlin entwickelt. Das Compiler"=Frontend (Scanner und Parser) wird mit ANTLR 4 generiert.
+Ziel ist es, einen Compiler zu entwickeln, der MiniJava (eine Teilmenge von Java) nach WebAssembly übersetzt. Die Eingabe ist MiniJava"=Quelltext, die Ausgabe ein WebAssembly"=Modul samt Laufzeitsystem für JavaScript. Der gesamte Compiler wird in Kotlin entwickelt. Das Compiler"=Frontend (Scanner und Parser) wird mit ANTLR 4.8 generiert.
 
 Schlussendlich soll es möglich sein, in MiniJava kleine, typische Web"=Anwendungen zu entwickeln.
 
 Weiters wird eine minimale Standardbibliothek entworfen, die essenzielle Schnittstellen für die Konsole und den DOM"=Zugriff zur Verfügung stellt.
 
-Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausgewählte wird in dieser Arbeit kurz eingangen:
+Es gibt bereits einige Technologien, die auf WebAssembly aufbauen. Auf drei ausgewählte wird in dieser Arbeit kurz eingegangen:
 \begin{itemize}
     \item Emscripten \cite{Emscripten} für C und C++,
     \item Rust \cite{RustWasmWebsite} und

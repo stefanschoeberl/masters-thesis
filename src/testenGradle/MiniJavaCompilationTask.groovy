@@ -1,4 +1,5 @@
 class MiniJavaCompilationTask extends JavaExec {
+
     private List<Object> inputParameters = []
     private Object outputDir
 

@@ -32,7 +32,7 @@ Nachfolgend findet sich die Implementierung des Fibonacci"=Rechners in JavaScrip
 
 Zusätzlich zur Basis"=Standardbibliothek wird eine eigene für den Browser mitkompiliert. Diese enthält Funktionalitäten, die auf Browser"=Schnittstellen abgebildet werden (Implementierungsdetails sind im nächsten Abschnitt zu finden).
 
-Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly"=Modul vom Web"=Server mit dem MIME"=Type \lstinline{application/wasm} bereitgestellt wird, sonst kann es zu Laufzeitfehlern kommen \cite{MDNWebAssembly}. Zu Entwicklungs- und Testzwecken reicht dafür das NPM"=Modul \lstinline{lite-server}\footnote{\url{https://www.npmjs.com/package/lite-server}} vollkommen aus. Für den produktiven Einsatz sollte man diesen Aspekt bei der Konfiguration des Web"=Servers beachten. Im Git"=Repository findet sich eine lauffähige Konfiguration für den Apache HTTP Server in Form eines \emph{Dockerfiles}.
+Beim Ausführen muss sichergestellt werden, dass das binäre WebAssembly"=Modul vom Web"=Server mit dem MIME"=Type \lstinline{application/wasm} bereitgestellt wird, sonst kann es zu Laufzeitfehlern kommen \cite{MDNWebAssembly}. Zu Entwicklungs- und Testzwecken reicht dafür das NPM"=Modul \lstinline{lite-server}\footnote{\url{https://www.npmjs.com/package/lite-server}} vollkommen aus. Für den produktiven Einsatz sollte man diesen Aspekt bei der Konfiguration des Web"=Servers beachten. Im GitHub"=Repository findet sich eine lauffähige Konfiguration für den Apache HTTP Server in Form eines \emph{Dockerfiles}.
 
 \section{Auszug aus der Standardbibliothek für den Browser}
 
@@ -60,7 +60,7 @@ In Abbildung \ref{fig:fibCalculatorBrowser} sind zwei Bildschirm"=Schnappschüss
     \label{fig:fibCalculatorBrowser}
 \end{figure}
 
-Während der Ausführung wurde die Laufzeit gemessen, dabei wird die gesamte Zeit ab dem Klicken des Start"=Knopfs bis zum Erstellen der Tabelle berücksichtigt. Man erkennt, dass die Laufzeit der MiniJava"=Version (4890 Millisekunden) im Vergleich zur JavaScript"=Version (8935 Millisekunden) deutlich kürzer ist.
+Während der Ausführung wurde die Laufzeit gemessen, dabei wird die gesamte Zeit ab dem Klicken des Start"=Knopfs bis zum Erstellen der Tabelle berücksichtigt. Man erkennt außerdem, dass die Laufzeit der MiniJava"=Version (4890 Millisekunden) im Vergleich zur JavaScript"=Version (8935 Millisekunden) deutlich kürzer ist.
 
 Der Fibonacci"=Rechner wurde auf der folgenden Sofware- und Hardware"=Konfiguration getestet:
 \begin{itemize}
@@ -73,7 +73,7 @@ Der Fibonacci"=Rechner wurde auf der folgenden Sofware- und Hardware"=Konfigurat
     \end{itemize}
 \end{itemize}
 
-\section{Vergleich JavaScript und MiniJava}
+\section{Vergleich MiniJava und JavaScript}
 
 Insgesamt sieht man, dass die Implementierungen aus Quelltextsicht sehr ähnlich sind. Sämtliche Anforderungen wurden von beiden Varianten erfüllt.
 
